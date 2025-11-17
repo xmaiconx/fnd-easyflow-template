@@ -1,0 +1,29 @@
+{
+  "name": "tinyce",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão para Terapeutas Autônomos",
+  "private": true,
+  "packageManager": "npm@9.0.0",
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev --parallel",
+    "dev:api": "cd apps/backend && npm run dev:api",
+    "dev:workers": "cd apps/backend && npm run dev:workers",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "migrate:latest": "cd libs/app-database && npm run migrate:latest",
+    "migrate:rollback": "cd libs/app-database && npm run migrate:rollback",
+    "seed:run": "cd libs/app-database && npm run seed:run"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "turbo": "^2.0.0",
+    "rimraf": "^5.0.0"
+  }
+}

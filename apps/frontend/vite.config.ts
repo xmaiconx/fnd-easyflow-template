@@ -1,0 +1,22 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@agentics/api-contracts': path.resolve(__dirname, '../../libs/api-contracts/src'),
+    },
+  },
+  server: {
+    port: 3000,
+    host: 'localhost',
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+  },
+})

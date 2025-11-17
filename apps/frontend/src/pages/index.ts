@@ -1,0 +1,7 @@
+export { LoginPage } from './login'
+export { SignUpPage } from './signup'
+export { SignUpSuccessPage } from './signup-success'
+export { ConfirmEmailPage } from './confirm-email'
+export { EmailNotVerifiedPage } from './email-not-verified'
+export { DashboardPage } from './dashboard'
+export { WorkspacesPage, WorkspaceSettingsPage } from './settings'
