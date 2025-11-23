@@ -66,9 +66,9 @@ agentics/
 
 ### Domain Layer (`libs/domain/src/`)
 ```
-├── entities/          # Account, User, Workspace (um por arquivo)
-├── enums/             # EntityStatus, UserRole, MessageType (um por arquivo)
-├── types/             # MessageContext, MessageMetadata
+├── entities/          # Account, User, Workspace, WorkspaceUser, Project, AuditLog, WebhookEvent
+├── enums/             # EntityStatus, UserRole, MessageType, ProjectStatus (um por arquivo)
+├── types/             # MessageContext, MessageMetadata, PipelineResult, ProjectPipelineConfig
 └── index.ts           # Barrel exports
 ```
 
@@ -183,7 +183,7 @@ import { AccountCreatedEvent } from './events';
 - `IConfigurationService` → `ConfigurationService`
 - `IEncryptionService` → `EncryptionService`
 - `DATABASE` → Kysely instance (PostgreSQL)
-- Todos os Repositories (User, Account, AuditLog, Webhook, WebhookEvent, Thread, Message, ChannelConnection, Assistant)
+- Todos os Repositories (User, Account, Workspace, WorkspaceUser, AuditLog, WebhookEvent, Thread, Message, Project)
 
 ### Workers Module
 **Arquivo**: `apps/backend/src/workers/worker.module.ts`
@@ -205,23 +205,21 @@ import { AccountCreatedEvent } from './events';
 
 **Módulos Ativos**:
 1. **auth/** - Autenticação e autorização
-   - Structure: commands/, events/, queries/, services/, strategies/
+   - Structure: commands/, events/, queries/, services/, strategies/, dtos/
    - Implements: signup, signin, JWT strategy, password recovery
 
-2. **assistants/** - Gerenciamento de assistentes IA
-   - Structure: commands/
-   - CRUD operations para assistants
-
-3. **audit/** - Logs de auditoria
+2. **audit/** - Logs de auditoria
+   - Structure: dtos/
    - Read-only access to audit logs
 
-4. **channels/** - Gerenciamento de conexões de canais
-   - WhatsApp, Telegram, etc.
-   - Credentials encryption via IEncryptionService
+3. **webhooks/** - Processamento de webhooks
+   - Structure: dtos/
+   - Receives and processes webhook events from external channels
 
-5. **webhooks/** - Gerenciamento de webhooks
-   - CRUD operations para webhook configurations
-   - Webhook URL generation
+4. **workspace/** - Gerenciamento de workspaces
+   - Structure: events/, dtos/
+   - Multi-workspace support per account
+   - User-workspace relationships
 
 ## 🔄 Padrões Arquiteturais
 
@@ -281,28 +279,16 @@ execute(context: MessageContext): Promise<PipelineResult>
 - **WebhookParserFactory**: Cria parsers por protocol (Whaticket, Waha, Notificamehub)
 - **MessageParserFactory**: Cria parsers de mensagem por tipo
 - **MessagePipelineFactory**: Cria pipelines customizados por projeto
-- **ChannelAdapterFactory**: Cria adapters por provedor de canal
 
-### 6. Channel Adapter Pattern
-**Arquivo**: `apps/backend/src/shared/adapters/channels/`
-
-**Componentes**:
-- `IChannelAdapter` (interface) - Abstração para envio de mensagens
-- `ChannelAdapterFactory` - Factory para criar adapters
-- `ChannelAdapterService` - Orquestra adapters
-- **Implementations**: `WhaticketOfficialAdapter` (WhatsApp Official API)
-
-**Responsabilidade**: Abstrai comunicação com diferentes provedores de canais (WhatsApp, Telegram, etc.)
-
-### 7. Encryption Service
+### 6. Encryption Service
 **Arquivo**: `apps/backend/src/shared/services/encryption.service.ts`
 
 **Interface**: `IEncryptionService` (libs/backend/src/security/)
 - **Algorithm**: AES-256-GCM
-- **Purpose**: Criptografa credenciais sensíveis de canais (tokens, API keys)
+- **Purpose**: Criptografa credenciais sensíveis (tokens, API keys)
 - **Methods**: `encrypt(plaintext: string): string`, `decrypt(ciphertext: string): string`
 
-### 8. Dependency Injection
+### 7. Dependency Injection
 - **NestJS DI Container**: Gerencia todas as dependências
 - **Interface-based**: Sempre injetar interfaces, não implementações
 - **Tokens**: Strings para providers (`'IUserRepository'`)
@@ -313,14 +299,18 @@ execute(context: MessageContext): Promise<PipelineResult>
 ```
 Account (tenant root)
   ↓ has many
+Workspaces (via account_id)
+  ↓ has many
+WorkspaceUsers (bridge: user_id + workspace_id)
+  ↓
 Users (via account_id)
   ↓ own
-ChannelConnections, Assistants, Webhooks (filtrados por account_id)
+Projects, WebhookEvents (filtrados por account_id)
   ↓ generate
-Threads, Messages, WebhookEvents (filtrados por account_id)
+Threads, Messages (filtrados por account_id)
 ```
 
-**Modelo Simplificado**: Isolamento direto por `account_id` sem workspaces intermediários.
+**Modelo Multi-Workspace**: Cada Account pode ter múltiplos Workspaces. Users pertencem a Accounts e podem ser associados a Workspaces via WorkspaceUser.
 
 ### Regras
 - **SEMPRE** filtrar queries por `account_id`
@@ -334,31 +324,41 @@ Threads, Messages, WebhookEvents (filtrados por account_id)
 ### Schema (PostgreSQL + UUID)
 ```
 accounts              # Tenant root
+workspaces            # Multi-workspace per account
+workspace_users       # User-workspace bridge table
 users                 # Auth + roles (linked to account_id)
 audit_logs            # Audit trail
-webhooks              # Webhook configurations
 webhook_events        # Incoming webhook events (auditing + async processing)
-channel_connections   # Channel connection configs (WhatsApp, Telegram, etc.)
-assistants            # AI assistant configurations
 threads               # Conversation threads
 messages              # Individual messages
+projects              # Bot/agent project configurations
 ```
 
 ### Migrations (Knex)
 **Pasta**: `libs/app-database/migrations/`
-- `20240926001_create_core_schema.js` - Core tables (accounts, users)
-- `20241027001_create_messaging_schema.js` - Messaging tables (webhook_events, threads, messages)
-- `20250103001_create_channel_connections_table.js` - Channel connections
-- `20250104001_create_assistants_table.js` - AI assistants
-- `20250104002_create_webhooks_table.js` - Webhooks
+- `20240926001_create_core_tables.js` - Core tables (accounts, workspaces, workspace_users)
+- `20240926002_create_user_tables.js` - Users table
+- `20240926006_create_audit_logs_table.js` - Audit logs
+- `20241027001_create_webhook_events_table.js` - Webhook events
+- `20241030001_create_threads_table.js` - Threads
+- `20241030002_create_messages_table.js` - Messages
+- `20241030003_create_projects_table.js` - Projects
+- `20241030004_alter_webhook_events_add_normalized_message.js` - Schema modification
+- `20250102001_add_workspace_onboarding_fields.js` - Workspace enhancements
 
 ### Kysely Types
 **Arquivo**: `libs/app-database/src/types/Database.ts`
 ```typescript
 export interface Database {
   accounts: AccountTable;
+  workspaces: WorkspaceTable;
+  workspace_users: WorkspaceUserTable;
   users: UserTable;
-  // ... type-safe schema
+  audit_logs: AuditLogTable;
+  webhook_events: WebhookEventTable;
+  threads: ThreadTable;
+  messages: MessageTable;
+  projects: ProjectTable;
 }
 ```
 
@@ -450,19 +450,18 @@ apps/frontend/src/
 │   ├── forms/        # Form components + validation
 │   ├── layout/       # Header, Sidebar, AuthLayout
 │   ├── auth/         # Auth-specific components
-│   ├── dashboard/    # Dashboard widgets
-│   ├── channels/     # Channel management components
-│   └── assistants/   # Assistant components
+│   └── workspace/    # Workspace management components
 ├── pages/            # Route pages
 │   ├── login.tsx, signup.tsx, signup-success.tsx
 │   ├── confirm-email.tsx, email-not-verified.tsx
-│   ├── dashboard.tsx, chat.tsx, ai-settings.tsx
-│   ├── channels/     # Channel pages
+│   ├── dashboard.tsx
 │   └── settings/     # Settings pages
 ├── hooks/            # useAuth, useSignIn, custom hooks
 ├── stores/           # Zustand stores (auth-store)
 ├── lib/              # API client, validations, constants
-├── types/            # Frontend types (locais + espelhados do backend)
+├── types/            # Frontend types (espelhados do backend)
+│   ├── api/          # DTOs espelhados (auth, audit, webhooks, workspace)
+│   └── domain/       # Domain entities as interfaces
 └── contexts/         # React Contexts
 ```
 
@@ -518,7 +517,7 @@ apps/frontend/src/
 
 ### Segurança
 - ✅ SEMPRE criptografar credenciais sensíveis (usar `IEncryptionService`)
-- ✅ Channel credentials (tokens, API keys) devem ser encrypted at rest
+- ✅ Credentials (tokens, API keys) devem ser encrypted at rest
 - ✅ Usar AES-256-GCM para encryption (via `ENCRYPTION_KEY` env var)
 - ✅ NUNCA logar credenciais ou dados sensíveis (mascarar em logs)
 - ✅ Validar ownership via `account_id` em todos os endpoints
@@ -577,12 +576,13 @@ Always inject `IConfigurationService` interface, never `ConfigService` directly 
 - `libs/domain/src/index.ts` - Domain barrel export (entities, enums, types)
 - `libs/backend/src/` - Interfaces layer
   - `cqrs/` - CQRS interfaces (ICommand, IEvent, ICommandHandler)
-  - `services/` - Service interfaces (ILoggerService, IEmailService, etc.)
+  - `services/` - Service interfaces (ILoggerService, IEmailService, IEncryptionService, etc.)
   - `messaging/` - Messaging interfaces (IEventBroker, IJobQueue)
   - `pipelines/` - Pipeline interfaces (IMessagePipeline, IMessagePipelineStep)
   - `webhooks/` - Webhook interfaces (IWebhookParser, IMessageParser)
-  - `channels/` - Channel interfaces (IChannelAdapter)
-  - `security/` - Security interfaces (IEncryptionService)
+  - `scheduling/` - Scheduling interfaces (IScheduleService)
+  - `features/` - Feature flags interfaces (IFeatureFlagService)
+  - `payment/` - Payment interfaces (IPaymentService)
 - `libs/app-database/src/index.ts` - Repositories barrel export (PostgreSQL, uses domain entities)
 
 ### Database
@@ -603,17 +603,18 @@ Always inject `IConfigurationService` interface, never `ConfigService` directly 
 
 ### Domain Layer Organization
 **Entities**: `libs/domain/src/entities/`
-- Account, User, AuditLog, Webhook, WebhookEvent, Assistant, ChannelConnection, Thread, Message
+- Account, User, Workspace, WorkspaceUser, AuditLog, WebhookEvent, Project
 
 **Enums**: `libs/domain/src/enums/`
-- EntityStatus, UserRole, OnboardingStatus, WebhookStatus, WebhookType
+- EntityStatus, UserRole, OnboardingStatus, ProjectStatus
+- WebhookStatus, WebhookType
 - ChatChannel, ChatProvider, ChatImplementation, PaymentProvider
 - MessageType, MessageStatus, MessageDirection, InteractiveType
-- ChannelConnectionStatus, AIAssistantStatus
 
 **Types**: `libs/domain/src/types/`
 - MessageProtocol, MessageContents, MessageMetadata, MessageContext
-- MediaObject, PipelineResult, WebhookMetadata, AssistantConfig, ChannelCredentials
+- MediaObject, PipelineResult, WebhookMetadata, WebhookGatewayConfig
+- ProjectPipelineConfig
 
 ### Event Naming Convention
 - **Domain Events**: `[Subject][PastTenseAction]Event` (ex: `AccountCreatedEvent`, `UserSignedUpEvent`)
