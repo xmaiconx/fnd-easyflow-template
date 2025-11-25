@@ -1,8 +1,15 @@
 #!/bin/bash
 
-# Script to create next feature documentation structure
-# Usage: ./create-feature-docs.sh [branch-name]
-# If branch-name is not provided, uses current git branch
+# Script to create feature documentation structure, branch, and PR
+# Usage: ./create-feature-docs.sh [branch-type] [feature-name]
+#
+# branch-type: feature, fix, refactor, docs (default: feature)
+# feature-name: descriptive name (default: uses current branch)
+#
+# Examples:
+#   ./create-feature-docs.sh feature user-authentication
+#   ./create-feature-docs.sh fix
+#   ./create-feature-docs.sh
 
 set -e
 
@@ -10,15 +17,17 @@ set -e
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Get branch name (from argument or current branch)
-if [ -z "$1" ]; then
-    BRANCH_NAME=$(git branch --show-current)
-    echo -e "${BLUE}Using current branch: ${BRANCH_NAME}${NC}"
-else
-    BRANCH_NAME="$1"
-    echo -e "${BLUE}Using provided branch: ${BRANCH_NAME}${NC}"
+# Get branch type (default: feature)
+BRANCH_TYPE="${1:-feature}"
+
+# Validate branch type
+if [[ ! "$BRANCH_TYPE" =~ ^(feature|fix|refactor|docs)$ ]]; then
+    echo -e "${RED}Error: Invalid branch type '$BRANCH_TYPE'${NC}"
+    echo -e "${YELLOW}Valid types: feature, fix, refactor, docs${NC}"
+    exit 1
 fi
 
 # Features directory
@@ -39,11 +48,49 @@ else
     echo -e "${GREEN}Last feature: ${LAST_FEATURE}${NC}"
 fi
 
-# Create feature directory name
-FEATURE_DIR="F${NEXT_NUMBER}-${BRANCH_NAME}"
+# Get current branch to check if we're on main
+CURRENT_BRANCH=$(git branch --show-current)
+
+# Get feature name
+if [ -z "$2" ]; then
+    # No feature name provided
+    if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; then
+        echo -e "${RED}Error: You're on ${CURRENT_BRANCH} and no feature name was provided${NC}"
+        echo -e "${YELLOW}Usage: ./create-feature-docs.sh [branch-type] [feature-name]${NC}"
+        echo -e "${YELLOW}Example: ./create-feature-docs.sh feature user-authentication${NC}"
+        exit 1
+    else
+        # Use current branch name (remove prefix if exists)
+        FEATURE_NAME=$(echo "$CURRENT_BRANCH" | sed -E 's/^(feature|fix|refactor|docs)\///')
+        echo -e "${BLUE}Using current branch name: ${FEATURE_NAME}${NC}"
+    fi
+else
+    FEATURE_NAME="$2"
+    echo -e "${BLUE}Using provided feature name: ${FEATURE_NAME}${NC}"
+fi
+
+# Create feature directory name (F000X-feature-name)
+FEATURE_DIR="F${NEXT_NUMBER}-${FEATURE_NAME}"
+NEW_BRANCH_NAME="${BRANCH_TYPE}/F${NEXT_NUMBER}-${FEATURE_NAME}"
 FEATURE_PATH="${FEATURES_DIR}/${FEATURE_DIR}"
 
-echo -e "${BLUE}Creating feature: ${FEATURE_DIR}${NC}"
+echo ""
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}Creating Feature: ${FEATURE_DIR}${NC}"
+echo -e "${BLUE}Branch: ${NEW_BRANCH_NAME}${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+# Create branch if on main/master
+if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; then
+    echo -e "${YELLOW}Creating new branch: ${NEW_BRANCH_NAME}${NC}"
+    git checkout -b "$NEW_BRANCH_NAME"
+    echo -e "${GREEN}✓ Branch created and checked out${NC}"
+else
+    echo -e "${YELLOW}Already on branch: ${CURRENT_BRANCH}${NC}"
+    echo -e "${YELLOW}Warning: Branch name doesn't match pattern ${NEW_BRANCH_NAME}${NC}"
+    echo -e "${YELLOW}Consider renaming: git branch -m ${NEW_BRANCH_NAME}${NC}"
+fi
 
 # Create directory
 mkdir -p "$FEATURE_PATH"
@@ -331,17 +378,107 @@ cat > "${FEATURE_PATH}/discovery.md" << 'EOF'
 EOF
 
 # Replace placeholders with actual values
-sed -i "s/BRANCH_NAME/${BRANCH_NAME}/g" "${FEATURE_PATH}/about.md"
+sed -i "s/BRANCH_NAME/${NEW_BRANCH_NAME}/g" "${FEATURE_PATH}/about.md"
 sed -i "s/CURRENT_DATE/${CURRENT_DATE}/g" "${FEATURE_PATH}/about.md"
-sed -i "s/BRANCH_NAME/${BRANCH_NAME}/g" "${FEATURE_PATH}/discovery.md"
+sed -i "s/BRANCH_NAME/${NEW_BRANCH_NAME}/g" "${FEATURE_PATH}/discovery.md"
 sed -i "s/CURRENT_DATE/${CURRENT_DATE}/g" "${FEATURE_PATH}/discovery.md"
 
 echo -e "${GREEN}✓ Created directory: ${FEATURE_PATH}${NC}"
 echo -e "${GREEN}✓ Created file: ${FEATURE_PATH}/about.md${NC}"
 echo -e "${GREEN}✓ Created file: ${FEATURE_PATH}/discovery.md${NC}"
+
+# Commit the initial structure
 echo ""
-echo -e "${BLUE}Feature documentation structure ready!${NC}"
+echo -e "${BLUE}Creating initial commit...${NC}"
+git add "${FEATURE_PATH}/"
+git commit -m "feat: initialize ${FEATURE_DIR} - discovery phase
+
+Created feature documentation structure for ${FEATURE_NAME}.
+
+📁 Structure:
+- docs/features/${FEATURE_DIR}/about.md - Feature specification template
+- docs/features/${FEATURE_DIR}/discovery.md - Discovery process template
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+echo -e "${GREEN}✓ Initial commit created${NC}"
+
+# Push to origin
+echo ""
+echo -e "${BLUE}Pushing branch to origin...${NC}"
+PUSH_OUTPUT=$(git push -u origin "$NEW_BRANCH_NAME" 2>&1)
+echo "$PUSH_OUTPUT"
+
+# Extract PR/MR URL from push output
+PR_URL=""
+
+# GitHub pattern
+if echo "$PUSH_OUTPUT" | grep -q "github.com"; then
+    PR_URL=$(echo "$PUSH_OUTPUT" | grep -oP 'https://github\.com/[^\s]+' | head -1)
+fi
+
+# GitLab pattern
+if echo "$PUSH_OUTPUT" | grep -q "gitlab.com"; then
+    PR_URL=$(echo "$PUSH_OUTPUT" | grep -oP 'https://gitlab\.com/[^\s]+' | head -1)
+fi
+
+# Create git-pr.md with PR/MR link
+if [ -n "$PR_URL" ]; then
+    cat > "${FEATURE_PATH}/git-pr.md" << EOF
+# Pull Request / Merge Request
+
+**Branch:** \`${NEW_BRANCH_NAME}\`
+**Feature:** ${FEATURE_DIR}
+**Created:** ${CURRENT_DATE}
+
+## PR/MR Link
+
+${PR_URL}
+
+## Status
+
+- [ ] Draft
+- [ ] Ready for Review
+- [ ] Approved
+- [ ] Merged
+
+## Notes
+
+[Add any relevant notes about the PR/MR here]
+EOF
+
+    echo -e "${GREEN}✓ Created ${FEATURE_PATH}/git-pr.md${NC}"
+    echo -e "${BLUE}PR/MR URL: ${PR_URL}${NC}"
+
+    # Commit git-pr.md
+    git add "${FEATURE_PATH}/git-pr.md"
+    git commit -m "docs: add PR/MR link to ${FEATURE_DIR}
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    git push
+else
+    echo -e "${YELLOW}⚠ Could not extract PR/MR URL from push output${NC}"
+    echo -e "${YELLOW}You can manually create the PR/MR and add the link to git-pr.md${NC}"
+fi
+
+echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}✓ Feature structure created successfully!${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo -e "${BLUE}📁 Feature Directory: ${FEATURE_PATH}/${NC}"
+echo -e "${BLUE}🌿 Branch: ${NEW_BRANCH_NAME}${NC}"
+if [ -n "$PR_URL" ]; then
+    echo -e "${BLUE}🔗 PR/MR: ${PR_URL}${NC}"
+fi
+echo ""
 echo -e "${YELLOW}Next steps:${NC}"
-echo -e "  1. Fill in the templates in ${FEATURE_PATH}/"
-echo -e "  2. Complete the discovery process"
-echo -e "  3. Proceed to planning phase"
+echo -e "  1. Use /feature command to complete discovery process"
+echo -e "  2. Fill in about.md and discovery.md templates"
+echo -e "  3. Use /plan command to create technical plan"
+echo -e "  4. Use /dev command to start development"
+echo ""

@@ -4,41 +4,64 @@ You are now acting as a **Feature Discovery & Documentation Specialist**. Your r
 
 This command initiates the feature discovery workflow, which is the FIRST PHASE of creating a new feature.
 
-## Phase 1: Initial Analysis (MANDATORY)
+## Phase 1: Initial Analysis & Setup (MANDATORY)
+
+### Step 1: Gather Feature Information
+
+Ask the user these questions FIRST:
+
+1. **Branch Type**: "What type of change is this?"
+   - `feature` - New functionality
+   - `fix` - Bug fix
+   - `refactor` - Code refactoring
+   - `docs` - Documentation only
+   - Default: `feature`
+
+2. **Feature Name**: "What's a short descriptive name for this feature?" (e.g., `user-authentication`, `webhook-notifications`)
+   - Use kebab-case (lowercase with hyphens)
+   - Keep it concise but descriptive
+
+### Step 2: Execute Initial Analysis
 
 Execute these commands in parallel to understand current context:
 
 ```bash
-# 1. Check existing features to determine next feature number
-ls docs/features/
-
-# 2. Analyze recent commits
+# 1. Analyze recent commits
 git log --oneline -20
 
-# 3. Check modified files in current branch
+# 2. Check modified files in current branch
 git diff main...HEAD --name-only
 
-# 4. Verify current branch
+# 3. Verify current branch
 git branch --show-current
 ```
 
-**Auto-Create Feature Documentation Structure:**
+### Step 3: Create Feature Structure
 
-After gathering the initial context, automatically run the helper script:
+Run the helper script with the information gathered:
 
 ```bash
-# Create feature documentation structure (auto-generates next F000X number)
-bash .claude/scripts/create-feature-docs.sh
+# Create feature documentation structure, branch, and push
+bash .claude/scripts/create-feature-docs.sh [branch-type] [feature-name]
+
+# Example:
+# bash .claude/scripts/create-feature-docs.sh feature user-authentication
 ```
 
 This script will:
 - Identify the last feature number in `docs/features/`
 - Determine the next feature number (F000X+1)
-- Create directory `docs/features/F[XXXX]-[branch-name]/`
-- Generate templated `about.md` and `discovery.md` files with proper structure
-- Use current git branch name automatically
+- Create new branch `[type]/F[XXXX]-[feature-name]` (if on main)
+- Create directory `docs/features/F[XXXX]-[feature-name]/`
+- Generate templated `about.md` and `discovery.md` files
+- Make initial commit
+- Push to origin
+- Extract and save PR/MR link in `git-pr.md`
 
-**Output:** You'll see the created feature directory path (e.g., `docs/features/F0004-webhook-notifications/`)
+**Output:** You'll see:
+- Feature directory path
+- New branch name
+- PR/MR URL (if available)
 
 **⚠️ CRITICAL CHECK:** Before proceeding, verify the requested feature doesn't already exist in the codebase. If similar functionality exists, inform the user and clarify if they want to:
 - Extend existing functionality
