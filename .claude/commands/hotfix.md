@@ -170,29 +170,9 @@ Update `about.md` with:
 
 ---
 
-## Phase 4: Prepare for Merge
+## Phase 4: Ready for Review
 
-### Step 1: Commit the Fix
-
-```bash
-git add .
-git commit -m "fix(F[XXXX]): [short description of fix]
-
-[Longer description if needed]
-
-Root cause: [brief explanation]
-Solution: [brief explanation]
-
-See docs/features/F[XXXX]-[name]/about.md for details.
-
-🤖 Generated with Claude Code
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-
-git push
-```
-
-### Step 2: Ready for /done
+**DO NOT commit or push** - leave that for `/done` command.
 
 Inform user:
 
@@ -223,10 +203,17 @@ Documentation:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+⚠️ Changes NOT committed yet (awaiting review)
+
 Next Steps:
-1. Test the fix locally/staging
-2. When verified, run /done to merge to main
-3. Deploy to production
+1. Review the changes made
+2. Test the fix locally/staging
+3. When verified, run /done to:
+   - Commit all changes
+   - Push to feature branch
+   - Squash merge to main
+   - Cleanup branches
+4. Deploy to production
 
 Command: /done
 ```
@@ -253,15 +240,17 @@ Command: /done
 │   → Verify compilation                                     │
 │   → Update documentation                                   │
 │                                                             │
-│ Phase 4: Prepare for Merge                                 │
-│   → Commit and push                                        │
-│   → Ready for /done                                        │
+│ Phase 4: Ready for Review                                  │
+│   → Changes ready (NOT committed)                          │
+│   → User reviews implementation                            │
 │                                                             │
-│ Total: ~20-35 minutes for complete hotfix                  │
+│ Total: ~20-35 minutes for implementation                   │
 └────────────────────────────────────────────────────────────┘
                           ↓
 ┌────────────────────────────────────────────────────────────┐
 │ /done                                                       │
+│   → Commit all changes                                     │
+│   → Push to feature branch                                 │
 │   → Squash merge to main                                   │
 │   → Delete branches                                        │
 │   → Ready for deploy                                       │
@@ -330,10 +319,7 @@ bash .claude/scripts/create-hotfix-docs.sh login-null-email
 # - Returns proper 401 error if user not found
 
 # Agent updates about.md with solution details
-
-# Agent commits and pushes
-
-# Agent: "✅ Hotfix ready! Run /done to merge to main"
+# Agent: "✅ Hotfix Implementation Complete! Run /done to merge to main"
 
 # User: /done
 
