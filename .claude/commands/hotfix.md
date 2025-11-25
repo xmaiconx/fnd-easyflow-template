@@ -1,0 +1,372 @@
+# 🔥 Hotfix - Rapid Bug Fix Workflow
+
+You are now acting as a **Rapid Response Bug Fix Specialist**. Your role is to quickly understand a critical bug, investigate the codebase, implement the fix, and prepare for merge - all in one streamlined workflow.
+
+**This command is for URGENT fixes only.** For non-urgent bugs during feature development, use `/fix` instead.
+
+---
+
+## When to Use /hotfix vs /fix
+
+| Scenario | Command |
+|----------|---------|
+| Production bug affecting users | **/hotfix** |
+| Critical security vulnerability | **/hotfix** |
+| System down or degraded | **/hotfix** |
+| Bug found during feature development | /fix |
+| Non-urgent improvement | /feature |
+
+---
+
+## Phase 1: Quick Discovery (2-3 minutes)
+
+### Step 1: Understand the Problem
+
+Ask user these essential questions ONLY:
+
+1. **What's broken?**
+   "Describe the bug in 1-2 sentences. What's happening that shouldn't?"
+
+2. **What's the impact?**
+   "How critical is this? (Production down / Users affected / Data at risk / Performance issue)"
+
+3. **Where does it happen?**
+   "Which part of the system? (Frontend / API / Worker / Database / External integration)"
+
+4. **Any error messages?**
+   "Do you have error logs or messages? (paste if available)"
+
+**Do NOT ask extensive questions.** Get just enough context to start investigating.
+
+### Step 2: Create Hotfix Structure
+
+Once you have the basic info, create the hotfix structure:
+
+```bash
+# Create hotfix with descriptive name (kebab-case)
+bash .claude/scripts/create-hotfix-docs.sh [hotfix-name]
+
+# Examples:
+# bash .claude/scripts/create-hotfix-docs.sh login-validation-error
+# bash .claude/scripts/create-hotfix-docs.sh payment-timeout-fix
+# bash .claude/scripts/create-hotfix-docs.sh api-null-pointer
+```
+
+**This script will:**
+- Create branch `fix/F[XXXX]-[hotfix-name]`
+- Create `docs/features/F[XXXX]-[hotfix-name]/about.md` (simplified template)
+- Make initial commit
+- Push to origin
+
+---
+
+## Phase 2: Rapid Investigation (5-10 minutes)
+
+### Step 1: Analyze the Flow
+
+Based on user's description, trace the affected flow:
+
+```bash
+# Search for related code
+# Use Grep, Glob, and Read tools to quickly find:
+# - Entry point (controller, component, worker)
+# - Business logic (service, handler)
+# - Data layer (repository, database)
+```
+
+**Document findings in about.md:**
+- Update "Steps to Reproduce" section
+- Fill "Root Cause Analysis" as you discover it
+
+### Step 2: Identify Root Cause
+
+Ask targeted follow-up questions if needed:
+
+- "When did this start happening?" (recent deploy? data change?)
+- "Does it happen always or intermittently?"
+- "Any recent changes to this area?"
+
+**Goal:** Identify the EXACT line/function causing the issue.
+
+### Step 3: Confirm Understanding
+
+Before implementing, briefly confirm with user:
+
+```
+"I found the issue. Here's what's happening:
+
+[1-2 sentence explanation of root cause]
+
+The fix will be:
+[1-2 sentence description of solution]
+
+Files to modify:
+- [file 1]
+- [file 2]
+
+Proceed with fix? (yes/no)"
+```
+
+---
+
+## Phase 3: Implement Fix (10-20 minutes)
+
+### Step 1: Make the Changes
+
+Implement the fix following these principles:
+
+**DO:**
+- Fix the root cause, not the symptom
+- Keep changes minimal and focused
+- Follow existing code patterns
+- Add defensive checks if needed
+
+**DO NOT:**
+- Refactor unrelated code
+- Add new features
+- Make "while we're here" improvements
+- Over-engineer the solution
+
+### Step 2: Verify Fix
+
+**Compilation Check:**
+```bash
+# Backend
+cd apps/backend && npm run build
+
+# Frontend (if applicable)
+cd apps/frontend && npm run build
+```
+
+**Logic Check:**
+- Does the fix address the root cause?
+- Could it introduce new issues?
+- Are edge cases handled?
+
+### Step 3: Update Documentation
+
+Update `about.md` with:
+
+**Solution section:**
+```markdown
+### Approach
+[What you did to fix it]
+
+### Files Modified
+- `[file path]` - [what changed]
+
+### Changes Made
+[Brief description of the actual code changes]
+```
+
+**Verification section:**
+```markdown
+### Testing Checklist
+- [x] Bug no longer reproduces
+- [x] Related functionality still works
+- [x] No new errors in logs
+- [x] Build passes
+```
+
+---
+
+## Phase 4: Prepare for Merge
+
+### Step 1: Commit the Fix
+
+```bash
+git add .
+git commit -m "fix(F[XXXX]): [short description of fix]
+
+[Longer description if needed]
+
+Root cause: [brief explanation]
+Solution: [brief explanation]
+
+See docs/features/F[XXXX]-[name]/about.md for details.
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+git push
+```
+
+### Step 2: Ready for /done
+
+Inform user:
+
+```
+✅ Hotfix Implementation Complete!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 Hotfix: F[XXXX]-[hotfix-name]
+🌿 Branch: fix/F[XXXX]-[hotfix-name]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Problem: [what was broken]
+Root Cause: [why it was broken]
+Solution: [what was fixed]
+
+Files Modified:
+- [file 1]
+- [file 2]
+
+Build Status:
+✅ Backend compiles
+✅ Frontend compiles (if applicable)
+
+Documentation:
+✓ docs/features/F[XXXX]-[name]/about.md updated
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Next Steps:
+1. Test the fix locally/staging
+2. When verified, run /done to merge to main
+3. Deploy to production
+
+Command: /done
+```
+
+---
+
+## Complete Hotfix Timeline
+
+```
+┌────────────────────────────────────────────────────────────┐
+│ /hotfix                                                     │
+│                                                             │
+│ Phase 1: Quick Discovery (2-3 min)                         │
+│   → What's broken? Impact? Where? Errors?                  │
+│   → Create branch + about.md                               │
+│                                                             │
+│ Phase 2: Rapid Investigation (5-10 min)                    │
+│   → Trace the flow                                         │
+│   → Find root cause                                        │
+│   → Confirm with user                                      │
+│                                                             │
+│ Phase 3: Implement Fix (10-20 min)                         │
+│   → Make minimal changes                                   │
+│   → Verify compilation                                     │
+│   → Update documentation                                   │
+│                                                             │
+│ Phase 4: Prepare for Merge                                 │
+│   → Commit and push                                        │
+│   → Ready for /done                                        │
+│                                                             │
+│ Total: ~20-35 minutes for complete hotfix                  │
+└────────────────────────────────────────────────────────────┘
+                          ↓
+┌────────────────────────────────────────────────────────────┐
+│ /done                                                       │
+│   → Squash merge to main                                   │
+│   → Delete branches                                        │
+│   → Ready for deploy                                       │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Critical Rules for Hotfixes
+
+**SPEED is important, but NOT at the cost of:**
+- Understanding the root cause
+- Proper fix (not band-aid)
+- Minimal testing
+- Basic documentation
+
+**DO:**
+- Move fast but deliberately
+- Ask only essential questions
+- Keep changes minimal
+- Document root cause and solution
+- Verify compilation
+
+**DO NOT:**
+- Skip understanding the problem
+- Make assumptions without checking
+- Add unrelated changes
+- Skip documentation entirely
+- Deploy without any testing
+
+---
+
+## Example Usage
+
+### Scenario: Login Failing in Production
+
+```bash
+# User: "Login is broken in production! Users can't sign in. /hotfix"
+
+# Agent asks quick questions:
+# "What's broken?" → Users getting 500 error on login
+# "Impact?" → All users affected, production down
+# "Where?" → Backend API /api/v1/auth/signin
+# "Errors?" → "TypeError: Cannot read property 'email' of undefined"
+
+# Agent creates structure:
+bash .claude/scripts/create-hotfix-docs.sh login-null-email
+
+# Branch created: fix/F0005-login-null-email
+# about.md created with template
+
+# Agent investigates:
+# - Reads auth.controller.ts
+# - Reads auth.service.ts
+# - Finds: missing null check on user object
+
+# Agent confirms:
+# "Found it! The login service isn't checking if user exists
+#  before accessing email property. Fix will add null check.
+#  Proceed? (yes)"
+
+# User: yes
+
+# Agent implements fix:
+# - Adds null check in auth.service.ts
+# - Returns proper 401 error if user not found
+
+# Agent updates about.md with solution details
+
+# Agent commits and pushes
+
+# Agent: "✅ Hotfix ready! Run /done to merge to main"
+
+# User: /done
+
+# Squash merge to main, ready for deploy
+```
+
+---
+
+## Hotfix vs Feature Development Comparison
+
+| Aspect | /feature workflow | /hotfix |
+|--------|-------------------|---------|
+| **Discovery** | Full 5-category questionnaire | 4 quick questions |
+| **Documentation** | about.md + discovery.md | about.md only (simplified) |
+| **Planning** | Optional /plan phase | No planning |
+| **Development** | /dev with full context | Integrated in /hotfix |
+| **Bug fixes** | /fix with versioning | Built into workflow |
+| **Time** | Hours to days | 20-35 minutes |
+| **Use case** | New features | Critical bugs |
+
+---
+
+## Integration with Workflow
+
+```
+Normal Feature Development:
+/feature → /plan → /dev → /fix → /done
+
+Hotfix (Urgent):
+/hotfix → /done
+
+Post-Hotfix (if needed):
+/hotfix → /done → /feature (for proper follow-up)
+```
+
+**After hotfix:** If the issue reveals deeper problems, create a proper feature to address root causes more thoroughly.
