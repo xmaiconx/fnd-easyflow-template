@@ -1,135 +1,139 @@
-# PRD – [NOME DO PRODUTO / SAAS]
-Versão: v1 (MVP avançado)  
-Responsável: [nome]  
-Data: [dd/mm/aaaa]  
-Status: [rascunho / em revisão / aprovado]
+# [Nome da Aplicação]
+
+**Versão:** v1 (MVP)
+**Responsável:** [nome]
+**Data:** [dd/mm/aaaa]
+**Status:** [rascunho / em revisão / aprovado]
 
 ---
 
-## 1. Visão do Produto
+## 1. Visão Geral
 
-**Resumo em 2–3 frases**  
-[Descreva o que é o produto, para quem é e qual transformação principal entrega.]
+**O que é:**
+[Descrição objetiva da aplicação em 2-3 frases - o que faz, qual problema resolve]
 
-**Problema principal que resolve**  
-[Qual dor clara o produto ataca?]
-
----
-
-## 2. Contexto e Oportunidade
-
-- Situação atual do mercado / cenário
-- Principais dores que você observou
-- Oportunidade (por que vale construir isso agora?)
+**Objetivo Principal:**
+[Qual transformação/resultado a aplicação entrega]
 
 ---
 
-## 3. Público-Alvo / Persona
+## 2. Escopo do V1
 
-**Perfil principal:**  
-- Quem é: [ex: dono de pequena agência, nutricionista, infoprodutor…]  
-- Momento atual: [ex: fatura 10k/mês, está travado na operação, etc.]  
+### O que ESTÁ incluído
+- [Feature/módulo 1]
+- [Feature/módulo 2]
+- [Feature/módulo 3]
 
-**Jobs to be Done principais:**  
-- [Quando…]  
-- [Eu quero…]  
-- [Para conseguir…]
-
----
-
-## 4. Proposta de Valor
-
-**Promessa central:**  
-[Frase única do tipo: “Ajuda [quem] a [resultado] sem [obstáculo].”]
-
-**Diferenciais chave:**  
-- [Diferencial 1]  
-- [Diferencial 2]  
-- [Diferencial 3]
+### O que NÃO está incluído (explicitamente fora)
+- [O que não será feito agora]
+- [Funcionalidades futuras]
 
 ---
 
-## 5. Escopo do V1 (MVP avançado)
+## 3. Features Principais
 
-**Inclui no v1:**  
-- [Feature/fluxo 1]  
-- [Feature/fluxo 2]  
-- [Feature/fluxo 3]  
+Lista das funcionalidades macro que compõem o V1:
 
-**Explicitamente fora do v1 (para não virar escopo infinito):**  
-- [O que não será feito agora]  
-- [Integrações que ficam para depois]  
+### 3.1 [Nome da Feature 1]
+**Descrição:** [O que faz em 1-2 linhas]
+**Objetivo:** [Por que existe / resultado esperado]
 
----
+### 3.2 [Nome da Feature 2]
+**Descrição:** [O que faz]
+**Objetivo:** [Resultado esperado]
 
-## 6. Principais Fluxos do Usuário
-
-Liste os fluxos de alto nível que o produto precisa ter no v1.
-
-Exemplo de formato:
-
-### 6.1 Fluxo: [nome do fluxo – ex: Onboarding / Cadastro de Projeto]
-
-**Objetivo do fluxo:**  
-[O que o usuário consegue ao final desse fluxo?]
-
-**Passos em alto nível:**
-1. [Passo 1]  
-2. [Passo 2]  
-3. [Passo 3]  
-
-(Repita para outros fluxos principais.)
+*(Repetir para outras features principais)*
 
 ---
 
-## 7. Arquitetura / Integrações (alto nível)
+## 4. Fluxos de Alto Nível
 
-- Sistemas externos / APIs:  
-  - [Ex: Stripe, WhatsApp API, etc.]  
-- Serviços internos / microserviços (se já existir):  
-  - [Ex: auth-service, billing-service, etc.]
+### 4.1 [Fluxo Principal - ex: Onboarding]
+**Objetivo:** [O que o usuário consegue ao completar]
 
----
+**Passos:**
+1. [Passo 1]
+2. [Passo 2]
+3. [Passo 3]
 
-## 8. Restrições e Premissas
+### 4.2 [Outro Fluxo Importante]
+**Objetivo:** [O que o usuário consegue ao completar]
 
-**Premissas (o que estou assumindo como verdade):**
-- [Ex: Usuário já tem conta no WhatsApp Business]
-- [Ex: O pagamento será só recorrente no cartão no v1]
+**Passos:**
+1. [Passo 1]
+2. [Passo 2]
 
-**Restrições:**
-- [Ex: Nada de app mobile nativo no v1]
-- [Ex: Foco em navegador desktop first]
-
----
-
-## 9. Riscos e Hipóteses
-
-**Principais hipóteses a validar:**
-- [Hipótese de valor – o usuário realmente quer isso?]
-- [Hipótese de usabilidade – ele consegue usar sem suporte?]
-
-**Riscos:**
-- [Risco de tech – ex: integração instável]
-- [Risco de negócio – ex: dependência de plataforma X]
+*(Repetir para outros fluxos importantes)*
 
 ---
 
-## 10. Roadmap Macro do V1
+## 5. Regras de Negócio Globais
 
-Liste as grandes entregas (que depois vão virar FRDs):
+Regras que atravessam todo o sistema:
 
-- F001 – [nome da funcionalidade]  
-- F002 – [nome da funcionalidade]  
-- F003 – [nome da funcionalidade]  
+1. **[Regra 1 - ex: Multi-tenancy]**
+   - Descrição: [Como funciona]
+   - Impacto: [Onde se aplica]
 
-(Ordem sugerida de implementação, se já tiver.)
+2. **[Regra 2 - ex: Autenticação]**
+   - Descrição: [Como funciona]
+   - Impacto: [Onde se aplica]
 
 ---
 
-## 11. Métricas de Sucesso do V1
+## 6. Arquitetura e Integrações
 
-- [Métrica 1 – ex: % de usuários que completam onboarding]  
-- [Métrica 2 – ex: nº de projetos criados por usuário em 7 dias]  
-- [Métrica 3 – ex: MRR mínimo ou nº de clientes pagantes no beta]
+### Stack Tecnológica
+- **Backend:** [ex: NestJS, Node.js]
+- **Frontend:** [ex: React, Next.js]
+- **Banco de Dados:** [ex: PostgreSQL]
+- **Infraestrutura:** [ex: Docker, AWS]
 
+### Integrações Externas
+- **[API/Serviço 1]**: [Para que serve]
+- **[API/Serviço 2]**: [Para que serve]
+
+### Serviços Internos (se aplicável)
+- **[Microserviço 1]**: [Responsabilidade]
+- **[Microserviço 2]**: [Responsabilidade]
+
+---
+
+## 7. Restrições e Premissas
+
+### Premissas Assumidas
+- [Premissa 1 - ex: Usuário terá acesso à internet]
+- [Premissa 2 - ex: Sistema operará 24/7]
+
+### Restrições Técnicas
+- [Restrição 1 - ex: Apenas navegadores modernos no V1]
+- [Restrição 2 - ex: Sem app mobile nativo inicialmente]
+
+### Dependências Críticas
+- [Dependência 1 - ex: API X precisa estar disponível]
+- [Dependência 2 - ex: Integração Y é bloqueante]
+
+---
+
+## 8. Critérios de "Mínimo Viável"
+
+O que precisa estar funcionando para o V1 ser considerado **utilizável**:
+
+- [ ] [Critério 1 - ex: Usuário consegue fazer cadastro e login]
+- [ ] [Critério 2 - ex: Feature X está operacional]
+- [ ] [Critério 3 - ex: Integração Y funciona end-to-end]
+
+---
+
+## 9. Roadmap Macro
+
+Sequência planejada de entregas (features que virarão FRDs):
+
+| ID | Feature | Prioridade | Dependências |
+|----|---------|------------|--------------|
+| F0001 | [Nome] | Alta | - |
+| F0002 | [Nome] | Média | F0001 |
+| F0003 | [Nome] | Baixa | F0001, F0002 |
+
+**Observações:**
+[Qualquer nota sobre ordem de implementação ou bloqueios conhecidos]
