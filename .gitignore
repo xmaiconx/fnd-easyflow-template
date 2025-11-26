@@ -148,3 +148,6 @@ apps/*/src/**/*.js.map
 
 # CI/CD artifacts
 build-matrix.json
+
+# MCP file
+.mcp*
