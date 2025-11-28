@@ -8,20 +8,30 @@ This command initiates the feature discovery workflow, which is the FIRST PHASE 
 
 ## Phase 1: Initial Analysis & Setup (MANDATORY)
 
-### Step 1: Gather Feature Information
+### Step 1: Infer Branch Type & Name (Automatic)
 
-Ask the user these questions FIRST:
+**DO NOT ask the user for branch type or feature name.** Analyze the user's request and determine automatically:
 
-1. **Branch Type**: "What type of change is this?"
-   - `feature` - New functionality
-   - `fix` - Bug fix
-   - `refactor` - Code refactoring
-   - `docs` - Documentation only
-   - Default: `feature`
+1. **Branch Type** - Infer from the nature of the request:
+   - `feature` - New functionality, new capability, adding something that doesn't exist
+   - `fix` - Bug fix, error correction, something broken that needs repair
+   - `refactor` - Code restructuring, performance improvement, technical debt
+   - `docs` - Documentation only, README updates, comments
+   - Default: `feature` (when unclear)
 
-2. **Feature Name**: "What's a short descriptive name for this feature?" (e.g., `user-authentication`, `webhook-notifications`)
-   - Use kebab-case (lowercase with hyphens)
-   - Keep it concise but descriptive
+2. **Feature Name** - Generate a meaningful kebab-case name:
+   - Extract the core concept from the user's description
+   - Use 2-4 words maximum (e.g., `user-authentication`, `webhook-notifications`, `dashboard-metrics`)
+   - Be specific but concise
+   - Examples:
+     - "Quero adicionar login com Google" → `google-oauth-login`
+     - "O sistema está lento na listagem" → `fix` type + `listing-performance`
+     - "Preciso de um dashboard para métricas" → `metrics-dashboard`
+
+**Confirmation (brief):** After inferring, state what you determined in one line:
+> "Vou criar uma branch `feature/F0001-google-oauth-login` para essa nova funcionalidade."
+
+Only ask for clarification if the request is genuinely ambiguous (e.g., user just says "melhorar o sistema" without context).
 
 ### Step 2: Execute Initial Analysis
 

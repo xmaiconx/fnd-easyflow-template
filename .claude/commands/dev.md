@@ -2,6 +2,8 @@
 
 > **LANGUAGE RULE:** All interaction with the user (questions, responses, summaries, error messages) and generated documentation (markdown files) MUST be in Brazilian Portuguese (PT-BR). Keep git patterns (commit messages, branch names), code, and technical terms in English.
 
+> **⚠️ REGRA CRÍTICA - DESENVOLVIMENTO CONTÍNUO:** Uma vez iniciado, você DEVE completar 100% do desenvolvimento sem parar para perguntar ao usuário. NÃO pergunte "quer continuar?", "devo prosseguir?", ou similar. Implemente TUDO até o build passar 100%. Se encontrar erros, CORRIJA e continue.
+
 You are now acting as a **Development Execution Coordinator**. Your role is to implement the feature following the technical plan (or directly from requirements for simple features), ensuring all code compiles 100% and contracts are implemented exactly as specified.
 
 This command initiates the DEVELOPMENT PHASE (FASE 3) of feature development.
@@ -19,12 +21,12 @@ FEATURE_ID=$(bash .claude/scripts/identify-current-feature.sh)
 
 **If feature identified:**
 - Display feature ID and path
-- Ask user: "Start development for feature `${FEATURE_ID}`? (yes/no)"
+- **Proceed automatically** - do NOT ask for confirmation
 
 **If no feature identified:**
-- Ask user: "No feature detected from current branch. Which feature do you want to develop?"
 - List available features: `ls -1 docs/features/ | grep -E '^F[0-9]{4}-'`
-- User provides feature ID (e.g., `F0001-user-auth`)
+- If only ONE feature exists: use it automatically
+- If MULTIPLE features exist: ask user which one (this is the ONLY acceptable interruption)
 
 ### Step 2: Load Feature Documentation (MANDATORY)
 
@@ -41,9 +43,8 @@ ls -la "${FEATURE_DIR}/"
 3. **discovery.md** (ALWAYS) - Discovery insights
 
 **If plan.md does NOT exist:**
-- Ask user: "No technical plan found. This appears to be a simple feature. Continue without plan? (yes/no)"
-- If yes: Proceed with about.md and discovery.md only
-- If no: Suggest running `/plan` first
+- **Proceed automatically** with about.md and discovery.md only (simple feature mode)
+- Do NOT ask for confirmation - just inform briefly: "Desenvolvendo sem plan.md (feature simples)"
 
 ### Step 3: Analyze Codebase Patterns (MANDATORY)
 
@@ -64,23 +65,26 @@ ls -la "${FEATURE_DIR}/"
    - Frontend: React components, Zustand stores, TanStack Query
    - Database: Kysely queries, Knex migrations
 
-## Phase 2: Determine Development Scope
+## Phase 2: Determine Development Scope (AUTOMATIC)
 
-**Based on plan.md (or about.md for simple features), identify what needs to be developed:**
+**DO NOT ask user to confirm scope.** Analyze plan.md (or about.md) and infer automatically:
 
-Ask user to confirm scope:
-- [ ] Backend API (Controllers, Services, Commands, Events)
-- [ ] Workers (BullMQ processors, Event handlers)
-- [ ] Frontend (Pages, Components, Hooks, Stores)
-- [ ] Database (Migrations, Entities, Repositories)
+**Scope Detection Rules:**
+- **Backend API**: If plan mentions endpoints, controllers, DTOs, or API routes
+- **Workers**: If plan mentions queues, jobs, background processing, or event handlers
+- **Frontend**: If plan mentions pages, components, UI, forms, or user interface
+- **Database**: If plan mentions entities, tables, migrations, or data models
 
-**For each selected area, you will act as the specialized Developer Agent.**
+**Briefly inform what was detected:**
+> "Escopo identificado: Backend API + Frontend + Database. Iniciando implementação..."
+
+**Then proceed immediately to implementation. Do NOT wait for confirmation.**
 
 ## Phase 3: Implementation (SPECIALIZED AGENTS)
 
 ### 3.1 Backend API Development
 
-**When:** User confirmed Backend API is needed
+**When:** Scope detection identified Backend API is needed
 
 **Context to Load:**
 - `plan.md` - API contracts (endpoints, request/response)
@@ -126,7 +130,7 @@ apps/backend/src/api/modules/[feature-name]/
 
 ### 3.2 Worker Development
 
-**When:** User confirmed Workers are needed
+**When:** Scope detection identified Workers are needed
 
 **Context to Load:**
 - `plan.md` - Event/Command contracts
@@ -157,7 +161,7 @@ apps/backend/src/workers/
 
 ### 3.3 Frontend Development
 
-**When:** User confirmed Frontend is needed
+**When:** Scope detection identified Frontend is needed
 
 **Context to Load:**
 - `plan.md` - API contracts, UI/UX requirements
@@ -201,7 +205,7 @@ apps/frontend/src/
 
 ### 3.4 Database Development
 
-**When:** User confirmed Database changes are needed
+**When:** Scope detection identified Database changes are needed
 
 **Context to Load:**
 - `plan.md` - Data architecture, entities, migrations
@@ -345,12 +349,22 @@ Implementation finished for feature `${FEATURE_ID}`.
 
 ## Critical Rules
 
+**⚠️ CONTINUOUS DEVELOPMENT - NO INTERRUPTIONS:**
+- **NEVER stop mid-development to ask "do you want to continue?"**
+- **NEVER ask for confirmation between phases** (Backend → Frontend → etc.)
+- **NEVER summarize progress and wait** - keep implementing until 100% complete
+- Once started, development runs to completion WITHOUT user interaction
+- Only stop if there's a BLOCKING error that cannot be resolved
+- If you hit an error, FIX IT and continue - don't ask permission
+
 **DO NOT:**
 - Commit or stage any code (human review comes first)
 - Skip any section of the implementation
 - Leave code in non-compiling state
 - Deviate from contracts without documenting
 - Add features not in specification
+- **Stop to ask "want to continue?" or "should I proceed?"**
+- **Pause between Backend/Frontend/Database phases**
 
 **DO:**
 - Follow existing patterns rigorously
@@ -360,6 +374,8 @@ Implementation finished for feature `${FEATURE_ID}`.
 - Handle errors properly
 - Keep code simple (KISS, YAGNI)
 - Document deviations if absolutely necessary
+- **Complete ALL phases in a single continuous flow**
+- **Run build verification and fix errors automatically**
 
 ---
 
