@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/auth-context'
 import { ThemeProvider } from '@/contexts/theme-context'
 import { AppLayout, AuthLayout } from '@/components/layout'
 import { ProtectedRoute, RedirectIfAuthenticated } from '@/components/auth'
-import { LoginPage, SignUpPage, SignUpSuccessPage, ConfirmEmailPage, EmailNotVerifiedPage, DashboardPage, WorkspacesPage, WorkspaceSettingsPage } from '@/pages'
+import { LoginPage, SignUpPage, SignUpSuccessPage, ConfirmEmailPage, EmailNotVerifiedPage, DashboardPage, WorkspacesPage, WorkspaceSettingsPage, BillingPage } from '@/pages'
 
 function App() {
   return (
@@ -48,6 +48,7 @@ function App() {
               <Route path="/profile" element={<div>Perfil (Em desenvolvimento)</div>} />
               <Route path="/settings/workspaces" element={<WorkspacesPage />} />
               <Route path="/settings/workspace/:workspaceId" element={<WorkspaceSettingsPage />} />
+              <Route path="/settings/billing" element={<BillingPage />} />
             </Route>
 
             {/* 404 */}

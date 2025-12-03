@@ -1,5 +1,5 @@
-import { CreateAuditLogDto } from '../api/modules/audit/dtos';
+import { AuditLog } from '@agentics/domain';
 
 export class CreateAuditLogCommand {
-  constructor(public readonly dto: CreateAuditLogDto) {}
+  constructor(public readonly data: Omit<AuditLog, 'id' | 'createdAt'>) {}
 }

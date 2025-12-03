@@ -20,6 +20,10 @@ export * from './messaging/commands';
 // Payment
 export { IPaymentGateway } from './payment/IPaymentGateway';
 export { CustomerResult, CustomerData } from './payment/types';
+export * from './payment/types';
+
+// Billing
+export * from './billing';
 
 // Scheduling
 export * from './scheduling';

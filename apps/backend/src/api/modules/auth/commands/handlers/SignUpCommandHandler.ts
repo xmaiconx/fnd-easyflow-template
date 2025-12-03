@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, BadRequestException } from '@nestjs/common';
 import { SignUpCommand } from '../SignUpCommand';
 import { AccountCreatedEvent } from '../../events/AccountCreatedEvent';
-import { EntityStatus, UserRole } from '@agentics/domain';
+import { EntityStatus, UserRole, OnboardingStatus } from '@agentics/domain';
 import { IUserRepository, IAccountRepository, IWorkspaceRepository, IWorkspaceUserRepository } from '@agentics/database';
 import { ILoggerService, IEventBroker, IConfigurationService } from '@agentics/backend';
 import * as bcrypt from 'bcrypt';
@@ -51,6 +51,8 @@ export class SignUpCommandHandler implements ICommandHandler<SignUpCommand> {
     const workspace = await this.workspaceRepository.create({
       accountId: account.id,
       name: `Meu Consultório`,
+      status: EntityStatus.ACTIVE,
+      onboardingStatus: OnboardingStatus.PENDING,
     });
 
     this.logger.info('Default workspace created', {

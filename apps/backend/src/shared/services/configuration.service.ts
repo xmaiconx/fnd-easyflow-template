@@ -63,4 +63,29 @@ export class ConfigurationService implements IConfigurationService {
       ),
     };
   }
+
+  // Stripe configuration methods
+  getStripeSecretKey(): string {
+    const key = this.configService.get<string>('STRIPE_SECRET_KEY');
+    if (!key) {
+      throw new Error('STRIPE_SECRET_KEY is required for billing functionality');
+    }
+    return key;
+  }
+
+  getStripeWebhookSecret(): string {
+    const secret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+    if (!secret) {
+      throw new Error('STRIPE_WEBHOOK_SECRET is required for webhook verification');
+    }
+    return secret;
+  }
+
+  getStripeSuccessUrl(): string {
+    return this.configService.get<string>('STRIPE_SUCCESS_URL') || `${this.getFrontendUrl()}/settings/billing?success=true`;
+  }
+
+  getStripeCancelUrl(): string {
+    return this.configService.get<string>('STRIPE_CANCEL_URL') || `${this.getFrontendUrl()}/settings/billing?canceled=true`;
+  }
 }

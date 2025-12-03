@@ -14,12 +14,6 @@ import {
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { WorkspaceFeatureGuard } from '../../guards/workspace-feature.guard';
 import { WorkspaceService } from './workspace.service';
-import {
-  CreateWorkspaceDto,
-  UpdateWorkspaceDto,
-  AddUserToWorkspaceDto,
-  UpdateWorkspaceUserRoleDto,
-} from './dtos';
 
 @Controller('workspaces')
 @UseGuards(JwtAuthGuard, WorkspaceFeatureGuard)
@@ -28,7 +22,7 @@ export class WorkspaceController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createWorkspace(@Body() dto: CreateWorkspaceDto, @Request() req: any) {
+  async createWorkspace(@Body() dto: { accountId: string; name: string; settings?: object }, @Request() req: any) {
     return await this.workspaceService.createWorkspace(dto, req.user.userId);
   }
 
@@ -48,7 +42,7 @@ export class WorkspaceController {
   }
 
   @Patch(':id')
-  async updateWorkspace(@Param('id') id: string, @Body() dto: UpdateWorkspaceDto) {
+  async updateWorkspace(@Param('id') id: string, @Body() dto: { name?: string; settings?: object }) {
     return await this.workspaceService.updateWorkspace(id, dto);
   }
 
@@ -72,14 +66,17 @@ export class WorkspaceController {
   @HttpCode(HttpStatus.CREATED)
   async addUserToWorkspace(
     @Param('id') workspaceId: string,
-    @Body() dto: Omit<AddUserToWorkspaceDto, 'workspaceId'>,
+    @Body() dto: { userId: string; role: string },
     @Request() req: any,
   ) {
-    const fullDto: AddUserToWorkspaceDto = {
-      workspaceId,
-      ...dto,
-    };
-    return await this.workspaceService.addUserToWorkspace(fullDto, req.user.userId);
+    return await this.workspaceService.addUserToWorkspace(
+      {
+        workspaceId,
+        userId: dto.userId,
+        role: dto.role,
+      },
+      req.user.userId,
+    );
   }
 
   @Get(':id/users')
@@ -91,9 +88,9 @@ export class WorkspaceController {
   async updateUserRole(
     @Param('id') workspaceId: string,
     @Param('userId') userId: string,
-    @Body() dto: UpdateWorkspaceUserRoleDto,
+    @Body() dto: { role: string },
   ) {
-    return await this.workspaceService.updateUserRole(workspaceId, userId, dto);
+    return await this.workspaceService.updateUserRole(workspaceId, userId, dto.role);
   }
 
   @Delete(':id/users/:userId')

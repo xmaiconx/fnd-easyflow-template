@@ -4,22 +4,34 @@ import { AuditLog } from '@agentics/domain';
 import { Database } from '../types';
 import { IAuditLogRepository } from '../interfaces';
 
+export interface AuditLogFilters {
+  workspaceId?: string;
+  accountId?: string;
+  userId?: string;
+  eventName?: string;
+  eventType?: 'domain' | 'integration';
+  startDate?: Date;
+  endDate?: Date;
+  limit?: number;
+  offset?: number;
+}
+
 @Injectable()
 export class AuditLogRepository implements IAuditLogRepository {
   constructor(private db: Kysely<Database>) {}
 
-  async create(dto: CreateAuditLogDto): Promise<AuditLog> {
+  async create(data: Omit<AuditLog, 'id' | 'createdAt'>): Promise<AuditLog> {
     const now = new Date();
     const result = await this.db
       .insertInto('audit_logs')
       .values({
-        workspace_id: dto.workspaceId || null,
-        account_id: dto.accountId || null,
-        user_id: dto.userId || null,
-        event_name: dto.eventName,
-        event_type: dto.eventType,
-        payload: dto.payload,
-        occurred_at: dto.occurredAt,
+        workspace_id: data.workspaceId || null,
+        account_id: data.accountId || null,
+        user_id: data.userId || null,
+        event_name: data.eventName,
+        event_type: data.eventType,
+        payload: data.payload,
+        occurred_at: data.occurredAt,
         created_at: now,
       })
       .returningAll()
@@ -38,7 +50,7 @@ export class AuditLogRepository implements IAuditLogRepository {
     return result ? this.mapToEntity(result) : null;
   }
 
-  async findByFilters(query: QueryAuditLogsDto): Promise<AuditLog[]> {
+  async findByFilters(query: AuditLogFilters): Promise<AuditLog[]> {
     let builder = this.db.selectFrom('audit_logs').selectAll();
 
     if (query.workspaceId) {
@@ -84,7 +96,7 @@ export class AuditLogRepository implements IAuditLogRepository {
     return results.map(this.mapToEntity);
   }
 
-  async countByFilters(query: QueryAuditLogsDto): Promise<number> {
+  async countByFilters(query: AuditLogFilters): Promise<number> {
     let builder = this.db.selectFrom('audit_logs').select(this.db.fn.count('id').as('count'));
 
     if (query.workspaceId) {

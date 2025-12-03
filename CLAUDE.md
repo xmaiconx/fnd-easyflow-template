@@ -1,5 +1,9 @@
 # Agentics - Development Guide
 
+## About
+
+Template base para alunos do **Fábrica de Negócios Digitais (FND)** iniciarem a construção de seus SaaS utilizando IA.
+
 ## 📋 Stack Tecnológica
 
 ### Monorepo

@@ -12,3 +12,5 @@ export { MessageDirection } from './MessageDirection';
 export { MessageStatus } from './MessageStatus';
 export { InteractiveType } from './InteractiveType';
 export { ProjectStatus } from './ProjectStatus';
+export { PlanCode } from './PlanCode';
+export { SubscriptionStatus } from './SubscriptionStatus';

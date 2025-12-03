@@ -1,6 +1,9 @@
 export { WebhookMetadata } from './WebhookMetadata';
 export { WebhookGatewayConfig } from './WebhookGatewayConfig';
 
+// Billing Types
+export type { PlanFeatures, PlanLimits, PlanFlags } from './PlanFeatures';
+
 // Message Protocol
 export type {
   MediaSource,

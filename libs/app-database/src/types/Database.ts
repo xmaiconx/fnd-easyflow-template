@@ -7,6 +7,9 @@ import { WebhookEventTable } from './WebhookEventTable';
 import { ThreadTable } from './ThreadTable';
 import { MessageTable } from './MessageTable';
 import { ProjectTable } from './ProjectTable';
+import { PlanTable } from './PlanTable';
+import { PlanPriceTable } from './PlanPriceTable';
+import { SubscriptionTable } from './SubscriptionTable';
 
 export interface Database {
   accounts: AccountTable;
@@ -18,4 +21,7 @@ export interface Database {
   threads: ThreadTable;
   messages: MessageTable;
   projects: ProjectTable;
+  plans: PlanTable;
+  plan_prices: PlanPriceTable;
+  subscriptions: SubscriptionTable;
 }

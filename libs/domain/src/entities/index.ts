@@ -5,3 +5,6 @@ export { WorkspaceUser } from './WorkspaceUser';
 export { AuditLog } from './AuditLog';
 export { WebhookEvent } from './WebhookEvent';
 export { Project, ProjectSettings } from './Project';
+export { Plan } from './Plan';
+export { PlanPrice } from './PlanPrice';
+export { Subscription } from './Subscription';

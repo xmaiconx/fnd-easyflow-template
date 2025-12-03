@@ -29,3 +29,5 @@ export {
   UpdateProjectData,
   ProjectFilters,
 } from './IProjectRepository';
+export { IPlanRepository } from './IPlanRepository';
+export { ISubscriptionRepository } from './ISubscriptionRepository';

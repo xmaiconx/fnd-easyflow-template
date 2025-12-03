@@ -28,18 +28,18 @@ export class AuditProcessor implements OnModuleInit {
       this.logger.debug('Processing audit log', {
         operation: 'audit.processor.processing',
         module: 'AuditProcessor',
-        eventName: command.dto.eventName,
-        workspaceId: command.dto.workspaceId,
+        eventName: command.data.eventName,
+        workspaceId: command.data.workspaceId,
       });
 
-      await this.auditLogRepository.create(command.dto);
+      await this.auditLogRepository.create(command.data);
 
       this.logger.info('Audit log created successfully', {
         operation: 'audit.processor.success',
         module: 'AuditProcessor',
-        eventName: command.dto.eventName,
-        workspaceId: command.dto.workspaceId || undefined,
-        accountId: command.dto.accountId || undefined,
+        eventName: command.data.eventName,
+        workspaceId: command.data.workspaceId || undefined,
+        accountId: command.data.accountId || undefined,
       });
     } catch (error) {
       this.logger.error('Failed to create audit log', error as Error, {

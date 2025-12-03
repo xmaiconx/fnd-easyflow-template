@@ -8,3 +8,6 @@ export { WebhookEventTable } from './WebhookEventTable';
 export { ThreadTable } from './ThreadTable';
 export { MessageTable } from './MessageTable';
 export { ProjectTable } from './ProjectTable';
+export { PlanTable } from './PlanTable';
+export { PlanPriceTable } from './PlanPriceTable';
+export { SubscriptionTable } from './SubscriptionTable';

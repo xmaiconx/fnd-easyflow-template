@@ -8,14 +8,14 @@ import { IWorkspaceUserRepository } from '../interfaces';
 export class WorkspaceUserRepository implements IWorkspaceUserRepository {
   constructor(private db: Kysely<Database>) {}
 
-  async addUserToWorkspace(dto: AddUserToWorkspaceDto): Promise<WorkspaceUser> {
+  async addUserToWorkspace(data: Omit<WorkspaceUser, 'createdAt'>): Promise<WorkspaceUser> {
     const now = new Date();
     const result = await this.db
       .insertInto('workspace_users')
       .values({
-        workspace_id: dto.workspaceId,
-        user_id: dto.userId,
-        role: dto.role,
+        workspace_id: data.workspaceId,
+        user_id: data.userId,
+        role: data.role,
         created_at: now,
       })
       .returningAll()
@@ -57,10 +57,10 @@ export class WorkspaceUserRepository implements IWorkspaceUserRepository {
     return result ? this.mapToEntity(result) : null;
   }
 
-  async updateRole(workspaceId: string, userId: string, dto: UpdateWorkspaceUserRoleDto): Promise<WorkspaceUser> {
+  async updateRole(workspaceId: string, userId: string, role: string): Promise<WorkspaceUser> {
     const result = await this.db
       .updateTable('workspace_users')
-      .set({ role: dto.role })
+      .set({ role })
       .where('workspace_id', '=', workspaceId)
       .where('user_id', '=', userId)
       .returningAll()

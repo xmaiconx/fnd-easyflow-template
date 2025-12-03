@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Kysely } from 'kysely';
-import { Workspace } from '@agentics/domain';
+import { Workspace, EntityStatus, OnboardingStatus } from '@agentics/domain';
 import { Database } from '../types';
 import { IWorkspaceRepository } from '../interfaces';
 
@@ -8,17 +8,17 @@ import { IWorkspaceRepository } from '../interfaces';
 export class WorkspaceRepository implements IWorkspaceRepository {
   constructor(private db: Kysely<Database>) {}
 
-  async create(dto: CreateWorkspaceDto): Promise<Workspace> {
+  async create(data: Omit<Workspace, 'id' | 'createdAt' | 'updatedAt'>): Promise<Workspace> {
     const now = new Date();
     const result = await this.db
       .insertInto('workspaces')
       .values({
-        account_id: dto.accountId,
-        name: dto.name,
-        settings: dto.settings || null,
-        status: 'active',
-        onboarding_status: 'pending',
-        archived_at: null,
+        account_id: data.accountId,
+        name: data.name,
+        settings: data.settings || null,
+        status: data.status,
+        onboarding_status: data.onboardingStatus,
+        archived_at: data.archivedAt || null,
         created_at: now,
         updated_at: now,
       })
@@ -50,15 +50,15 @@ export class WorkspaceRepository implements IWorkspaceRepository {
     return results.map(this.mapToEntity);
   }
 
-  async update(id: string, dto: UpdateWorkspaceDto): Promise<Workspace> {
+  async update(id: string, data: Partial<Omit<Workspace, 'id' | 'createdAt'>>): Promise<Workspace> {
     const updateData: any = {
       updated_at: new Date(),
     };
 
-    if (dto.name !== undefined) updateData.name = dto.name;
-    if (dto.settings !== undefined) updateData.settings = dto.settings;
-    if (dto.status !== undefined) updateData.status = dto.status;
-    if (dto.onboardingStatus !== undefined) updateData.onboarding_status = dto.onboardingStatus;
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.settings !== undefined) updateData.settings = data.settings;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.onboardingStatus !== undefined) updateData.onboarding_status = data.onboardingStatus;
 
     const result = await this.db
       .updateTable('workspaces')

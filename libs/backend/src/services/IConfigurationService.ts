@@ -10,4 +10,10 @@ export interface IConfigurationService {
   getSuperAdminEmail(): string | undefined;
   isSuperAdminEmail(email: string): boolean;
   getFeatureFlags(): IFeatureFlags;
+
+  // Stripe configuration
+  getStripeSecretKey(): string;
+  getStripeWebhookSecret(): string;
+  getStripeSuccessUrl(): string;
+  getStripeCancelUrl(): string;
 }

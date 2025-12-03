@@ -18,3 +18,6 @@ export interface CustomerData {
   name: string;
   phone?: string;
 }
+
+// Re-export Stripe service interfaces
+export { IStripeService, StripeCheckoutSession, StripePortalSession } from './IStripeService';

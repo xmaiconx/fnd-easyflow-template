@@ -10,11 +10,15 @@ import {
   IWorkspaceRepository,
   IWorkspaceUserRepository,
   IAuditLogRepository,
+  IPlanRepository,
+  ISubscriptionRepository,
   UserRepository,
   AccountRepository,
   WorkspaceRepository,
   WorkspaceUserRepository,
   AuditLogRepository,
+  PlanRepository,
+  SubscriptionRepository,
   createDatabase
 } from '@agentics/database';
 import { ResendEmailService } from './services/resend-email.service';
@@ -37,6 +41,8 @@ const ACCOUNT_REPOSITORY_TOKEN = 'IAccountRepository';
 const WORKSPACE_REPOSITORY_TOKEN = 'IWorkspaceRepository';
 const WORKSPACE_USER_REPOSITORY_TOKEN = 'IWorkspaceUserRepository';
 const AUDIT_LOG_REPOSITORY_TOKEN = 'IAuditLogRepository';
+const PLAN_REPOSITORY_TOKEN = 'IPlanRepository';
+const SUBSCRIPTION_REPOSITORY_TOKEN = 'ISubscriptionRepository';
 const EMAIL_QUEUE_SERVICE_TOKEN = 'IEmailQueueService';
 const EVENT_BROKER_TOKEN = 'IEventBroker';
 const CONFIGURATION_SERVICE_TOKEN = 'IConfigurationService';
@@ -99,6 +105,16 @@ const MESSAGE_BUFFER_SERVICE_TOKEN = 'IMessageBufferService';
       inject: [DATABASE_TOKEN],
     },
     {
+      provide: PLAN_REPOSITORY_TOKEN,
+      useFactory: (db) => new PlanRepository(db),
+      inject: [DATABASE_TOKEN],
+    },
+    {
+      provide: SUBSCRIPTION_REPOSITORY_TOKEN,
+      useFactory: (db) => new SubscriptionRepository(db),
+      inject: [DATABASE_TOKEN],
+    },
+    {
       provide: EMAIL_QUEUE_SERVICE_TOKEN,
       useClass: EmailQueueService,
     },
@@ -127,6 +143,8 @@ const MESSAGE_BUFFER_SERVICE_TOKEN = 'IMessageBufferService';
     WORKSPACE_REPOSITORY_TOKEN,
     WORKSPACE_USER_REPOSITORY_TOKEN,
     AUDIT_LOG_REPOSITORY_TOKEN,
+    PLAN_REPOSITORY_TOKEN,
+    SUBSCRIPTION_REPOSITORY_TOKEN,
     EMAIL_QUEUE_SERVICE_TOKEN,
     EVENT_BROKER_TOKEN,
     CONFIGURATION_SERVICE_TOKEN,

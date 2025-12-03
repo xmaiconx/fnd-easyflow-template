@@ -378,6 +378,7 @@ Always include this reference at the end:
 | Comando | Descrição |
 |---------|-----------|
 | `/help` | Este guia |
+| `/question` | Tire dúvidas sobre a feature (sem alterar código) |
 
 ---
 
@@ -665,6 +666,48 @@ If user asks "o que o /feature faz?" or similar, provide detailed explanation:
 - Bug crítico de segurança
 
 **Quer executar agora?** Digite `/hotfix`
+```
+
+#### About `/question`
+
+```markdown
+## ❓ Comando `/question`
+
+**Propósito:** Tirar dúvidas sobre a feature atual sem alterar nenhum código.
+
+### O que acontece quando você executa:
+
+1. **Carrega contexto:**
+   - Lê toda documentação da feature
+   - Entende o que foi planejado e implementado
+
+2. **Responde suas perguntas:**
+   - Explica em linguagem simples
+   - Usa exemplos práticos
+   - Foca no que o usuário vai ver/fazer
+
+3. **Orienta próximos passos:**
+   - Se precisar mudar algo → sugere `/plan`
+   - Se encontrou bug → sugere `/fix`
+   - Se quer nova feature → sugere `/feature`
+
+### Resultado
+- Respostas claras sobre a feature
+- NENHUMA alteração no código
+
+### Quando usar
+- Quer entender o que foi desenvolvido
+- Tem dúvidas sobre como funciona
+- Quer saber o status da feature
+- Precisa explicar para alguém
+
+### Exemplos de perguntas:
+- "O que essa feature faz?"
+- "Como o usuário vai usar isso?"
+- "Por que foi feito assim?"
+- "Isso já está pronto?"
+
+**Quer executar agora?** Digite `/question`
 ```
 
 ---

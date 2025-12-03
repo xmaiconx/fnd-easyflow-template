@@ -1,0 +1,27 @@
+import { Module } from '@nestjs/common';
+import { BillingController } from './billing.controller';
+import { BillingService } from './billing.service';
+import { StripeService } from './stripe.service';
+import { PlanService } from './plan.service';
+import { StripeWebhookService } from './stripe-webhook.service';
+import { SharedModule } from '../../../shared/shared.module';
+
+@Module({
+  imports: [SharedModule],
+  controllers: [BillingController],
+  providers: [
+    BillingService,
+    {
+      provide: 'IStripeService',
+      useClass: StripeService,
+    },
+    {
+      provide: 'IPlanService',
+      useClass: PlanService,
+    },
+    StripeWebhookService,
+    PlanService, // Also provide directly for internal use
+  ],
+  exports: ['IPlanService', PlanService],
+})
+export class BillingModule {}

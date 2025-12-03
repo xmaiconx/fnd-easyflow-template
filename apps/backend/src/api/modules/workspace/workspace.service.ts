@@ -1,12 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
-import { Workspace, WorkspaceUser } from '@agentics/domain';
-import {
-  CreateWorkspaceDto,
-  UpdateWorkspaceDto,
-  AddUserToWorkspaceDto,
-  UpdateWorkspaceUserRoleDto,
-} from './dtos';
+import { Workspace, WorkspaceUser, EntityStatus, OnboardingStatus } from '@agentics/domain';
 import { WorkspaceCreatedEvent, UserAddedToWorkspaceEvent } from './events';
 import { IWorkspaceRepository, IWorkspaceUserRepository } from '@agentics/database';
 import { ILoggerService } from '@agentics/backend';
@@ -20,15 +14,21 @@ export class WorkspaceService {
     private readonly eventBus: EventBus,
   ) {}
 
-  async createWorkspace(dto: CreateWorkspaceDto, createdBy: string): Promise<Workspace> {
+  async createWorkspace(data: { accountId: string; name: string; settings?: object }, createdBy: string): Promise<Workspace> {
     this.logger.info('Creating workspace', {
       operation: 'workspace.create.start',
       module: 'WorkspaceService',
-      accountId: dto.accountId,
-      name: dto.name,
+      accountId: data.accountId,
+      name: data.name,
     });
 
-    const workspace = await this.workspaceRepository.create(dto);
+    const workspace = await this.workspaceRepository.create({
+      accountId: data.accountId,
+      name: data.name,
+      settings: data.settings,
+      status: EntityStatus.ACTIVE,
+      onboardingStatus: OnboardingStatus.PENDING,
+    });
 
     // Add creator as owner
     await this.workspaceUserRepository.addUserToWorkspace({
@@ -50,7 +50,7 @@ export class WorkspaceService {
       operation: 'workspace.create.success',
       module: 'WorkspaceService',
       workspaceId: workspace.id,
-      accountId: dto.accountId,
+      accountId: data.accountId,
     });
 
     return workspace;
@@ -68,14 +68,14 @@ export class WorkspaceService {
     return await this.workspaceRepository.findByAccountId(accountId);
   }
 
-  async updateWorkspace(id: string, dto: UpdateWorkspaceDto): Promise<Workspace> {
+  async updateWorkspace(id: string, data: Partial<Pick<Workspace, 'name' | 'settings' | 'status' | 'onboardingStatus'>>): Promise<Workspace> {
     this.logger.info('Updating workspace', {
       operation: 'workspace.update.start',
       module: 'WorkspaceService',
       workspaceId: id,
     });
 
-    const workspace = await this.workspaceRepository.update(id, dto);
+    const workspace = await this.workspaceRepository.update(id, data);
 
     this.logger.info('Workspace updated successfully', {
       operation: 'workspace.update.success',
@@ -139,22 +139,22 @@ export class WorkspaceService {
     });
   }
 
-  async addUserToWorkspace(dto: AddUserToWorkspaceDto, addedBy: string): Promise<WorkspaceUser> {
+  async addUserToWorkspace(data: { workspaceId: string; userId: string; role: string }, addedBy: string): Promise<WorkspaceUser> {
     this.logger.info('Adding user to workspace', {
       operation: 'workspace.add_user.start',
       module: 'WorkspaceService',
-      workspaceId: dto.workspaceId,
-      userId: dto.userId,
-      role: dto.role,
+      workspaceId: data.workspaceId,
+      userId: data.userId,
+      role: data.role,
     });
 
-    const workspaceUser = await this.workspaceUserRepository.addUserToWorkspace(dto);
+    const workspaceUser = await this.workspaceUserRepository.addUserToWorkspace(data);
 
     // Publish event
-    const event = new UserAddedToWorkspaceEvent(dto.workspaceId, {
-      workspaceId: dto.workspaceId,
-      userId: dto.userId,
-      role: dto.role,
+    const event = new UserAddedToWorkspaceEvent(data.workspaceId, {
+      workspaceId: data.workspaceId,
+      userId: data.userId,
+      role: data.role,
       addedBy,
     });
     this.eventBus.publish(event);
@@ -162,8 +162,8 @@ export class WorkspaceService {
     this.logger.info('User added to workspace successfully', {
       operation: 'workspace.add_user.success',
       module: 'WorkspaceService',
-      workspaceId: dto.workspaceId,
-      userId: dto.userId,
+      workspaceId: data.workspaceId,
+      userId: data.userId,
     });
 
     return workspaceUser;
@@ -177,16 +177,16 @@ export class WorkspaceService {
     return await this.workspaceUserRepository.findByUserId(userId);
   }
 
-  async updateUserRole(workspaceId: string, userId: string, dto: UpdateWorkspaceUserRoleDto): Promise<WorkspaceUser> {
+  async updateUserRole(workspaceId: string, userId: string, role: string): Promise<WorkspaceUser> {
     this.logger.info('Updating user role in workspace', {
       operation: 'workspace.update_role.start',
       module: 'WorkspaceService',
       workspaceId,
       userId,
-      newRole: dto.role,
+      newRole: role,
     });
 
-    const workspaceUser = await this.workspaceUserRepository.updateRole(workspaceId, userId, dto);
+    const workspaceUser = await this.workspaceUserRepository.updateRole(workspaceId, userId, role);
 
     this.logger.info('User role updated successfully', {
       operation: 'workspace.update_role.success',
