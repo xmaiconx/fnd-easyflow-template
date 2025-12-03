@@ -8,6 +8,54 @@ You are now acting as a **Development Execution Coordinator**. Your role is to *
 
 This command initiates the DEVELOPMENT PHASE (FASE 3) of feature development.
 
+## Phase 0: Detect Review Fix Mode (AUTOMATIC)
+
+**⚠️ REVIEW FIX MODE:** Check if user is passing a `review.md` file as context (e.g., `/dev @docs/features/F0001-feature-name/review.md`).
+
+**Detection:**
+- If user message mentions or references a `review.md` file
+- OR if you detect review content in the context (look for "Code Review:", "Critical Issues", "Review Score")
+
+**If Review Fix Mode detected:**
+1. **Load the review.md file** (already in context or read it)
+2. **Extract all Critical Issues and Recommendations** from review
+3. **Skip normal Phase 1-2** (feature context already loaded in previous dev cycle)
+4. **Go directly to Phase 3** (Implementation) with FOCUS ON FIXING REVIEW ISSUES
+5. **In Phase 5 (Documentation)**: ADD a "Review Fixes" section to `implementation.md`
+
+**Review Fix Mode Implementation Strategy:**
+
+```markdown
+## Context from Review
+- Feature: ${FEATURE_ID}
+- Review Status: [Status from review.md]
+- Critical Issues: [Count]
+- Recommendations: [Count]
+
+## Implementation Approach
+For each Critical Issue and Recommendation:
+1. Locate the problematic file
+2. Apply the suggested fix from review
+3. Verify fix maintains functionality
+4. Run build to verify
+5. Document fix in implementation.md
+
+## Success Criteria
+- ALL Critical Issues resolved
+- Recommended improvements applied where feasible
+- Build passes 100%
+- No new violations introduced
+```
+
+**After completing fixes:**
+- Update `implementation.md` with "Review Fixes" section
+- Suggest running `/review` again to validate fixes
+
+**If NOT in Review Fix Mode:**
+- Proceed with normal Phase 1 (Identify Feature & Load Context)
+
+---
+
 ## Subagent Strategy
 
 **IMPORTANT:** This command uses the **Task tool with subagents** to parallelize development when possible. You act as the **Coordinator**, dispatching specialized subagents for each development area.
@@ -509,7 +557,14 @@ DONE (100% complete)
 
 Create implementation documentation:
 
-**Create:** `docs/features/${FEATURE_ID}/implementation.md`
+**Create or Update:** `docs/features/${FEATURE_ID}/implementation.md`
+
+**If Review Fix Mode:**
+- **UPDATE** existing `implementation.md`
+- **ADD** new "Review Fixes" section at the end (before Notes)
+
+**If Normal Development Mode:**
+- **CREATE** new `implementation.md`
 
 **Structure:**
 ```markdown
@@ -544,6 +599,33 @@ Create implementation documentation:
 
 - \`[file path]\` - [~20 word description of why deleted]
 
+## Review Fixes (ONLY in Review Fix Mode)
+
+**Review Date:** [date of review that triggered fixes]
+**Review Score:** [score from review.md]
+
+### Critical Issues Fixed
+
+#### Issue #1: [Title from review]
+**File:** \`path/to/file.ts\`
+**Problem:** [Brief description of violation]
+**Fix Applied:** [Description of what was changed]
+**Result:** ✅ Resolved
+
+#### Issue #2: [Title from review]
+[Same structure...]
+
+### Recommendations Applied
+
+#### Recommendation #1: [Title from review]
+**File:** \`path/to/file.ts\`
+**Improvement:** [Brief description]
+**Result:** ✅ Applied
+
+### Recommendations Deferred (if any)
+
+- [Recommendation title] - [Reason for deferring]
+
 ## Build Status
 
 - [ ] Backend compiles successfully
@@ -561,6 +643,8 @@ Create implementation documentation:
 ## Notes
 
 [Any important notes about the implementation, deviations from plan, or decisions made during development]
+
+[In Review Fix Mode: Add notes about architectural improvements made based on review]
 ```
 
 ## Phase 6: Completion
@@ -568,6 +652,8 @@ Create implementation documentation:
 **DO NOT commit code** - it will be reviewed by human first.
 
 Inform the user:
+
+**If Normal Development Mode:**
 
 **"✅ Development Complete!**
 
@@ -589,9 +675,37 @@ Implementation finished for feature `${FEATURE_ID}`.
 **Next Steps:**
 1. Review the implementation
 2. Test the functionality
-3. Run code review (manual or with Code Review Agent)
+3. Run code review: `/review`
 4. When approved, stage and commit changes
 5. Update PR/MR status"
+
+---
+
+**If Review Fix Mode:**
+
+**"✅ Review Fixes Complete!**
+
+Correções aplicadas para feature `${FEATURE_ID}` baseadas no review.
+
+**Summary:**
+- Critical Issues Fixed: [X]
+- Recommendations Applied: [Y]
+- Files Modified: [Z]
+
+**Build Status:**
+- ✅ Backend: Compiling successfully
+- ✅ Frontend: Compiling successfully
+
+**Documentation:**
+- ✓ Review fixes documented in `docs/features/${FEATURE_ID}/implementation.md` (Review Fixes section)
+
+**Next Steps:**
+1. Validar as correções executando:
+   ```bash
+   /review
+   ```
+2. Se aprovado, stage e commit
+3. Se ainda houver issues, executar `/dev @docs/features/${FEATURE_ID}/review.md` novamente"
 
 ---
 
