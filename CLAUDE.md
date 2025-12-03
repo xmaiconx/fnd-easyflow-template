@@ -370,8 +370,14 @@ export interface Database {
 
 ### Environment Variables (.env)
 ```bash
-# Database
+# Database (Supabase PostgreSQL)
 DATABASE_URL=postgresql://user:pass@host:port/db
+
+# Supabase Auth (REQUIRED)
+SUPABASE_URL=https://[project-ref].supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...  # Frontend-safe, also used in backend
+SUPABASE_SECRET_KEY=sb_secret_...  # Backend only - NEVER expose in frontend!
+SUPABASE_WEBHOOK_SECRET=your-webhook-secret-here  # For webhook signature validation
 
 # Redis (single instance for jobs + cache)
 REDIS_JOBS_URL=redis://localhost:6379
@@ -379,9 +385,6 @@ REDIS_JOBS_URL=redis://localhost:6379
 # API
 API_PORT=3001
 API_BASE_URL=http://localhost:3001  # Base URL for webhook generation
-
-# Auth
-JWT_SECRET=your-secret-key-here
 
 # Encryption (AES-256-GCM for credentials)
 ENCRYPTION_KEY=your-32-byte-hex-key-here

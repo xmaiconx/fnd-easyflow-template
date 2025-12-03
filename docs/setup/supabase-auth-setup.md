@@ -28,11 +28,13 @@ Este guia detalha como configurar a autenticacao do Supabase para o projeto FND 
 
 1. Acesse o [Supabase Dashboard](https://supabase.com/dashboard)
 2. Selecione seu projeto
-3. Va em **Settings > API**
+3. Va em **Settings > API Keys**
 4. Copie as seguintes credenciais:
    - **Project URL**: `https://[project-ref].supabase.co`
-   - **anon public key**: Chave publica para o frontend
-   - **service_role key**: Chave privada para o backend (NUNCA exponha no frontend!)
+   - **Publishable key**: Chave publica para o frontend (anteriormente chamada de "anon public key")
+   - **Secret keys > default**: Chave privada para o backend (NUNCA exponha no frontend!)
+     - Clique no icone de olho para revelar a chave completa
+     - Esta e a equivalente a antiga "service_role key"
 
 ### 2. Habilitar Provedor de Email/Senha
 
@@ -152,11 +154,11 @@ Crie/edite o arquivo `.env` na raiz do projeto:
 # URL do projeto Supabase
 SUPABASE_URL=https://[project-ref].supabase.co
 
-# Chave anonima (segura para frontend)
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Publishable key (segura para frontend - antiga "anon key")
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
-# Chave de servico (APENAS BACKEND - nunca exponha!)
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Secret key (APENAS BACKEND - nunca exponha! - antiga "service_role key")
+SUPABASE_SECRET_KEY=sb_secret_...
 
 # Secret para validacao de webhooks (gere com: openssl rand -base64 32)
 SUPABASE_WEBHOOK_SECRET=seu-webhook-secret-aqui
@@ -188,7 +190,7 @@ VITE_API_URL=http://localhost:3001
 
 # Supabase Auth (chaves publicas - seguras para frontend)
 VITE_SUPABASE_URL=https://[project-ref].supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
 ### 3. Executar Migrations
@@ -212,7 +214,7 @@ O Claude Code pode automatizar algumas configuracoes usando as ferramentas MCP d
 1. **Executar migrations SQL**
 2. **Verificar tabelas existentes**
 3. **Gerar tipos TypeScript**
-4. **Obter URL e chave anonima do projeto**
+4. **Obter URL e Publishable key do projeto**
 5. **Verificar advisories de seguranca**
 6. **Deploy de Edge Functions**
 
@@ -237,7 +239,7 @@ Configure a autenticacao Supabase para o projeto seguindo estes passos:
 
 3. Gere os tipos TypeScript atualizados
 
-4. Obtenha a URL e anon key do projeto para eu configurar no .env
+4. Obtenha a URL e Publishable key do projeto para eu configurar no .env
 
 5. Execute um check de seguranca (advisories) para verificar se ha problemas
 
@@ -273,7 +275,7 @@ mcp__supabase__generate_typescript_types()
 
 // 4. Obter credenciais
 mcp__supabase__get_project_url()
-mcp__supabase__get_anon_key()
+mcp__supabase__get_anon_key()  // Retorna a Publishable key
 
 // 5. Verificar seguranca
 mcp__supabase__get_advisors({ type: "security" })
@@ -390,7 +392,7 @@ npm run dev:api
 
 **Solucao**:
 1. Faca logout e login novamente
-2. Verifique se `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` estao corretos
+2. Verifique se `SUPABASE_URL` e `SUPABASE_SECRET_KEY` estao corretos
 3. Verifique se o relogio do servidor esta sincronizado
 
 ### Erro: "Email not confirmed"
@@ -434,14 +436,14 @@ npm run dev:api
 
 - [ ] Backend (.env)
   - [ ] `SUPABASE_URL` configurado
-  - [ ] `SUPABASE_ANON_KEY` configurado
-  - [ ] `SUPABASE_SERVICE_ROLE_KEY` configurado
+  - [ ] `SUPABASE_PUBLISHABLE_KEY` configurado
+  - [ ] `SUPABASE_SECRET_KEY` configurado
   - [ ] `SUPABASE_WEBHOOK_SECRET` configurado
   - [ ] `DATABASE_URL` configurado
 
 - [ ] Frontend (.env)
   - [ ] `VITE_SUPABASE_URL` configurado
-  - [ ] `VITE_SUPABASE_ANON_KEY` configurado
+  - [ ] `VITE_SUPABASE_PUBLISHABLE_KEY` configurado
   - [ ] `VITE_API_URL` configurado
 
 - [ ] Migrations
@@ -469,9 +471,9 @@ npm run dev:api
 
 **Project URL**: `https://ogkmccnebhhtwidwxmhp.supabase.co`
 
-**Anon Key**:
+**Publishable Key** (antiga "Anon Key"):
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9na21jY25lYmhodHdpZHd4bWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3MTg4MzIsImV4cCI6MjA4MDI5NDgzMn0.VirgnkvBybTZtPdzw8qzmZyr6WrSr395ef_BsXYVk94
+sb_publishable_YaZy9Ci8FNZmNjnskySNA_8GzMs-p
 ```
 
-> **Nota**: A `service_role_key` deve ser obtida no Supabase Dashboard em **Settings > API** e NUNCA deve ser compartilhada ou commitada no repositorio.
+> **Nota**: A **Secret key** (antiga "service_role_key") deve ser obtida no Supabase Dashboard em **Settings > API Keys > Secret keys** e NUNCA deve ser compartilhada ou commitada no repositorio.
