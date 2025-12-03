@@ -73,7 +73,7 @@ export class SupabaseService implements ISupabaseService {
   }
 
   /**
-   * Get user by ID (admin operation using service role key)
+   * Get user by ID (admin operation using secret key)
    * Used by reconciliation worker and webhook handlers
    */
   async getUserById(authUserId: string): Promise<SupabaseUser> {
