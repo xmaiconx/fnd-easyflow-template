@@ -2,7 +2,6 @@ import { IFeatureFlags } from '../features/IFeatureFlags';
 
 export interface IConfigurationService {
   getFrontendUrl(): string;
-  getJwtSecret(): string; // DEPRECATED: Using Supabase Auth
   getResendApiKey(): string;
   getResendFromEmail(): string;
   getRedisJobsUrl(): string;
@@ -13,8 +12,8 @@ export interface IConfigurationService {
 
   // Supabase Auth configuration
   getSupabaseUrl(): string;
-  getSupabaseAnonKey(): string;
-  getSupabaseServiceRoleKey(): string;
+  getSupabasePublishableKey(): string;
+  getSupabaseSecretKey(): string;
   getSupabaseWebhookSecret(): string;
 
   // Stripe configuration

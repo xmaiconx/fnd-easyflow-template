@@ -35,7 +35,7 @@ export interface ISupabaseService {
   getUser(accessToken: string): Promise<SupabaseUser>;
 
   /**
-   * Get user by ID (admin operation using service role key)
+   * Get user by ID (admin operation using secret key)
    * Used by reconciliation worker and webhook handlers
    *
    * @param authUserId - UUID of user in auth.users

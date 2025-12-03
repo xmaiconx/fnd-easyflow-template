@@ -11,8 +11,8 @@ import * as crypto from 'crypto';
  * - Admin operations (getUserById, listUsers)
  * - Webhook signature verification
  *
- * Uses service role key for admin operations (backend only).
- * Frontend uses anon key directly via @supabase/supabase-js.
+ * Uses secret key for admin operations (backend only).
+ * Frontend uses publishable key directly via @supabase/supabase-js.
  */
 @Injectable()
 export class SupabaseService implements ISupabaseService {
@@ -24,11 +24,11 @@ export class SupabaseService implements ISupabaseService {
     private readonly logger: ILoggerService,
   ) {
     const supabaseUrl = this.configService.getSupabaseUrl();
-    const supabaseServiceRoleKey = this.configService.getSupabaseServiceRoleKey();
+    const supabaseSecretKey = this.configService.getSupabaseSecretKey();
     this.webhookSecret = this.configService.getSupabaseWebhookSecret();
 
-    // Initialize Supabase client with service role key (admin access)
-    this.supabaseClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    // Initialize Supabase client with secret key (admin access)
+    this.supabaseClient = createClient(supabaseUrl, supabaseSecretKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
@@ -73,7 +73,7 @@ export class SupabaseService implements ISupabaseService {
   }
 
   /**
-   * Get user by ID (admin operation using service role key)
+   * Get user by ID (admin operation using secret key)
    * Used by reconciliation worker and webhook handlers
    */
   async getUserById(authUserId: string): Promise<SupabaseUser> {

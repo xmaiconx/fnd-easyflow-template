@@ -10,9 +10,6 @@ export class ConfigurationService implements IConfigurationService {
     return this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
   }
 
-  getJwtSecret(): string {
-    return this.configService.get<string>('JWT_SECRET') || 'rugido-digital-secret-key';
-  }
 
   getResendApiKey(): string {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
@@ -73,18 +70,18 @@ export class ConfigurationService implements IConfigurationService {
     return url;
   }
 
-  getSupabaseAnonKey(): string {
-    const key = this.configService.get<string>('SUPABASE_ANON_KEY');
+  getSupabasePublishableKey(): string {
+    const key = this.configService.get<string>('SUPABASE_PUBLISHABLE_KEY');
     if (!key) {
-      throw new Error('SUPABASE_ANON_KEY is required for Supabase Auth');
+      throw new Error('SUPABASE_PUBLISHABLE_KEY is required for Supabase Auth');
     }
     return key;
   }
 
-  getSupabaseServiceRoleKey(): string {
-    const key = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+  getSupabaseSecretKey(): string {
+    const key = this.configService.get<string>('SUPABASE_SECRET_KEY');
     if (!key) {
-      throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for Supabase Auth');
+      throw new Error('SUPABASE_SECRET_KEY is required for Supabase Auth');
     }
     return key;
   }
