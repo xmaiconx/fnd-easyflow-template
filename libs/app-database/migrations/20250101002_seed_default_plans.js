@@ -1,9 +1,12 @@
 /**
+ * SEED DATA - Default Plans
+ * Seeds initial FREE, STARTER, and PROFESSIONAL plans with prices
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
-  // Fixed UUIDs for plans
+  // Fixed UUIDs for predictable plan references
   const FREE_PLAN_ID = '00000000-0000-0000-0000-000000000001';
   const STARTER_PLAN_ID = '00000000-0000-0000-0000-000000000002';
   const PROFESSIONAL_PLAN_ID = '00000000-0000-0000-0000-000000000003';

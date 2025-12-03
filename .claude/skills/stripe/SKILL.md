@@ -13,7 +13,7 @@ Integração Stripe para SaaS. Consulta `stripe-doc.md` via Grep para exemplos d
 
 ## Database Schema
 
-**Migration:** `libs/app-database/migrations/20251202001_create_billing_tables.js`
+**Migration:** `libs/app-database/migrations/20250101001_create_initial_schema.js`
 
 ```
 plans → plan_prices → subscriptions → payment_history
