@@ -33,7 +33,9 @@ If discovery is not complete, inform the user:
 │     ↓                                                           │
 │  Phase 4: Review Subagent → follows .claude/commands/review.md  │
 │     ↓                                                           │
-│  Phase 5: Final Verification (build 100%)                       │
+│  Phase 5: Documentation Subagent → implementation.md            │
+│     ↓                                                           │
+│  Phase 6: Final Verification (build 100%)                       │
 │     ↓                                                           │
 │  DONE: Feature ready for commit                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -334,12 +336,103 @@ npm run build
 - Issues corrigidos: [X]
 - Score final: [Y/10]
 
+Gerando documentação...
+```
+
+---
+
+## Phase 5: Documentation Subagent
+
+### Dispatch Documentation Subagent
+
+**Use Task tool with `subagent_type: "general-purpose"`**
+
+```
+description: "Document feature ${FEATURE_ID}"
+prompt: |
+  You are a **Documentation Specialist** creating implementation documentation for feature ${FEATURE_ID}.
+
+  ## Instructions
+  Follow the documentation format from: .claude/commands/dev.md (Phase 5: Documentation section)
+
+  ## CRITICAL: LEAN DOCUMENTATION
+  Create CONCISE documentation. NO verbose descriptions.
+
+  ## Context to Gather
+  1. Read docs/features/${FEATURE_ID}/plan.md - What was planned
+  2. Read docs/features/${FEATURE_ID}/review.md - What was reviewed/fixed
+  3. Use git diff to identify ALL files created/modified/deleted
+
+  ## Commands to Run
+  ```bash
+  # Get all changed files
+  git status --porcelain
+
+  # Get diff summary
+  git diff --stat
+  ```
+
+  ## Output Format
+  Create: docs/features/${FEATURE_ID}/implementation.md
+
+  Follow this EXACT structure (from dev.md):
+
+  ```markdown
+  # Implementation: [Feature Name]
+
+  **Date:** [current date]
+  **Developer:** Claude Code
+
+  ## Files Created
+  - `[path]` - [~20 word description]
+
+  ## Files Modified
+  - `[path]` - [~20 word description]
+
+  ## Files Deleted
+  - `[path]` - [~20 word reason]
+
+  ## Build Status
+  - [x] Backend compiles successfully
+  - [x] Frontend compiles successfully
+
+  ## Notes
+  [Important notes, deviations from plan, decisions made - keep brief]
+  ```
+
+  ## Rules
+  - ~20 words MAX per file description
+  - NO verbose explanations
+  - NO code snippets
+  - Focus on WHAT was done, not HOW
+  - List ALL files changed (use git status)
+
+  ## Report Back
+  - implementation.md created
+  - Total files: created/modified/deleted counts
+```
+
+### Verify Documentation Created
+
+```bash
+cat "docs/features/${FEATURE_ID}/implementation.md"
+```
+
+**Output to user:**
+```
+✅ Phase 5: Documentação concluída
+
+📄 Implementation doc: docs/features/${FEATURE_ID}/implementation.md
+- Files created: [X]
+- Files modified: [Y]
+- Files deleted: [Z]
+
 Verificação final...
 ```
 
 ---
 
-## Phase 5: Final Verification
+## Phase 6: Final Verification
 
 ### Full Build Check
 
@@ -373,13 +466,14 @@ ls -la "docs/features/${FEATURE_ID}/"
 
 📊 Execution Summary:
 ┌────────────────────────────────────────────────────────────────┐
-│ Phase          │ Status │ Subagents │                         │
+│ Phase           │ Status │ Subagents │                        │
 ├────────────────────────────────────────────────────────────────┤
-│ 1. Context     │   ✅   │     -     │                         │
-│ 2. Planning    │   ✅   │     1     │                         │
-│ 3. Development │   ✅   │     N     │                         │
-│ 4. Review      │   ✅   │     1     │                         │
-│ 5. Verification│   ✅   │     -     │                         │
+│ 1. Context      │   ✅   │     -     │                        │
+│ 2. Planning     │   ✅   │     1     │                        │
+│ 3. Development  │   ✅   │     N     │                        │
+│ 4. Review       │   ✅   │     1     │                        │
+│ 5. Documentation│   ✅   │     1     │                        │
+│ 6. Verification │   ✅   │     -     │                        │
 └────────────────────────────────────────────────────────────────┘
 
 📦 Components Implemented:
@@ -466,7 +560,8 @@ Each phase MUST complete successfully before next:
 1. Planning → plan.md exists and is complete
 2. Development → ALL builds pass
 3. Review → ALL issues fixed, build passes
-4. Verification → Final build 100% passing
+4. Documentation → implementation.md created (lean format)
+5. Verification → Final build 100% passing
 
 ---
 
