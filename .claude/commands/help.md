@@ -356,14 +356,22 @@ Always include this reference at the end:
 
 ## 📚 Referência de Comandos
 
+### Setup Inicial
+
+| Comando | Descrição | Quando Usar |
+|---------|-----------|-------------|
+| `/founder` | Cria seu perfil de comunicação | **Uma vez**, antes de começar (adapta a linguagem) |
+| `/prd` | Define o produto/MVP | **Uma vez**, no início do projeto |
+
 ### Fluxo Principal (Construção de Features)
 
 | Comando | Descrição | Quando Usar |
 |---------|-----------|-------------|
-| `/prd` | Define o produto/MVP | **Uma vez**, no início do projeto |
 | `/feature` | Discovery de uma feature | Início de cada funcionalidade |
 | `/plan` | Planejamento técnico | Após discovery (opcional para features simples) |
-| `/dev` | Implementação | Após discovery ou plan |
+| `/dev` | Implementação manual | Após discovery ou plan (você acompanha) |
+| `/autopilot` | Implementação autônoma | Após discovery ou plan (Claude faz tudo) |
+| `/review` | Revisar implementação | Após `/dev` ou `/autopilot` |
 | `/done` | Finaliza e merge | Quando feature está pronta |
 
 ### Fluxo de Correções
@@ -378,22 +386,28 @@ Always include this reference at the end:
 | Comando | Descrição |
 |---------|-----------|
 | `/help` | Este guia |
-| `/question` | Tire dúvidas sobre a feature (sem alterar código) |
+| `/brainstorm` | Conversar sobre ideias e explorar possibilidades (sem alterar código) |
+| `/question` | Tire dúvidas sobre a feature atual (sem alterar código) |
 
 ---
 
 ## 🔄 Fluxos de Trabalho
 
+### Setup Inicial (uma vez)
+```
+/founder → /prd
+```
+
 ### Desenvolvimento Normal
 ```
-/prd → /feature → /plan → /dev → /done
-              ↘          ↗
-               (opcional)
+/feature → /plan → /dev ou /autopilot → /review → /done
+                ↘                    ↗
+                  (opcional)
 ```
 
 ### Feature Simples (sem planejamento)
 ```
-/prd → /feature → /dev → /done
+/feature → /autopilot → /done
 ```
 
 ### Correção Durante Desenvolvimento
@@ -406,15 +420,22 @@ Always include this reference at the end:
 /hotfix → /done → deploy
 ```
 
+### Exploração de Ideias
+```
+/brainstorm → (decide criar feature?) → /feature
+```
+
 ---
 
 ## 💡 Dicas
 
-1. **Comece pelo PRD** - Defina seu produto antes de codar
-2. **MVP primeiro** - Foque no mínimo para validar e vender
-3. **Uma feature por vez** - Complete antes de começar outra
-4. **Documente sempre** - Os comandos geram documentação automática
-5. **Use /help** - Quando estiver perdido, volte aqui!
+1. **Comece pelo /founder** - Adapta a comunicação ao seu perfil
+2. **Depois o PRD** - Defina seu produto antes de codar
+3. **MVP primeiro** - Foque no mínimo para validar e vender
+4. **Uma feature por vez** - Complete antes de começar outra
+5. **Use /autopilot** - Para implementação autônoma sem precisar acompanhar
+6. **Documente sempre** - Os comandos geram documentação automática
+7. **Use /help** - Quando estiver perdido, volte aqui!
 
 ---
 
@@ -469,6 +490,40 @@ If user asks "o que o /feature faz?" or similar, provide detailed explanation:
 - Quando quiser reformular o produto
 
 **Quer executar agora?** Digite `/prd`
+```
+
+#### About `/founder`
+
+```markdown
+## 👤 Comando `/founder`
+
+**Propósito:** Criar seu perfil de comunicação para adaptar a linguagem dos comandos.
+
+### O que acontece quando você executa:
+
+1. **3 perguntas rápidas (~2 min):**
+   - Sua experiência com desenvolvimento
+   - Como prefere que explique as coisas
+   - Seu papel no projeto
+
+2. **Identificação do perfil:**
+   - Leigo → Linguagem simples, zero jargão
+   - Básico → Termos simples, explicações
+   - Intermediário → Termos técnicos comuns ok
+   - Técnico → Discussão técnica completa
+
+3. **Documentação:**
+   - Cria `docs/founder_profile.md`
+   - Outros comandos consultam este perfil
+
+### Resultado
+- `docs/founder_profile.md` - Seu perfil de comunicação
+
+### Quando usar
+- **Uma vez**, antes de começar o projeto
+- Quando quiser ajustar as preferências
+
+**Quer executar agora?** Digite `/founder`
 ```
 
 #### About `/feature`
@@ -571,6 +626,82 @@ If user asks "o que o /feature faz?" or similar, provide detailed explanation:
 **Quer executar agora?** Digite `/dev`
 ```
 
+#### About `/autopilot`
+
+```markdown
+## 🤖 Comando `/autopilot`
+
+**Propósito:** Implementação 100% autônoma - Claude faz tudo sem interrupções.
+
+### O que acontece quando você executa:
+
+1. **Carrega contexto:**
+   - Lê toda documentação da feature
+   - Analisa padrões do codebase
+   - Entende completamente o que fazer
+
+2. **Implementação contínua:**
+   - Desenvolve 100% sem perguntas
+   - Cria backend, frontend, database
+   - Resolve erros automaticamente
+   - Faz múltiplas iterações se necessário
+
+3. **Verificação:**
+   - Build deve passar 100%
+   - Documenta tudo em `implementation.md`
+
+### Resultado
+- Feature 100% implementada
+- Build passando
+- `implementation.md` completo
+
+### Quando usar
+- Após `/feature` ou `/plan`
+- Quando quer que Claude trabalhe sozinho
+- Ideal para features bem especificadas
+
+### Diferença do `/dev`:
+- `/dev` = você acompanha o processo
+- `/autopilot` = Claude faz tudo sozinho
+
+**Quer executar agora?** Digite `/autopilot`
+```
+
+#### About `/review`
+
+```markdown
+## 🔍 Comando `/review`
+
+**Propósito:** Revisar a implementação antes de finalizar.
+
+### O que acontece quando você executa:
+
+1. **Análise da implementação:**
+   - Verifica código contra especificação
+   - Identifica problemas potenciais
+   - Valida padrões do projeto
+
+2. **Relatório de revisão:**
+   - O que está correto
+   - O que precisa ajuste
+   - Sugestões de melhoria
+
+3. **Próximos passos:**
+   - Se aprovado → `/done`
+   - Se precisa ajuste → feedback específico
+
+### Resultado
+- Relatório de revisão
+- Confiança antes do merge
+
+### Quando usar
+- Após `/dev` ou `/autopilot`
+- Antes de `/done`
+- Quando quer validar a implementação
+
+**Quer executar agora?** Digite `/review`
+```
+
 #### About `/done`
 
 ```markdown
@@ -666,6 +797,47 @@ If user asks "o que o /feature faz?" or similar, provide detailed explanation:
 - Bug crítico de segurança
 
 **Quer executar agora?** Digite `/hotfix`
+```
+
+#### About `/brainstorm`
+
+```markdown
+## 💡 Comando `/brainstorm`
+
+**Propósito:** Conversar livremente sobre ideias, explorar possibilidades e entender o projeto.
+
+### O que acontece quando você executa:
+
+1. **Carrega contexto do projeto:**
+   - Lê seu perfil de comunicação
+   - Entende features existentes
+   - Conhece a arquitetura
+
+2. **Conversa livre:**
+   - Responde perguntas sobre o projeto
+   - Explora ideias de novas features
+   - Avalia viabilidade técnica
+   - Compara opções
+
+3. **Orienta próximos passos:**
+   - Se surgir uma feature → sugere `/feature`
+   - Se encontrar bug → sugere `/fix`
+
+### Resultado
+- Respostas e insights sobre o projeto
+- NENHUMA alteração no código
+
+### Quando usar
+- Quer explorar uma ideia antes de formalizar
+- Tem dúvidas sobre o que é possível
+- Quer entender o que já existe
+- Antes de decidir criar uma feature
+
+### Diferença do `/question`:
+- `/question` = foco na feature ATUAL
+- `/brainstorm` = conversa LIVRE sobre qualquer tema
+
+**Quer executar agora?** Digite `/brainstorm`
 ```
 
 #### About `/question`

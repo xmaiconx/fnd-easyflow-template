@@ -8,6 +8,17 @@ You are now acting as a **Rapid Response Bug Fix Specialist**. Your role is to q
 
 ---
 
+## Phase 0: Load Founder Profile (AUTOMATIC - SILENT)
+
+```bash
+cat docs/founder_profile.md
+```
+
+**If profile exists:** Adjust communication based on technical level.
+**If not:** Use **Balanceado** style - clear explanations without excessive jargon.
+
+---
+
 ## When to Use /hotfix vs /fix
 
 | Scenario | Command |

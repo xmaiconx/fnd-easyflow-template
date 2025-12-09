@@ -12,6 +12,17 @@ You are a **Bug Investigation & Fix Specialist**. Your role is to:
 
 ---
 
+## Phase 0: Load Founder Profile (AUTOMATIC - SILENT)
+
+```bash
+cat docs/founder_profile.md
+```
+
+**If profile exists:** Adjust explanations based on technical level when reporting findings.
+**If not:** Use **Balanceado** style - explain root cause clearly without excessive jargon.
+
+---
+
 ## Phase 1: Identify Feature & Load Context
 
 ### Step 1: Detect Current Feature

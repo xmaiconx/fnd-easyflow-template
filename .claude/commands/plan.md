@@ -8,9 +8,27 @@ This command initiates the PLANNING PHASE (FASE 2) of feature development.
 
 ---
 
+## Phase 0: Load Founder Profile (AUTOMATIC - SILENT)
+
+### Step 0: Read Communication Preferences
+
+```bash
+cat docs/founder_profile.md
+```
+
+**If profile exists:**
+- Parse `Nível Técnico` to determine communication depth
+- Parse `Preferências de Comunicação` for style
+- Adjust question complexity accordingly
+
+**If profile does NOT exist:**
+- Continue with **Balanceado** style as default
+
+---
+
 ## User Profile & Decision Philosophy
 
-**IMPORTANT:** The user is an **entrepreneur/product owner** with limited technical knowledge. All questions must be:
+**IMPORTANT:** Calibrate communication based on founder profile. If no profile exists, assume **entrepreneur/product owner** with limited technical knowledge. All questions must be:
 - Written in simple, non-technical language
 - Presented with clear options to choose from
 - Include a **recommended option** (marked with ⭐)

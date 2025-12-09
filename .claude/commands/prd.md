@@ -32,6 +32,27 @@ This command initiates the PRD (Product Requirements Document) creation workflow
 
 ---
 
+## Phase 0: Load Founder Profile (AUTOMATIC - SILENT)
+
+### Step 0: Read Communication Preferences
+
+```bash
+cat docs/founder_profile.md
+```
+
+**If profile exists:**
+- Parse `Nível Técnico` to determine communication depth
+- Parse `Preferências de Comunicação` for style
+- **Leigo/Básico:** Use everyday language, no jargon, practical examples
+- **Intermediário:** Can use common terms with brief explanations
+- **Técnico:** Full technical discussion allowed
+
+**If profile does NOT exist:**
+- Inform: "📋 Dica: Execute `/founder` primeiro para personalizar a comunicação!"
+- Continue with **Balanceado** style as default
+
+---
+
 ## Phase 1: Initial Setup (AUTOMATIC)
 
 ### Step 1: Check Existing PRD

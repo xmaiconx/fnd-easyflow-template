@@ -6,6 +6,27 @@ You are now acting as a **Feature Discovery & Documentation Specialist**. Your r
 
 This command initiates the feature discovery workflow, which is the FIRST PHASE of creating a new feature.
 
+## Phase 0: Load Founder Profile (AUTOMATIC - SILENT)
+
+### Step 0: Read Communication Preferences
+
+```bash
+cat docs/founder_profile.md
+```
+
+**If profile exists:**
+- Parse `Nível Técnico` to determine communication depth
+- Parse `Preferências de Comunicação` for style
+- Adjust question complexity and explanations accordingly:
+  - **Leigo/Básico:** Simple language, practical examples, no jargon
+  - **Intermediário:** Can use common technical terms with explanations
+  - **Técnico:** Full technical discussion allowed
+
+**If profile does NOT exist:**
+- Continue with **Balanceado** style as default
+
+---
+
 ## Phase 1: Initial Analysis & Setup (MANDATORY)
 
 ### Step 1: Infer Branch Type & Name (Automatic)
@@ -316,12 +337,29 @@ Before completing discovery, verify ALL items:
 
 When ALL phases are complete and documentation is filled, inform the user:
 
-**"✅ Feature Discovery Complete!**
+```markdown
+**✅ Feature Discovery Complete!**
 
-Documentation created in `docs/features/F[XXXX]-[branch-name]/`:
-- ✓ `about.md` - Feature specification
-- ✓ `discovery.md` - Discovery process record
+📄 Documentação criada em `docs/features/F[XXXX]-[branch-name]/`:
+- ✓ `about.md` - Especificação da feature
+- ✓ `discovery.md` - Registro do processo
 
-**Next Step:** You can now proceed to the Planning phase to design the technical implementation.
+---
 
-Use `/plan` command or create a technical design document."
+**📌 Próximos Passos:**
+
+### Opção 1: Planejamento Técnico (Recomendado para features complexas)
+Execute `/plan` para criar o plano técnico detalhado.
+
+### Opção 2: Implementação Direta
+
+**Se quer acompanhar o desenvolvimento:**
+Execute `/dev` - você vai ver o progresso em tempo real.
+
+**Se quer que o Claude trabalhe sozinho:**
+Execute `/autopilot` - implementação 100% autônoma sem interrupções.
+
+---
+
+💡 **Dica:** Para features simples e bem especificadas, `/autopilot` é ideal!
+```
