@@ -109,6 +109,44 @@ From `implementation.md`, extract and **read ALL files** created/modified.
 
 **REGRA:** Se está no CLAUDE.md, DEVE ser seguido.
 
+### 2.6 Environment Variables Validation
+
+**⚠️ OBRIGATÓRIO:** Verificar se TODAS as variáveis de ambiente usadas no código estão documentadas no `.env.example`.
+
+**Processo de verificação:**
+
+```bash
+# 1. Buscar variáveis de ambiente nos arquivos implementados
+grep -rE "process\.env\.|getEnv\(|config\.(get|has)" apps/ libs/ --include="*.ts" | grep -v node_modules
+
+# 2. Verificar IConfigurationService para novos métodos
+cat apps/backend/src/shared/services/configuration.service.ts
+
+# 3. Comparar com .env.example
+cat .env.example
+```
+
+**Checklist de Variáveis de Ambiente:**
+- [ ] Toda nova variável `process.env.NOVA_VAR` está no `.env.example`
+- [ ] Novos métodos em `IConfigurationService` têm variável correspondente
+- [ ] Variáveis têm valor de exemplo ou placeholder (não valores reais)
+- [ ] Variáveis sensíveis têm comentário indicando que são secrets
+
+**Se encontrar variável não documentada:**
+1. Adicionar ao `.env.example` com valor placeholder
+2. Adicionar comentário explicativo se necessário
+3. Documentar no relatório de review
+
+**Exemplo de correção:**
+```bash
+# Antes (.env.example sem a variável)
+# ... outras variáveis ...
+
+# Depois (.env.example com a variável adicionada)
+# Nova Feature - [Nome da Feature]
+NOVA_VARIAVEL=seu-valor-aqui  # Descrição breve do propósito
+```
+
 ---
 
 ## Phase 3: Architecture & SOLID Analysis
@@ -203,6 +241,11 @@ cat docs/instructions/security.md
 - [ ] CORS restrito (não usar origin: '*' em produção)
 - [ ] Secrets via environment variables
 
+### Environment Variables
+- [ ] Novas variáveis documentadas no `.env.example`
+- [ ] Valores de exemplo (não valores reais/sensíveis)
+- [ ] Comentários explicativos para variáveis complexas
+
 ### XSS
 - [ ] Outputs sanitizados
 - [ ] URLs validadas antes de usar em href/src
@@ -213,12 +256,49 @@ cat docs/instructions/security.md
 
 ---
 
-## Phase 5: KISS & YAGNI
+## Phase 5: Code Quality Checks
 
-- No unused abstractions
-- No premature optimization
-- No future-proofing for hypothetical requirements
-- Simple solutions for simple problems
+### 5.1 TypeScript Quality
+- [ ] Sem uso de `any` (usar tipos explícitos ou `unknown`)
+- [ ] Interfaces/Types definidos para objetos complexos
+- [ ] Retornos de função tipados explicitamente
+
+### 5.2 Database Migrations
+- [ ] Nova tabela/coluna → migration criada em `libs/app-database/migrations/`
+- [ ] Migration tem `up` e `down` funcionais
+- [ ] Kysely types atualizados em `libs/app-database/src/types/Database.ts`
+
+### 5.3 Frontend Types Mirror
+- [ ] Novos DTOs do backend espelhados em `apps/frontend/src/types/`
+- [ ] Interfaces (não classes) no frontend
+- [ ] Enums espelhados com mesmos valores
+
+### 5.4 Barrel Exports (index.ts)
+- [ ] Novos arquivos exportados no `index.ts` do módulo
+- [ ] Handlers NÃO exportados (são implementation details)
+- [ ] Commands/Events exportados corretamente
+
+### 5.5 Dead Code & Debug
+- [ ] Sem `console.log` (usar logger injetado)
+- [ ] Sem `debugger` statements
+- [ ] Sem código comentado
+- [ ] Sem imports não utilizados
+
+### 5.6 Hardcoded Values
+- [ ] Sem magic numbers (usar constantes nomeadas)
+- [ ] Strings repetidas extraídas para constantes
+- [ ] URLs/endpoints em configuração, não hardcoded
+
+### 5.7 Error Handling
+- [ ] Usar exceptions do NestJS (`BadRequestException`, `NotFoundException`, etc.)
+- [ ] Não retornar `null` quando deveria lançar `NotFoundException`
+- [ ] Erros com mensagens descritivas
+
+### 5.8 KISS & YAGNI
+- [ ] Sem abstrações não utilizadas
+- [ ] Sem otimização prematura
+- [ ] Sem código para requisitos hipotéticos
+- [ ] Soluções simples para problemas simples
 
 ---
 
@@ -278,10 +358,10 @@ npm run build
 | Category | Score | Status |
 |----------|-------|--------|
 | Project Patterns | X/10 | ✅/⚠️/❌ |
-| Architecture | X/10 | ✅/⚠️/❌ |
-| SOLID Principles | X/10 | ✅/⚠️/❌ |
+| Architecture & SOLID | X/10 | ✅/⚠️/❌ |
 | Security & Multi-Tenancy | X/10 | ✅/⚠️/❌ |
-| Code Quality | X/10 | ✅/⚠️/❌ |
+| Code Quality (types, exports, dead code) | X/10 | ✅/⚠️/❌ |
+| Database & Migrations | X/10 | ✅/⚠️/❌ |
 | **OVERALL** | **X/10** | **✅** |
 
 ---
