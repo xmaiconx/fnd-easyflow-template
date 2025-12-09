@@ -6,33 +6,53 @@ description: |
 
 # Atualizacao de Documentacao Claude
 
-Documentacao do projeto (CLAUDE.md) e fonte de verdade arquitetural para onboarding, assistentes IA e alinhamento do time. DEVE refletir estado atual do codebase, nao aspiracoes. Esta skill previne drift de documentacao atraves de verificacao sistematica antes de atualizacoes, aplicando brevidade (~50 palavras por conceito) e mantendo consistencia com padroes estabelecidos.
+> **DOCUMENTATION STYLE:** Seguir padroes definidos em `.claude/skills/documentation-style/SKILL.md`
+
+Documentacao do projeto (CLAUDE.md) e fonte de verdade arquitetural para onboarding, assistentes IA e alinhamento do time. DEVE refletir estado atual do codebase, nao aspiracoes.
 
 **Principio Central**: Documentacao e codigo. Docs desatualizados sao piores que nenhum doc - enganam e erodem confianca.
 
-## Diretrizes de Formatacao
+---
 
-### Regras Obrigatorias
-- **Idioma**: Sempre pt-br no CLAUDE.md
-- **Sem emojis**: Nenhum emoji em headers ou conteudo
-- **Sem codigo de exemplo**: Apenas listar paths de arquivos importantes
-- **Brevidade**: Maximo 100 palavras por paragrafo
-- **Especificidade**: Mencionar arquivos/classes concretos com paths
+## Hierarquia de Documentacao
 
-### O Que NAO Incluir
-- Blocos de codigo com implementacoes
-- Exemplos de uso de classes/funcoes
-- Controllers, DTOs, POCOs, classes de dominio puras
-- Variaveis de ambiente detalhadas
-- Scripts npm detalhados
+```
+CLAUDE.md (resumo executivo - ~500 palavras max)
+    ↓ referencia
+docs/architecture/technical-spec.md (detalhes tecnicos completos)
+    ↓ referencia
+docs/features/* (documentacao de features)
+```
 
-### O Que INCLUIR
-- Listagem de paths de enums e entities (sem codigo)
-- Paths de arquivos com regras de negocio importantes
-- Stack tecnologica com versoes
-- Convencoes de nomenclatura
-- Boas praticas (KISS, YAGNI)
-- Padroes arquiteturais (descricao textual, sem codigo)
+### CLAUDE.md vs technical-spec.md
+
+| CLAUDE.md | technical-spec.md |
+|-----------|-------------------|
+| Resumo executivo | Detalhes completos |
+| Stack e versoes principais | Todos os padroes e convencoes |
+| Convencoes essenciais | Exemplos e paths completos |
+| ~500 palavras | Sem limite |
+
+**CLAUDE.md DEVE conter:**
+```markdown
+## Especificacao Tecnica
+
+Detalhes completos da arquitetura em: `docs/architecture/technical-spec.md`
+```
+
+---
+
+## Pre-requisito: technical-spec.md
+
+**ANTES de atualizar CLAUDE.md**, verificar se existe `docs/architecture/technical-spec.md`:
+
+```bash
+ls docs/architecture/technical-spec.md 2>/dev/null
+```
+
+**Se NAO existir:** Orientar usuario a executar `/architecture` primeiro.
+
+**Se existir:** Usar como fonte de verdade para padroes do projeto.
 
 ## Processo de Atualizacao
 
