@@ -214,31 +214,54 @@ Para detalhes técnicos completos sobre arquitetura, padrões e convenções, co
 
 ## 🚀 Deploy
 
-### Vercel (Recomendado)
+### Arquitetura de Produção
 
-1. Conecte o repositório ao Vercel
+- **Backend**: Railway (Docker container com API + Workers)
+- **Frontend**: Cloudflare Pages (static hosting)
+- **Database**: Supabase PostgreSQL
+- **Queue**: Redis (Railway addon ou externo)
+
+### Railway (Backend)
+
+1. Conecte o repositório ao Railway
 2. Configure as variáveis de ambiente (ver seção abaixo)
-3. Deploy automático via git push
+3. Deploy automático via `git push origin main`
+
+O backend roda em modo `hybrid` por padrão (API + Workers BullMQ no mesmo container).
+
+### Cloudflare Pages (Frontend)
+
+1. Conecte o repositório ao Cloudflare Pages
+2. Configure o build:
+   - Build command: `npm run build`
+   - Build output directory: `apps/frontend/dist`
+   - Root directory: `/`
+3. Configure as variáveis de ambiente do frontend
+4. Deploy automático via git push
 
 ### Variáveis de Ambiente
 
-**Obrigatórias:**
+**Backend (Railway):**
 - `DATABASE_URL` - Supabase PostgreSQL
+- `REDIS_URL` - Redis connection string
+- `NODE_MODE` - `hybrid` (padrão) | `api` | `workers`
 - `SUPABASE_URL` - Supabase API
 - `SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SECRET_KEY`
-- `QSTASH_TOKEN` - Upstash QStash
-- `QSTASH_CURRENT_SIGNING_KEY`
-- `QSTASH_NEXT_SIGNING_KEY`
+- `SUPABASE_WEBHOOK_SECRET`
 - `RESEND_API_KEY` - Resend
 - `STRIPE_SECRET_KEY` - Stripe
 - `STRIPE_WEBHOOK_SECRET`
 - `ENCRYPTION_KEY` - 32-byte hex key para AES-256-GCM
-
-**Opcionais:**
-- `VERCEL_URL` - Auto-set by Vercel
+- `API_PORT` - Porta da API (Railway define automaticamente)
+- `API_BASE_URL` - URL pública da API
 - `FRONTEND_URL` - URL do frontend em produção
 - `LOG_LEVEL` - Log level (error, warn, info, debug)
+
+**Frontend (Cloudflare Pages):**
+- `VITE_SUPABASE_URL` - Supabase API
+- `VITE_SUPABASE_PUBLISHABLE_KEY` - Supabase publishable key
+- `VITE_API_URL` - URL da API em produção
 
 ## 🤝 Suporte
 
