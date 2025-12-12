@@ -7,11 +7,49 @@ set -e
 
 PRD_FILE="docs/prd.md"
 
+# Function to check PRD completion status
+check_prd_status() {
+    local file="$1"
+    local filled_sections=0
+    local total_sections=10
+
+    # Check each major section for content
+    ! grep -q "\[Descrição clara e concisa do produto\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Público-alvo principal e secundário\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Dor/necessidade que o produto endereça\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[O que queremos validar/provar com o MVP\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Nome da Funcionalidade 1\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Tipo 1\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Sistema 1\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Expectativa de tempo de resposta\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Feature\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+    ! grep -q "\[Risco 1\]" "$file" 2>/dev/null && ((filled_sections++)) || true
+
+    echo "$filled_sections/$total_sections"
+}
+
 # Verifica se o PRD já existe
 if [ -f "$PRD_FILE" ]; then
-    echo "⚠️  PRD já existe em $PRD_FILE"
+    COMPLETION=$(check_prd_status "$PRD_FILE")
+
+    echo "========================================"
+    echo "RESULT"
+    echo "========================================"
     echo "STATUS: EXISTS"
     echo "PATH: $PRD_FILE"
+    echo "COMPLETION: $COMPLETION sections filled"
+    echo ""
+
+    # List pending sections
+    echo "PENDING_SECTIONS:"
+    grep -q "\[Descrição clara e concisa do produto\]" "$PRD_FILE" 2>/dev/null && echo "  - 1.1 O que é? (Product description)"
+    grep -q "\[Público-alvo principal e secundário\]" "$PRD_FILE" 2>/dev/null && echo "  - 1.2 Para quem? (Target audience)"
+    grep -q "\[Dor/necessidade que o produto endereça\]" "$PRD_FILE" 2>/dev/null && echo "  - 1.3 Que problema resolve? (Problem statement)"
+    grep -q "\[O que queremos validar/provar com o MVP\]" "$PRD_FILE" 2>/dev/null && echo "  - 3.1 Objetivo do MVP (MVP objective)"
+    grep -q "\[Nome da Funcionalidade 1\]" "$PRD_FILE" 2>/dev/null && echo "  - 4. Funcionalidades Principais (Main features)"
+    echo ""
+    echo "NEXT_ACTION: Fill pending sections in PRD"
+    echo "========================================"
     exit 0
 fi
 
@@ -215,5 +253,33 @@ cat > "$PRD_FILE" << 'EOF'
 EOF
 
 echo "✅ PRD criado com sucesso!"
+
+# === STRUCTURED OUTPUT FOR AGENT ===
+echo ""
+echo "========================================"
+echo "RESULT"
+echo "========================================"
 echo "STATUS: CREATED"
 echo "PATH: $PRD_FILE"
+echo "COMPLETION: 0/10 sections filled"
+echo ""
+echo "SECTIONS_TO_FILL:"
+echo "  1. Visão do Produto (O que é, Para quem, Problema, Valor)"
+echo "  2. Contexto e Motivação (Por que agora, Alternativas, Diferencial)"
+echo "  3. Escopo do MVP (Objetivo, Critérios de sucesso, Incluído/Excluído)"
+echo "  4. Funcionalidades Principais (Features detalhadas)"
+echo "  5. Usuários e Permissões (Tipos, Onboarding, Multi-tenancy)"
+echo "  6. Integrações (APIs externas, Integrações futuras)"
+echo "  7. Requisitos Não-Funcionais (Performance, Segurança, Disponibilidade)"
+echo "  8. Roadmap de Funcionalidades (Fase 1 MVP, Fase 2)"
+echo "  9. Riscos e Dependências (Riscos, Dependências externas, Premissas)"
+echo "  10. Glossário (Termos e definições)"
+echo ""
+echo "PRIORITY_SECTIONS:"
+echo "  - HIGH: 1. Visão do Produto, 3. Escopo do MVP"
+echo "  - MEDIUM: 4. Funcionalidades, 5. Usuários"
+echo "  - LOW: 6-10 (can be filled progressively)"
+echo ""
+echo "NEXT_ACTION: Fill section 1 (Visão do Produto)"
+echo "NEXT_COMMAND: /prd (to guide PRD completion)"
+echo "========================================"
