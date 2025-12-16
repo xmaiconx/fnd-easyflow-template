@@ -8,30 +8,31 @@ You are now acting as a **Feature Discovery & Documentation Specialist**. Your r
 
 This command initiates the feature discovery workflow, which is the FIRST PHASE of creating a new feature.
 
-## Phase 0: Load Founder Profile (AUTOMATIC - SILENT)
+## Phase 0-1: Unified Initialization (SINGLE SCRIPT)
 
-### Step 0: Read Communication Preferences
+### Step 1: Run Feature Init Script
+
+Execute the unified initialization script that collects ALL required context:
 
 ```bash
-cat docs/founder_profile.md
+bash .claude/scripts/feature-init.sh
 ```
 
-**If profile exists:**
-- Parse `Nível Técnico` to determine communication depth
-- Parse `Preferências de Comunicação` for style
-- Adjust question complexity and explanations accordingly:
-  - **Leigo/Básico:** Simple language, practical examples, no jargon
-  - **Intermediário:** Can use common technical terms with explanations
-  - **Técnico:** Full technical discussion allowed
+This script returns structured output with:
+- **FOUNDER_PROFILE**: Tech level, communication style (adjust your language accordingly)
+- **GIT_CONTEXT**: Current branch, recent commits, modified files
+- **FEATURES_STATUS**: Existing features, next available number (F000X)
+- **ARCHITECTURE_REFERENCE**: Where to find patterns (technical-spec.md or CLAUDE.md)
+- **CODEBASE_PATTERNS**: Detected stack, multi-tenancy, CQRS patterns
+- **RECOMMENDATIONS**: Suggested next action
 
-**If profile does NOT exist:**
-- Continue with **Balanceado** style as default
+**Communication Adjustment based on TECH_LEVEL:**
+- **Leigo/Básico:** Simple language, practical examples, no jargon
+- **Intermediário:** Common technical terms with brief explanations
+- **Técnico/Avançado:** Full technical discussion allowed
+- **Balanceado (default):** Mix of simple and technical
 
----
-
-## Phase 1: Initial Analysis & Setup (MANDATORY)
-
-### Step 1: Infer Branch Type & Name (Automatic)
+### Step 2: Infer Branch Type & Name (Automatic)
 
 **DO NOT ask the user for branch type or feature name.** Analyze the user's request and determine automatically:
 
@@ -55,21 +56,6 @@ cat docs/founder_profile.md
 > "Vou criar uma branch `feature/F0001-google-oauth-login` para essa nova funcionalidade."
 
 Only ask for clarification if the request is genuinely ambiguous (e.g., user just says "melhorar o sistema" without context).
-
-### Step 2: Execute Initial Analysis
-
-Execute these commands in parallel to understand current context:
-
-```bash
-# 1. Analyze recent commits
-git log --oneline -20
-
-# 2. Check modified files in current branch
-git diff main...HEAD --name-only
-
-# 3. Verify current branch
-git branch --show-current
-```
 
 ### Step 3: Create Feature Structure
 
@@ -313,13 +299,13 @@ Once you have gathered all information through strategic questioning, FILL IN th
 
 Before completing discovery, verify ALL items:
 
-- [ ] Executed `ls docs/features/` and determined next F000X number
-- [ ] Analyzed git log and git diff
-- [ ] Asked ALL strategic question categories
-- [ ] Received answers for ALL questions
-- [ ] Created directory `docs/features/F[XXXX]-[branch-name]/`
-- [ ] Created `about.md` with complete structure
-- [ ] Created `discovery.md` with complete structure
+- [ ] Executed `bash .claude/scripts/feature-init.sh` (gathered all context)
+- [ ] Executed `bash .claude/scripts/create-feature-docs.sh [type] [name]` (created structure)
+- [ ] Asked ALL strategic question categories (or validated inferences)
+- [ ] Received answers/validation for ALL questions
+- [ ] Read documentation-style skill
+- [ ] Filled `about.md` with complete specification
+- [ ] Filled `discovery.md` with complete discovery record
 - [ ] Documented ALL decisions and their rationale
 - [ ] Identified and documented edge cases
 - [ ] Defined measurable acceptance criteria
