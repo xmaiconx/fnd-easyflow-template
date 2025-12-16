@@ -8,271 +8,248 @@ description: |
 
 > **DOCUMENTATION STYLE:** Seguir padroes definidos em `.claude/skills/documentation-style/SKILL.md`
 
-Documentacao do projeto (CLAUDE.md) e fonte de verdade arquitetural para onboarding, assistentes IA e alinhamento do time. DEVE refletir estado atual do codebase, nao aspiracoes.
+CLAUDE.md e fonte de verdade arquitetural para onboarding, assistentes IA e alinhamento do time. DEVE ser **self-contained** e refletir estado atual do codebase.
 
-**Principio Central**: Documentacao e codigo. Docs desatualizados sao piores que nenhum doc - enganam e erodem confianca.
-
----
-
-## Hierarquia de Documentacao
-
-```
-CLAUDE.md (resumo executivo - ~500 palavras max)
-    ↓ referencia
-docs/architecture/technical-spec.md (detalhes tecnicos completos)
-    ↓ referencia
-docs/features/* (documentacao de features)
-```
-
-### CLAUDE.md vs technical-spec.md
-
-| CLAUDE.md | technical-spec.md |
-|-----------|-------------------|
-| Resumo executivo | Detalhes completos |
-| Stack e versoes principais | Todos os padroes e convencoes |
-| Convencoes essenciais | Exemplos e paths completos |
-| ~500 palavras | Sem limite |
-
-**CLAUDE.md DEVE conter:**
-```markdown
-## Especificacao Tecnica
-
-Detalhes completos da arquitetura em: `docs/architecture/technical-spec.md`
-```
+**Principio Central**: CLAUDE.md e o unico arquivo que o modelo precisa ler. Toda informacao em um lugar. Sem arquivos separados.
 
 ---
 
-## Pre-requisito: technical-spec.md
+## Estrutura do CLAUDE.md (Self-Contained)
 
-**ANTES de atualizar CLAUDE.md**, verificar se existe `docs/architecture/technical-spec.md`:
-
-```bash
-ls docs/architecture/technical-spec.md 2>/dev/null
+```
+CLAUDE.md
+├── About (human-readable, ~5 linhas)
+├── Quick Start (human-readable, comandos essenciais)
+├── ## Technical Spec (token-efficient, JSON minificado)
+│   ├── Stack
+│   ├── Structure
+│   ├── Layers
+│   ├── Patterns
+│   ├── Domain
+│   ├── Config
+│   ├── Security
+│   ├── Critical Files
+│   └── Business Rules
+├── Best Practices (human-readable)
+├── Features (referencia a /docs/features/)
+└── Design Principles (KISS, YAGNI, etc.)
 ```
 
-**Se NAO existir:** Orientar usuario a executar `/architecture` primeiro.
+### Formato por Secao
 
-**Se existir:** Usar como fonte de verdade para padroes do projeto.
+| Secao | Formato | Publico Alvo |
+|-------|---------|--------------|
+| About, Quick Start | Human-readable | Devs humanos |
+| Technical Spec | Token-efficient (JSON minificado) | IA + Devs |
+| Best Practices | Human-readable | Devs humanos |
+| Design Principles | Human-readable | Devs humanos |
+
+**IMPORTANTE**: NAO criar arquivo `technical-spec.md` separado. Tudo fica no CLAUDE.md.
+
+---
 
 ## Processo de Atualizacao
 
-### Fase 1: Auditar Estado Atual
+### Fase 1: Identificar Tipo de Mudanca
 
-**Objetivo**: Identificar gaps entre CLAUDE.md e realidade do codebase.
+| Tipo de Mudanca | Acao |
+|-----------------|------|
+| Stack, patterns, domain, entities, enums | Executar `/architecture` |
+| Boas praticas, principios | Editar secao manualmente |
+| Nova feature | Verificar se afeta Technical Spec → `/architecture` |
+| Correcao de typo | Edicao manual direta |
 
-**Passos**:
-1. **Verificar commits recentes** para mudancas arquiteturais:
-   ```bash
-   git log --oneline -20 --name-status
-   ```
-   Procurar: novos modulos, arquivos deletados, mudancas de dependencias
+### Fase 2: Auditar Estado Atual
 
-2. **Verificar estrutura do monorepo**:
-   ```bash
-   ls apps/ libs/
-   ```
-   Comparar com secao "Estrutura do Monorepo" no CLAUDE.md
+```bash
+# Commits recentes com mudancas arquiteturais
+git log --oneline -20 --name-status | grep -E "entities|enums|module|service"
 
-3. **Verificar features desenvolvidas**:
-   ```bash
-   ls docs/features/
-   ```
-   Garantir que secao "Features Desenvolvidas" esta atualizada
+# Estrutura atual
+ls apps/ libs/
 
-### Fase 2: Mapear Stack Tecnologica
-
-**Objetivo**: Descrever libs/apps de forma concisa (~50 palavras cada).
-
-**Template** (por lib/app):
-```
-### [Nome do Pacote]
-**Proposito**: [Problema que resolve] (10-15 palavras)
-**Componentes Principais**: [Exports/modulos principais] (15-20 palavras)
-**Dependencias**: [Integracoes criticas] (10-15 palavras)
+# Features documentadas
+ls docs/features/
 ```
 
-**Diretrizes**:
-- Alvo: 40-60 palavras total
-- Ser especifico: "Kysely 0.27 para queries type-safe" nao "coisas de banco"
-- Listar exports concretos: "EmailQueueService, ResendEmailService" nao "varios servicos"
-- Omitir obviedades: Nao dizer "escrito em TypeScript" para cada pacote
+### Fase 3: Atualizar Secao Correta
 
-### Fase 3: Atualizar Secoes Afetadas
+**Secao Technical Spec** (token-efficient):
+- **SEMPRE** usar `/architecture` para atualizar
+- NAO editar JSON minificado manualmente
+- Formato: `{"key":"value"}` em uma linha
 
-**Objetivo**: Modificar apenas secoes impactadas por mudancas, preservando estilo.
-
-**Mapa de Secoes do CLAUDE.md**:
-1. **Stack Tecnologica** - Dependencias, versoes, libs core
-2. **Clean Architecture** - Estrutura do monorepo (apps/*, libs/*)
-3. **Convencoes de Nomenclatura** - Padroes de naming
-4. **Estrutura de Arquivos** - Novos modulos ou convencoes
-5. **Arquitetura Backend** - Shared.module, worker.module, CQRS
-6. **Padroes Arquiteturais** - Novos padroes (factories, strategies, etc.)
-7. **Multi-Tenancy** - Mudancas de isolamento de tenant
-8. **Database** - Atualizacoes de schema, novas tabelas
-9. **Arquitetura Frontend** - Novas pages, stores, components
-10. **Boas Praticas** - Novas convencoes ou anti-patterns
-11. **Arquivos com Regras de Negocio** - Arquivos criticos com logica de negocio
-12. **Features Desenvolvidas** - Referencia a /docs/features/*
-13. **Principios de Design** - KISS, YAGNI, SOLID
-
-**Estrategia de Atualizacao**:
-- Localizar subsecao exata que precisa atualizacao
-- Preservar tom e formato existente
-- Usar marcadores para boas praticas (Correto/Errado)
-- Adicionar explicacoes "Por que?" para regras nao obvias
-
-**Red Flags**:
-- Reescrever secoes inteiras quando apenas uma subsecao mudou
-- Mudar tom de conciso para verboso
-- Adicionar blocos de codigo extensos
-- Remover informacoes existentes validas para dar espaco a novas
+**Outras secoes** (human-readable):
+- Editar diretamente
+- Manter brevidade (~100 palavras max por paragrafo)
+- Sem emojis em headers
 
 ### Fase 4: Verificar Consistencia
 
-**Objetivo**: Garantir que atualizacao segue padroes estabelecidos.
-
 **Checklist**:
-- [ ] **Brevidade**: Nenhum paragrafo excede 100 palavras
-- [ ] **Especificidade**: Menciona arquivos/classes concretos
-- [ ] **Versoes**: Inclui numeros de versao para dependencias
-- [ ] **Formatacao**:
-  - [ ] Sem emojis em headers
-  - [ ] Blocos de codigo especificam linguagem apenas para comandos bash
-  - [ ] Convencoes usam camelCase, PascalCase, snake_case conforme contexto
-- [ ] **Cross-references**: Paths de arquivos correspondem a estrutura real
-- [ ] **Idioma**: Sempre pt-br
+- [ ] Paths mencionados existem no projeto
+- [ ] Versoes de dependencias estao corretas
+- [ ] JSON minificado esta em uma linha (sem quebras)
+- [ ] Technical Spec atualizado via `/architecture`
 
-**Comandos de Verificacao**:
 ```bash
 # Verificar se paths mencionados existem
-grep -oP '`[^`]+\.(ts|js|json|yml)`' CLAUDE.md | sort -u
-
-# Verificar nomes de pacotes
-grep "@agentics" CLAUDE.md
+grep -oP '`[^`]+\.(ts|js|json)`' CLAUDE.md | sort -u
 ```
 
-## Secao: Arquivos com Regras de Negocio
+---
 
-Esta secao substitui "Key Files" e deve listar APENAS arquivos que contem logica de negocio importante.
+## Secao Technical Spec (Token-Efficient)
 
-**O Que Incluir**:
-- Services que orquestram logica de negocio
-- Command Handlers que implementam validacoes
-- Pipeline Steps que executam fluxos
-- Factories que criam objetos complexos
+Esta secao usa formato otimizado para consumo por IA:
 
-**O Que NAO Incluir**:
-- Controllers (apenas roteamento)
-- DTOs (apenas estrutura de dados)
-- POCOs/Entities (apenas definicao de dados)
-- Repositories (apenas acesso a dados)
-- Interfaces (apenas contratos)
+```markdown
+## Technical Spec
 
-**Formato**:
-```
-### Arquivos com Regras de Negocio
+> Secao otimizada para consumo por IA. Formato token-efficient.
 
-**Backend - Services**
-- apps/backend/src/api/modules/auth/auth.service.ts - Orquestra autenticacao, validacao de credenciais e geracao de tokens JWT
-- apps/backend/src/api/modules/workspace/workspace.service.ts - Gerencia criacao e associacao de usuarios a workspaces
+**Generated:** YYYY-MM-DD | **Type:** Monorepo
 
-**Backend - Command Handlers**
-- apps/backend/src/api/modules/auth/commands/handlers/SignUpCommandHandler.ts - Valida dados de cadastro, cria conta e usuario, emite eventos
+### Stack
+{"pkg":"npm","build":"turbo","ts":"5.0+"}
+{"backend":{"framework":"NestJS 10","db":"PostgreSQL 15","orm":"Kysely 0.27"}}
+{"frontend":{"framework":"React 18.2","bundler":"Vite 4.4","ui":"Shadcn+Tailwind"}}
 
-**Backend - Pipeline Steps**
-- apps/backend/src/shared/messages/pipeline/steps/GenerateAIResponseStep.ts - Processa contexto e gera resposta usando assistente IA configurado
-```
+### Structure
+{"paths":{"backend":"apps/backend","frontend":"apps/frontend","domain":"libs/domain"}}
 
-**Regra**: Cada arquivo com descricao de ~20 palavras explicando a regra de negocio principal.
+### Layers
+domain → interfaces → database → api
 
-## Secao: Features Desenvolvidas
+### Patterns
+{"identified":["CQRS","Repository","DI","CleanArchitecture"]}
+{"conventions":{"files":"kebab-case","classes":"PascalCase","interfaces":"I+PascalCase"}}
 
-Esta secao DEVE existir no CLAUDE.md e referenciar a pasta /docs/features/*.
+### Domain
+{"entitiesPath":"libs/domain/src/entities","entities":["Account","User","Workspace"]}
+{"enumsPath":"libs/domain/src/enums","enums":[{"name":"UserRole","values":"owner|admin|member"}]}
 
-**Conteudo Obrigatorio**:
-```
-### Features Desenvolvidas
+### Config
+{"envAccess":"IConfigurationService","configFile":"apps/backend/src/shared/services/configuration.service.ts"}
 
-Funcionalidades desenvolvidas no projeto estao documentadas em /docs/features/. Cada feature possui pasta propria com estrutura padronizada contendo tres documentos: about.md (requisitos e escopo), discovery.md (processo de descoberta e decisoes) e implementation.md (detalhes tecnicos da implementacao). Consultar esta pasta para entender contexto de features existentes antes de implementar novas funcionalidades.
-```
+### Security
+{"multiTenancy":{"enabled":true,"strategy":"account_id"}}
+{"auth":{"provider":"Supabase","strategy":"JWT"}}
 
-**Proposito**: Orientar desenvolvedores e assistentes IA a consultarem /docs/features/ para entender contexto de features existentes antes de iniciar novas implementacoes.
+### Critical Files
+{"backendCore":["apps/backend/src/main.ts - Dispatcher","apps/backend/src/shared/shared.module.ts - DI"]}
 
-## Secao: Enums e Entities
-
-Listar APENAS paths, sem codigo:
-
-**Formato Correto**:
-```
-### Domain Layer
-
-**Entities** (libs/domain/src/entities/)
-- Account.ts
-- User.ts
-- Workspace.ts
-- AuditLog.ts
-
-**Enums** (libs/domain/src/enums/)
-- EntityStatus.ts
-- UserRole.ts
-- OnboardingStatus.ts
+### Business Rules
+- SEMPRE filtrar queries por account_id
+- Repositories retornam entities, NUNCA DTOs
 ```
 
-**Formato Errado** (NAO usar):
-```typescript
-// NAO incluir codigo como este
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user'
-}
+**Regras**:
+- JSON em uma linha (minificado)
+- Maximo 10 palavras por descricao de arquivo
+- Usar `/architecture` para gerar/atualizar
+
+---
+
+## Secoes Human-Readable
+
+### About
+```markdown
+## About
+
+Template base para [proposito]. Stack: [principais tecnologias].
 ```
 
-## Racionalizacoes Comuns (e Realidade)
+### Quick Start
+```markdown
+## Quick Start
+
+npm install
+npm run dev
+```
+
+### Best Practices
+```markdown
+## Best Practices
+
+### Arquitetura
+- Respeitar hierarquia Clean Architecture
+- Commands para escrita, Queries direto nos Repositories
+
+### Multi-Tenancy
+- SEMPRE filtrar por account_id
+- Validar ownership em todos endpoints
+```
+
+### Features
+```markdown
+## Features
+
+Documentacao de features em `/docs/features/`. Cada feature possui: about.md, discovery.md, implementation.md.
+```
+
+### Design Principles
+```markdown
+## Design Principles
+
+- **KISS**: Keep It Simple, Stupid
+- **YAGNI**: You Aren't Gonna Need It
+```
+
+---
+
+## Quando Usar /architecture vs Edicao Manual
+
+| Situacao | Acao |
+|----------|------|
+| Novo pacote/lib | `/architecture` |
+| Nova entity/enum | `/architecture` |
+| Novo pattern | `/architecture` |
+| Mudanca de versao | `/architecture` |
+| Nova regra de negocio | Editar Business Rules |
+| Corrigir typo | Edicao manual |
+| Atualizar Best Practices | Edicao manual |
+
+---
+
+## Red Flags
+
+Sinais de violacao:
+- ❌ Criar `technical-spec.md` separado
+- ❌ JSON formatado com quebras de linha
+- ❌ Editar Technical Spec manualmente
+- ❌ Duplicar informacao entre secoes
+- ❌ Documentar aspiracoes em vez de realidade
+
+---
+
+## Racionalizacoes Comuns
 
 | Desculpa | Realidade |
 |----------|-----------|
-| "Vou documentar isso depois" | Depois nunca chega. Faca agora enquanto contexto esta fresco. |
-| "E so uma pequena mudanca" | Pequenas mudancas acumulam. Teoria da janela quebrada se aplica. |
-| "O codigo e auto-documentado" | Arquitetura, convencoes e decisoes de "por que" nao estao no codigo. |
-| "Todo mundo no time sabe disso" | Onboarding, voce do futuro e assistentes IA nao sabem. |
-| "Documentacao sempre fica desatualizada" | So se voce nao mantiver. Esta skill previne isso. |
+| "Vou documentar depois" | Depois nunca chega |
+| "E so uma pequena mudanca" | Pequenas mudancas acumulam |
+| "O codigo e auto-documentado" | Arquitetura nao esta no codigo |
+| "Preciso de arquivo separado" | CLAUDE.md self-contained e mais eficiente |
 
-## Red Flags: Voce Esta Violando o Espirito
+---
 
-Observe estes pensamentos/declaracoes:
-- "Vou adicionar um TODO para documentar isso depois"
-- "Deixa eu so fazer push, docs podem esperar"
-- "Funciona, e isso que importa" (sem atualizar CLAUDE.md)
-- "Ninguem le isso mesmo"
-- Escrever docs aspiracionais: "Isso vai suportar feature X" (ainda nao implementada)
-- Copiar/colar de docs antigos sem verificar codigo atual
-- Adicionar explicacoes verbosas que pertencem a comentarios, nao docs de arquitetura
-- Documentar detalhes de implementacao ao inves de padroes/convencoes
-- Adicionar emojis ou blocos de codigo extensos
+## Integracao com Outros Comandos
 
-## Integracao com Outras Skills
+**Para atualizar Technical Spec:**
+→ Usar `/architecture`
 
-**Usar antes desta skill**:
-- `systematic-debugging` - Se incerto sobre o que mudou, debugar codebase primeiro
-- `root-cause-tracing` - Rastrear mudancas arquiteturais ate requisitos
+**Apos atualizar CLAUDE.md:**
+→ `/review` para validar codigo contra padroes
 
-**Usar apos esta skill**:
-- `verification-before-completion` - Sempre verificar se paths/comandos nos docs funcionam
-- `requesting-code-review` - Ter docs revisados como parte do PR
+---
 
-**Skills relacionadas**:
-- `writing-plans` - Planos frequentemente se tornam secoes de documentacao
-- `test-driven-development` - Padroes de teste pertencem ao CLAUDE.md
+## Nota Final
 
-## Nota Final: Documentacao e uma Feature
+CLAUDE.md deve ser:
+1. **Self-contained** - Toda informacao em um arquivo
+2. **Atualizado** - Reflete codigo atual
+3. **Hibrido** - Secoes human-readable + secao token-efficient
+4. **Verificavel** - Paths e versoes validaveis
 
-Tratar atualizacoes do CLAUDE.md com o mesmo rigor que codigo:
-- Revisar em PRs
-- Executar comandos de verificacao
-- Testar que paths funcionam
-- Aplicar em CI (futuro: lint docs para paths quebrados)
-
-**Evidencia antes de afirmacoes**: Se documentar um padrao, verificar que existe no codigo primeiro.
-
-Sem excecoes. Sem "depois". Sem racionalizacao.
+Sem excecoes. Sem arquivos separados. Sem racionalizacao.

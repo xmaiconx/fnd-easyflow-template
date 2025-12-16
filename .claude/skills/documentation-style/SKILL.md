@@ -119,6 +119,58 @@ Documentação é código. Docs desatualizados são piores que nenhum doc - enga
 
 ---
 
+## Formato Otimizado para IA (Token-Efficient)
+
+Para documentos consumidos principalmente por IA (technical-spec.md, context files):
+
+### Princípios
+- **Densidade máxima** - Mais informação em menos tokens
+- **JSON minificado** - Dados estruturados em uma linha
+- **Zero redundância** - Cada informação aparece uma única vez
+- **Paths > Descrições** - Referenciar arquivo é melhor que explicar
+
+### JSON Inline (Minificado)
+```markdown
+{"key":"value","key2":"value2","nested":{"a":"b"}}
+```
+**Não usar:**
+```json
+{
+  "key": "value",
+  "key2": "value2"
+}
+```
+
+### Arrays de Objetos
+```markdown
+[{"name":"Entity1","desc":"10 palavras"},{"name":"Entity2","desc":"10 palavras"}]
+```
+
+### Listas Compactas
+```markdown
+- [path] - [máximo 10 palavras de descrição]
+```
+
+### Tabelas Condensadas
+Usar apenas quando comparação é necessária. Preferir JSON para dados simples.
+
+### Hierarquias com Setas
+```markdown
+[layer1] → [layer2] → [layer3]
+```
+
+### Quando Usar Este Formato
+- `technical-spec.md` - Especificação técnica do projeto
+- `context-discovery.md` - Contexto para health checks
+- Qualquer documento que será lido por IA antes de humanos
+
+### Quando NÃO Usar
+- README.md - Lido por humanos primeiro
+- about.md, discovery.md - Documentação de features
+- Brainstorms - Linguagem natural
+
+---
+
 ## Verificação de Qualidade
 
 ### Antes de Finalizar Documento

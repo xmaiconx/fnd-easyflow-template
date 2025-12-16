@@ -66,12 +66,29 @@ ls -la "docs/features/${FEATURE_ID}/"
 
 **If missing:** STOP and inform user to run `/feature` first.
 
-### Step 3: Load Context
+### Step 3: Load Project Architecture Reference
 
-Read ALL context files in parallel:
+**Verificar se existe technical-spec.md:**
+
+```bash
+# Verificar se existe technical-spec.md (fonte primária)
+ls docs/architecture/technical-spec.md 2>/dev/null
+```
+
+**Hierarquia de referência:**
+1. **`docs/architecture/technical-spec.md`** (preferencial - detalhes completos)
+2. **`CLAUDE.md`** (fallback - resumo executivo)
+
+**Se technical-spec.md NÃO existir:**
+- Informar: "⚠️ **RECOMENDAÇÃO:** Execute `/architecture` para gerar especificação técnica completa do projeto."
+- Continuar usando CLAUDE.md como referência
+
+### Step 4: Load Feature Context
+
+Read ALL feature context files in parallel:
 1. `docs/features/${FEATURE_ID}/about.md`
 2. `docs/features/${FEATURE_ID}/discovery.md`
-3. `CLAUDE.md` - Project architecture
+3. `docs/features/${FEATURE_ID}/plan.md` (se existir)
 
 **Output to user:**
 ```
@@ -80,7 +97,7 @@ Read ALL context files in parallel:
 📂 Context carregado:
 - about.md: ✅
 - discovery.md: ✅
-- CLAUDE.md: ✅
+- Architecture ref: ✅ (technical-spec.md) OU ⚠️ (CLAUDE.md - recomendado executar /architecture)
 
 Iniciando execução autônoma...
 ```
@@ -285,35 +302,51 @@ description: "Review feature ${FEATURE_ID}"
 prompt: |
   You are executing the REVIEW phase for feature ${FEATURE_ID}.
 
-  ## Instructions
-  Follow ALL instructions from: .claude/commands/review.md
+  ## Primary Tool: code-review Skill
+
+  You MUST use the `code-review` skill to perform comprehensive review.
+
+  **Invoke the skill with:**
+  ```typescript
+  await invokeSkill('code-review', {
+    featureId: '${FEATURE_ID}',
+    mode: 'autopilot',  // auto-fix enabled
+    context: {
+      aboutMd: await readFile('docs/features/${FEATURE_ID}/about.md'),
+      planMd: await readFile('docs/features/${FEATURE_ID}/plan.md'),
+      implementationMd: await readFile('docs/features/${FEATURE_ID}/implementation.md'),
+      technicalSpec: await readFile('docs/architecture/technical-spec.md')  // or CLAUDE.md if not exists
+    }
+  });
+  ```
 
   ## AUTOPILOT OVERRIDES (CRITICAL)
-  These rules OVERRIDE any conflicting instructions in review.md:
+
+  The skill already handles auto-fix in autopilot mode, but ensure:
 
   1. **NO QUESTIONS:** Do not ask any questions
-     - Proceed with review automatically
+     - The skill will proceed with review automatically
 
-  2. **AUTO-FIX ALL ISSUES:** This is already in review.md but CRITICAL
-     - Fix ALL violations automatically
-     - Do not just report - FIX
+  2. **AUTO-FIX ALL ISSUES:**
+     - Pass mode: 'autopilot' to the skill
+     - Skill will fix ALL violations automatically
 
   3. **BUILD MUST PASS:**
-     - After all fixes, build MUST pass 100%
-     - Keep fixing until it does
+     - After skill completes, verify build passes
+     - If not, fix remaining issues
 
   ## Context
   - Feature ID: ${FEATURE_ID}
   - Plan: docs/features/${FEATURE_ID}/plan.md
-  - Architecture: CLAUDE.md (SOURCE OF TRUTH for patterns)
+  - Architecture: technical-spec.md or CLAUDE.md
 
   ## Output
-  Create: docs/features/${FEATURE_ID}/review.md
+  The skill creates: docs/features/${FEATURE_ID}/review.md
 
   ## Report Back
   - Issues found (count)
   - Issues fixed (count)
-  - Final score
+  - Final score (from skill output)
   - Build status (MUST be passing)
 ```
 

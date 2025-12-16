@@ -1,444 +1,195 @@
 # Architecture Discovery & Documentation
 
-> **LANGUAGE RULE:** Documentação gerada DEVE ser em Português (PT-BR). Termos técnicos e código em Inglês.
+> **LANGUAGE:** Documentação em PT-BR. Termos técnicos e código em EN.
+> **OUTPUT:** Seção `## Technical Spec` dentro do `CLAUDE.md`
 
-> **DOCUMENTATION STYLE:** Seguir padrões definidos em `.claude/skills/documentation-style/SKILL.md`
-
-Este comando analisa o codebase e gera documentação técnica dos padrões encontrados. Funciona tanto para projetos novos (template) quanto projetos legados.
-
-**Output:** `docs/architecture/technical-spec.md`
+Este comando analisa o codebase e atualiza a seção Technical Spec do CLAUDE.md com dados estruturados em formato token-efficient.
 
 ---
 
-## Phase 1: Detect Project Type
+## Princípio Central
 
-### Step 1: Check for Existing Spec
-```bash
-# Verificar se já existe documentação
-ls docs/architecture/technical-spec.md 2>/dev/null
-```
-
-**Se existir:** Perguntar ao usuário se deseja atualizar ou recriar do zero.
-
-### Step 2: Identify Project Nature
-```bash
-# Verificar estrutura básica
-ls -la
-ls package.json 2>/dev/null
-ls apps/ libs/ src/ 2>/dev/null
-```
-
-**Classificar como:**
-- **Monorepo**: Se existir `apps/` e `libs/`
-- **Single App**: Se existir apenas `src/`
-- **Custom**: Estrutura não convencional
+**Descobrir, não impor.** Documentar o que EXISTE no código, não o que "deveria" existir. CLAUDE.md é self-contained - toda informação em um único arquivo.
 
 ---
 
-## Phase 2: Analyze Project Structure
+## Phase 1: Verificação Inicial
 
-### 2.1 Package Manager & Build System
+### Step 1: Check CLAUDE.md
 ```bash
-# Identificar package manager
+ls CLAUDE.md 2>/dev/null
+grep "## Technical Spec" CLAUDE.md 2>/dev/null
+```
+
+**Se CLAUDE.md não existir:** Criar arquivo completo.
+**Se seção Technical Spec não existir:** Adicionar seção.
+**Se existir:** Perguntar se deseja atualizar.
+
+### Step 2: Identify Project Type
+```bash
+ls package.json apps/ libs/ src/ 2>/dev/null
+```
+**Classificar:** Monorepo | SingleApp | Custom
+
+---
+
+## Phase 2: Stack Detection
+
+### 2.1 Package Manager & Build
+```bash
 ls package-lock.json yarn.lock pnpm-lock.yaml bun.lockb 2>/dev/null
-
-# Verificar scripts disponíveis
-cat package.json | grep -A 50 '"scripts"'
-
-# Verificar se é monorepo
-cat package.json | grep -E '"workspaces"|"turbo"'
+cat package.json | grep -E '"workspaces"|"turbo"|"nx"'
 ```
 
-**Documentar:**
-- Package manager (npm/yarn/pnpm/bun)
-- Build system (turbo/nx/lerna/none)
-- Scripts principais
-
-### 2.2 Backend Framework Detection
+### 2.2 Frameworks & Dependencies
 ```bash
-# NestJS
-grep -r "@nestjs" package.json */package.json 2>/dev/null
+# Backend
+grep -r "@nestjs\|express\|fastify\|hono" package.json */package.json 2>/dev/null
 
-# Express
-grep -r '"express"' package.json */package.json 2>/dev/null
+# Frontend
+grep -r '"react"\|"vue"\|"@angular/core"\|"next"' package.json */package.json 2>/dev/null
 
-# Fastify
-grep -r '"fastify"' package.json */package.json 2>/dev/null
+# Database
+grep -r '"kysely"\|"typeorm"\|"drizzle-orm"\|"prisma"\|"knex"' package.json */package.json 2>/dev/null
 
-# Hono
-grep -r '"hono"' package.json */package.json 2>/dev/null
+# Auth
+grep -r '"@supabase/supabase-js"\|"firebase"\|"passport"\|"next-auth"' package.json */package.json 2>/dev/null
+
+# Infra
+grep -r '"bullmq"\|"redis"\|"ioredis"\|"resend"\|"stripe"' package.json */package.json 2>/dev/null
 ```
-
-**Documentar:** Framework, versão, estrutura de módulos
-
-### 2.3 Frontend Framework Detection
-```bash
-# React
-grep -r '"react"' package.json */package.json 2>/dev/null
-
-# Vue
-grep -r '"vue"' package.json */package.json 2>/dev/null
-
-# Angular
-grep -r '"@angular/core"' package.json */package.json 2>/dev/null
-
-# Next.js
-grep -r '"next"' package.json */package.json 2>/dev/null
-```
-
-**Documentar:** Framework, versão, bibliotecas de UI
-
-### 2.4 Database & ORM Detection
-```bash
-# Prisma
-ls prisma/schema.prisma 2>/dev/null
-
-# TypeORM
-grep -r '"typeorm"' package.json */package.json 2>/dev/null
-
-# Kysely
-grep -r '"kysely"' package.json */package.json 2>/dev/null
-
-# Drizzle
-grep -r '"drizzle-orm"' package.json */package.json 2>/dev/null
-
-# Knex (migrations)
-grep -r '"knex"' package.json */package.json 2>/dev/null
-
-# Mongoose
-grep -r '"mongoose"' package.json */package.json 2>/dev/null
-```
-
-**Documentar:** Database, ORM/Query builder, migrations
-
-### 2.5 Authentication Detection
-```bash
-# Supabase Auth
-grep -r '"@supabase/supabase-js"' package.json */package.json 2>/dev/null
-
-# Firebase Auth
-grep -r '"firebase"' package.json */package.json 2>/dev/null
-
-# Passport
-grep -r '"passport"' package.json */package.json 2>/dev/null
-
-# NextAuth
-grep -r '"next-auth"' package.json */package.json 2>/dev/null
-
-# Clerk
-grep -r '"@clerk"' package.json */package.json 2>/dev/null
-```
-
-**Documentar:** Provider de auth, estratégia (JWT, session, etc.)
 
 ---
 
-## Phase 3: Analyze Code Patterns
+## Phase 3: Pattern Detection
 
-### 3.1 Directory Structure
 ```bash
-# Listar estrutura principal
-find . -type d -maxdepth 3 -not -path '*/node_modules/*' -not -path '*/.git/*' | head -50
-```
+# CQRS
+find . -type d \( -name "commands" -o -name "queries" \) 2>/dev/null | grep -v node_modules | head -5
 
-**Documentar:** Estrutura de pastas, convenções de organização
+# Repository
+find . -type f -iname "*repository*" 2>/dev/null | grep -v node_modules | head -10
 
-### 3.2 Architectural Patterns
-```bash
-# CQRS (Commands/Queries)
-find . -type d -name "commands" -o -name "queries" 2>/dev/null | grep -v node_modules
+# Services
+find . -type f -name "*.service.ts" 2>/dev/null | grep -v node_modules | head -10
 
-# Repository Pattern
-find . -type f -name "*repository*" -o -name "*Repository*" 2>/dev/null | grep -v node_modules | head -10
-
-# Service Layer
-find . -type f -name "*.service.ts" -o -name "*.service.js" 2>/dev/null | grep -v node_modules | head -10
-
-# Controllers
-find . -type f -name "*.controller.ts" -o -name "*.controller.js" 2>/dev/null | grep -v node_modules | head -10
-```
-
-**Documentar:** Padrões identificados (CQRS, Repository, Service Layer, etc.)
-
-### 3.3 Naming Conventions
-```bash
-# Verificar convenções de arquivos
-ls -la src/ apps/*/src/ libs/*/src/ 2>/dev/null | head -30
-
-# Verificar convenções de classes/interfaces
-grep -rh "^export class\|^export interface\|^export type\|^export enum" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -20
-```
-
-**Documentar:** Convenções de nomenclatura (camelCase, PascalCase, kebab-case, etc.)
-
-### 3.4 Dependency Injection
-```bash
-# NestJS DI
-grep -r "@Inject\|@Injectable" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -10
-
-# Manual DI (interfaces)
+# DI
 grep -rh "^export interface I[A-Z]" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -10
 ```
 
-**Documentar:** Padrão de DI, tokens utilizados
+---
 
-### 3.5 Configuration Pattern
+## Phase 4: Domain Analysis
+
 ```bash
-# Como configs são acessadas
-grep -r "process\.env\." --include="*.ts" . 2>/dev/null | grep -v node_modules | head -10
+# Entities
+find . -type f \( -name "*.entity.ts" -o -path "*/entities/*.ts" \) 2>/dev/null | grep -v node_modules
 
-# ConfigService ou similar
-grep -r "ConfigService\|IConfigurationService\|config\." --include="*.ts" . 2>/dev/null | grep -v node_modules | head -10
+# Enums
+find . -type f -path "*/enums/*.ts" 2>/dev/null | grep -v node_modules
+
+# DTOs
+find . -type f \( -name "*.dto.ts" -o -path "*/dtos/*.ts" \) 2>/dev/null | grep -v node_modules | head -15
 ```
-
-**Documentar:** Como variáveis de ambiente são acessadas
 
 ---
 
-## Phase 4: Analyze Domain Layer
+## Phase 5: Critical Files
 
-### 4.1 Entities/Models
 ```bash
-# Encontrar entities
-find . -type f \( -name "*.entity.ts" -o -path "*/entities/*" -o -path "*/models/*" \) 2>/dev/null | grep -v node_modules | head -20
-```
+# Entry points
+find . -name "main.ts" -o -name "app.ts" 2>/dev/null | grep -v node_modules | head -10
 
-### 4.2 Enums
-```bash
-# Encontrar enums
-find . -type f -path "*/enums/*" 2>/dev/null | grep -v node_modules
-grep -rh "^export enum" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -10
-```
-
-### 4.3 DTOs
-```bash
-# Encontrar DTOs
-find . -type f \( -name "*.dto.ts" -o -path "*/dtos/*" -o -path "*/dto/*" \) 2>/dev/null | grep -v node_modules | head -20
-```
-
-**Documentar:** Onde ficam entities, enums, DTOs
-
----
-
-## Phase 5: Analyze Infrastructure
-
-### 5.1 Queue/Jobs System
-```bash
-# BullMQ
-grep -r '"bullmq"' package.json */package.json 2>/dev/null
+# Modules
+find . -name "*.module.ts" 2>/dev/null | grep -v node_modules | head -10
 
 # Workers
-find . -type f -name "*.worker.ts" -o -name "*.job.ts" 2>/dev/null | grep -v node_modules
+find . -name "*.worker.ts" 2>/dev/null | grep -v node_modules
 ```
-
-### 5.2 Caching
-```bash
-# Redis
-grep -r '"redis"\|"ioredis"' package.json */package.json 2>/dev/null
-
-# In-memory
-grep -r "cache\|Cache" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -5
-```
-
-### 5.3 Email Service
-```bash
-# Resend
-grep -r '"resend"' package.json */package.json 2>/dev/null
-
-# Nodemailer
-grep -r '"nodemailer"' package.json */package.json 2>/dev/null
-
-# SendGrid
-grep -r '"@sendgrid"' package.json */package.json 2>/dev/null
-```
-
-### 5.4 Payment Integration
-```bash
-# Stripe
-grep -r '"stripe"' package.json */package.json 2>/dev/null
-
-# PagSeguro/PagarMe
-grep -r '"pagarme"\|"pagseguro"' package.json */package.json 2>/dev/null
-```
-
-**Documentar:** Serviços de infraestrutura identificados
 
 ---
 
-## Phase 6: Generate Technical Spec
+## Phase 6: Update CLAUDE.md
 
-**Create:** `docs/architecture/technical-spec.md`
+### Localizar seção Technical Spec
 
-### Template do Documento
+Se existir `## Technical Spec`, substituir conteúdo até próximo `## `.
+Se não existir, adicionar antes de `## Design Principles` ou no final.
+
+### Formato da Seção Technical Spec
 
 ```markdown
-# Especificação Técnica do Projeto
+## Technical Spec
 
-**Gerado em:** [data]
-**Última análise:** [data]
+> Seção otimizada para consumo por IA. Formato token-efficient.
 
----
+**Generated:** YYYY-MM-DD | **Type:** [Monorepo|SingleApp]
 
-## Stack Tecnológica
+### Stack
+{"pkg":"npm","build":"turbo","ts":"5.0+"}
+{"backend":{"framework":"NestJS 10","db":"PostgreSQL 15","orm":"Kysely 0.27","migrations":"Knex 3.0","auth":"Supabase","queue":"BullMQ 5.0","cache":"Redis 7","email":"Resend 2.0","payments":"Stripe"}}
+{"frontend":{"framework":"React 18.2","bundler":"Vite 4.4","ui":"Shadcn+Tailwind","state":"Zustand 4.4","forms":"RHF+Zod","http":"Axios 1.5"}}
 
-### Build & Package
-- **Package Manager:** [npm/yarn/pnpm] [versão]
-- **Build System:** [turbo/nx/none]
-- **Monorepo:** [sim/não]
+### Structure
+{"paths":{"backend":"apps/backend","frontend":"apps/frontend","domain":"libs/domain","database":"libs/app-database","interfaces":"libs/backend","migrations":"libs/app-database/migrations","workers":"apps/backend/src/workers"}}
 
-### Backend
-- **Framework:** [NestJS/Express/Fastify] [versão]
-- **Database:** [PostgreSQL/MySQL/MongoDB] [versão se conhecida]
-- **ORM/Query Builder:** [Prisma/Kysely/TypeORM] [versão]
-- **Migrations:** [Prisma/Knex/TypeORM migrations]
+### Layers
+domain → interfaces → database → api
+- domain: Entities, Enums, Types (zero deps)
+- interfaces: Service contracts (deps: domain)
+- database: Repositories (deps: domain, interfaces)
+- api: Controllers, Services, Handlers (deps: all)
 
-### Frontend
-- **Framework:** [React/Vue/Angular/Next.js] [versão]
-- **UI Library:** [Shadcn/MUI/Tailwind]
-- **State Management:** [Zustand/Redux/Pinia]
+### Patterns
+{"identified":["CQRS","Repository","DI","EventDriven","CleanArchitecture"]}
+{"conventions":{"files":"kebab-case","classes":"PascalCase","interfaces":"I+PascalCase","dbColumns":"snake_case","variables":"camelCase"}}
+{"diTokens":{"ILoggerService":"WinstonLoggerService","IEmailService":"ResendEmailService","IConfigurationService":"ConfigurationService","IQueueService":"BullMQQueueAdapter","DATABASE":"Kysely"}}
 
-### Autenticação
-- **Provider:** [Supabase/Firebase/Passport/Custom]
-- **Estratégia:** [JWT/Session/OAuth]
+### Domain
+{"entitiesPath":"libs/domain/src/entities","entities":["Account","User","Workspace","WorkspaceUser","AuditLog","Plan","PlanPrice","Subscription","WebhookEvent"]}
+{"enumsPath":"libs/domain/src/enums","enums":[{"name":"EntityStatus","values":"active|inactive|deleted"},{"name":"UserRole","values":"owner|admin|member"},{"name":"OnboardingStatus","values":"pending|completed"},{"name":"PlanCode","values":"free|pro|enterprise"},{"name":"SubscriptionStatus","values":"active|canceled|past_due"},{"name":"WebhookStatus","values":"pending|processed|failed"},{"name":"WebhookType","values":"stripe|supabase"}]}
+{"dtosPath":"apps/backend/src/api/modules/*/dtos","conventions":{"input":"[Action][Entity]Dto","response":"[Entity]ResponseDto"}}
 
-### Infraestrutura
-- **Queue:** [BullMQ/none]
-- **Cache:** [Redis/in-memory/none]
-- **Email:** [Resend/Nodemailer/none]
-- **Payments:** [Stripe/none]
+### Config
+{"envAccess":"IConfigurationService","configFile":"apps/backend/src/shared/services/configuration.service.ts","envExample":".env.example"}
 
----
+### Security
+{"multiTenancy":{"enabled":true,"strategy":"account_id","filter":"ALWAYS filter by account_id"}}
+{"auth":{"provider":"Supabase","strategy":"JWT","guards":"apps/backend/src/api/guards"}}
 
-## Estrutura do Projeto
+### Critical Files
+{"backendCore":["apps/backend/src/main.ts - Dispatcher NODE_MODE","apps/backend/src/shared/shared.module.ts - DI central"]}
+{"services":["apps/backend/src/shared/services/configuration.service.ts - Env access","apps/backend/src/shared/services/supabase.service.ts - Auth client"]}
+{"workers":["apps/backend/src/workers/email.worker.ts - Email queue","apps/backend/src/workers/audit.worker.ts - Audit logs","apps/backend/src/workers/stripe-webhook.worker.ts - Stripe events"]}
+{"database":["libs/app-database/src/types/Database.ts - Kysely schema","libs/app-database/src/kysely.ts - DB connection"]}
+{"frontend":["apps/frontend/src/App.tsx - Root component","apps/frontend/src/stores/auth-store.ts - Auth state","apps/frontend/src/lib/api.ts - HTTP client"]}
 
-### Organização de Pastas
-```
-[estrutura identificada]
-```
-
-### Convenções de Nomenclatura
-
-| Tipo | Convenção | Exemplo |
-|------|-----------|---------|
-| Arquivos | [kebab-case/camelCase] | [exemplo] |
-| Classes | [PascalCase] | [exemplo] |
-| Interfaces | [I + PascalCase / sem prefixo] | [exemplo] |
-| Variáveis | [camelCase] | [exemplo] |
-| Banco de dados | [snake_case] | [exemplo] |
-
----
-
-## Padrões Arquiteturais
-
-### [Padrão 1 - ex: Repository Pattern]
-**Onde:** [paths dos arquivos]
-**Convenção:** [descrição breve]
-
-### [Padrão 2 - ex: CQRS]
-**Onde:** [paths dos arquivos]
-**Convenção:** [descrição breve]
-
----
-
-## Domain Layer
-
-### Entities
-**Path:** [caminho base]
-- [Entity1.ts] - [descrição ~10 palavras]
-- [Entity2.ts] - [descrição ~10 palavras]
-
-### Enums
-**Path:** [caminho base]
-- [Enum1.ts] - [descrição ~10 palavras]
-
-### DTOs
-**Path:** [caminho base]
-**Convenção:** [como DTOs são nomeados/organizados]
-
----
-
-## Configuração & Ambiente
-
-### Acesso a Variáveis de Ambiente
-**Padrão:** [process.env direto / ConfigService / IConfigurationService]
-**Arquivo de config:** [path se existir]
-
-### Variáveis Obrigatórias
-Referência: `.env.example`
-
----
-
-## Regras de Segurança
-
-### Multi-Tenancy
-**Implementado:** [sim/não]
-**Estratégia:** [account_id em queries / schema separation / none]
-
-### Autenticação
-**Guards:** [paths dos guards]
-**Validação:** [como é feita]
-
----
-
-## Arquivos Importantes
-
-### Backend - Core
-- [path/arquivo.ts] - [descrição ~10 palavras]
-
-### Backend - Services
-- [path/arquivo.ts] - [descrição ~10 palavras]
-
-### Frontend - Core
-- [path/arquivo.ts] - [descrição ~10 palavras]
-
----
-
-## Regras Específicas do Projeto
-
-[Seção para regras de negócio específicas identificadas ou informadas pelo usuário]
-
----
-
-*Este documento foi gerado automaticamente pelo comando `/architecture` e deve ser atualizado quando houver mudanças significativas na arquitetura.*
+### Business Rules
+- Multi-tenancy: SEMPRE filtrar queries por account_id
+- JWT contém accountId claim injetado pelo Supabase
+- Super Admin: SUPER_ADMIN_EMAIL tem acesso cross-tenant
+- Repositories retornam domain entities, NUNCA DTOs
+- Commands para escrita, Queries direto nos Repositories
+- Event Handlers devem ser idempotentes
 ```
 
 ---
 
-## Phase 7: Update CLAUDE.md Reference
-
-Após gerar o `technical-spec.md`, verificar se CLAUDE.md referencia o documento:
+## Phase 7: Completion
 
 ```markdown
-## Especificação Técnica
+✅ Architecture analysis complete!
 
-Detalhes completos da arquitetura e padrões do projeto em: `docs/architecture/technical-spec.md`
-```
+**Updated:** CLAUDE.md → Section "Technical Spec"
+**Format:** Token-efficient (AI consumption)
 
----
-
-## Phase 8: Completion
-
-```markdown
-✅ **Análise de Arquitetura Completa!**
-
-**Documento gerado:** `docs/architecture/technical-spec.md`
-
-**Stack identificada:**
+**Detected:**
+- Type: [Monorepo|SingleApp]
 - Backend: [framework]
 - Frontend: [framework]
-- Database: [db + orm]
-- Auth: [provider]
+- Patterns: [list]
 
-**Padrões identificados:**
-- [lista de padrões]
-
-**Próximos passos:**
-1. Revise o documento gerado
-2. Complete seções marcadas com [?] ou [a definir]
-3. Adicione regras específicas do seu projeto
-4. Execute `/review` para validar código contra estes padrões
-
-**Nota:** Os comandos `/review`, `/dev`, `/plan` e `/fix` agora usarão este documento como referência de padrões.
+**Next:** Run `/review` to validate code against these patterns.
 ```
 
 ---
@@ -446,35 +197,26 @@ Detalhes completos da arquitetura e padrões do projeto em: `docs/architecture/t
 ## Critical Rules
 
 **DO:**
-- ✅ Analisar TODO o codebase antes de gerar documentação
-- ✅ Seguir padrões de `.claude/skills/documentation-style/SKILL.md`
-- ✅ Ser específico com paths e versões
-- ✅ Criar pasta `docs/architecture/` se não existir
-- ✅ Perguntar ao usuário sobre padrões não identificáveis automaticamente
+- ✅ Atualizar seção dentro do CLAUDE.md (não criar arquivo separado)
+- ✅ JSON minificado em uma linha
+- ✅ Máximo 10 palavras por descrição
+- ✅ Documentar o que EXISTE
 
 **DO NOT:**
-- ❌ Assumir padrões sem verificar no código
-- ❌ Gerar documentação aspiracional (o que "deveria" ser)
-- ❌ Incluir blocos de código extensos
-- ❌ Sobrescrever spec existente sem confirmação
-- ❌ Inventar padrões que não existem no projeto
+- ❌ Criar technical-spec.md separado
+- ❌ JSON formatado/indentado
+- ❌ Blocos de código > 3 linhas
+- ❌ Inventar padrões não encontrados
 
 ---
 
-## For Legacy Projects
+## Legacy Projects
 
-Quando o projeto não segue convenções claras:
+Quando padrões são inconsistentes:
 
-1. **Documentar o que existe**, não o que "deveria" existir
-2. **Marcar inconsistências** encontradas (ex: "Alguns services usam DI, outros não")
-3. **Sugerir melhorias** em seção separada "Oportunidades de Melhoria"
-4. **Perguntar ao usuário** quando houver ambiguidade
-
+1. Documentar o que existe
+2. Adicionar ao final da seção:
 ```markdown
-### Inconsistências Identificadas
-
-- **[Área]:** [descrição da inconsistência]
-  - Arquivos que seguem padrão A: [lista]
-  - Arquivos que seguem padrão B: [lista]
-  - **Recomendação:** [sugestão]
+### Inconsistencies
+[{"area":"[area]","patternA":"[found]","patternB":"[found]","files":"[count]"}]
 ```
