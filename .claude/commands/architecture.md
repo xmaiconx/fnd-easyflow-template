@@ -111,6 +111,14 @@ find . -name "*.worker.ts" 2>/dev/null | grep -v node_modules
 
 ## Phase 6: Update CLAUDE.md
 
+**PRE-DOCUMENTATION CHECKPOINT (MANDATORY):**
+```
+1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
+2. Execute: cat .claude/skills/documentation-style/SKILL.md
+3. Apply token-efficient format to Technical Spec section
+4. TodoWrite: Mark item as completed after writing
+```
+
 ### Localizar seção Technical Spec
 
 Se existir `## Technical Spec`, substituir conteúdo até próximo `## `.

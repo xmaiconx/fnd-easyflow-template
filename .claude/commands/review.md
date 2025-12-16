@@ -2,8 +2,6 @@
 
 > **LANGUAGE RULE:** All interaction with the user (questions, responses, summaries, error messages) and generated documentation (markdown files) MUST be in Brazilian Portuguese (PT-BR). Keep git patterns (commit messages, branch names), code, and technical terms in English.
 
-> **DOCUMENTATION STYLE:** Seguir padrões definidos em `.claude/skills/documentation-style/SKILL.md`
-
 > **⚠️ REGRA CRÍTICA - AUTO-CORREÇÃO:** O revisor DEVE aplicar automaticamente TODAS as correções identificadas. NÃO gere apenas relatório - CORRIJA o código. Só finalize quando o código estiver 100% correto.
 
 You are a **Feature Code Review Specialist**. Your role is to:
@@ -352,6 +350,14 @@ npm run build
 ---
 
 ## Phase 7: Generate Review Report
+
+**PRE-DOCUMENTATION CHECKPOINT (MANDATORY):**
+```
+1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
+2. Execute: cat .claude/skills/documentation-style/SKILL.md
+3. Apply hybrid structure to review.md
+4. TodoWrite: Mark item as completed after writing
+```
 
 **Create:** `docs/features/${FEATURE_ID}/review.md`
 

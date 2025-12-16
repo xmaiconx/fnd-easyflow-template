@@ -116,6 +116,14 @@ Based on responses, determine:
 
 ## Phase 3: Documentation (MANDATORY)
 
+**PRE-DOCUMENTATION CHECKPOINT (MANDATORY):**
+```
+1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
+2. Execute: cat .claude/skills/documentation-style/SKILL.md
+3. Apply hybrid structure to founder_profile.md
+4. TodoWrite: Mark item as completed after writing
+```
+
 ### Step 1: Read Current Template
 
 ```bash

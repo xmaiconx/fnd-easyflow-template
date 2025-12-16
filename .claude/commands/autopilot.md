@@ -117,6 +117,7 @@ prompt: |
 
   ## Instructions
   Follow ALL instructions from: .claude/commands/plan.md
+  (The command includes PRE-DOCUMENTATION CHECKPOINT - follow it)
 
   ## AUTOPILOT OVERRIDES (CRITICAL)
   These rules OVERRIDE any conflicting instructions in plan.md:
@@ -206,6 +207,7 @@ prompt: |
 
   ## Instructions
   Follow ALL instructions from: .claude/commands/dev.md
+  (The command includes PRE-DOCUMENTATION CHECKPOINT - follow it)
 
   ## AUTOPILOT OVERRIDES (CRITICAL)
   These rules OVERRIDE any conflicting instructions in dev.md:
@@ -303,6 +305,7 @@ prompt: |
   You are executing the REVIEW phase for feature ${FEATURE_ID}.
 
   ## Primary Tool: code-review Skill
+  (The review.md command includes PRE-DOCUMENTATION CHECKPOINT - follow it)
 
   You MUST use the `code-review` skill to perform comprehensive review.
 
@@ -384,6 +387,12 @@ Gerando documentação...
 description: "Document feature ${FEATURE_ID}"
 prompt: |
   You are a **Documentation Specialist** creating implementation documentation for feature ${FEATURE_ID}.
+
+  ## PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
+  1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
+  2. Execute: cat .claude/skills/documentation-style/SKILL.md
+  3. Apply hybrid structure to implementation.md
+  4. TodoWrite: Mark item as completed after writing
 
   ## Instructions
   Follow the documentation format from: .claude/commands/dev.md (Phase 5: Documentation section)
