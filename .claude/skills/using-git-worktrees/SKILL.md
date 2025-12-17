@@ -9,9 +9,23 @@ description: Use when starting feature work that needs isolation from current wo
 
 Git worktrees create isolated workspaces sharing the same repository, allowing work on multiple branches simultaneously without switching.
 
-**Core principle:** Systematic directory selection + safety verification = reliable isolation.
+**Core principle:** Systematic directory selection + safety verification = reliable isolation + **VSCode separado**.
 
-**Announce at start:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
+**Announce at start:** "Vou usar a skill using-git-worktrees para criar um workspace isolado."
+
+## When to Use
+
+Esta skill é **INDEPENDENTE** dos comandos de desenvolvimento. Use quando:
+- Você quer **isolamento total** para trabalhar em uma feature
+- Você precisa manter o workspace atual intacto (ex: servidor rodando)
+- Você quer trabalhar em múltiplas features simultaneamente
+
+**Workflow típico:**
+```
+1. Execute /feature no workspace atual (cria branch + documentação)
+2. Use esta skill para criar worktree isolada
+3. Continue o desenvolvimento no VSCode que será aberto
+```
 
 ## Directory Selection Process
 
@@ -133,12 +147,49 @@ go test ./...
 
 **If tests pass:** Report ready.
 
-### 5. Report Location
+### 5. Open VSCode in Worktree
 
+**CRITICAL:** After setup, open a NEW VSCode window in the worktree:
+
+```bash
+# Open VSCode in the worktree directory
+code "$path"
 ```
-Worktree ready at <full-path>
-Tests passing (<N> tests, 0 failures)
-Ready to implement <feature-name>
+
+### 6. Report and Handoff
+
+```markdown
+## ✅ Worktree Criada com Sucesso!
+
+📁 **Localização:** `<full-path>`
+🌿 **Branch:** `<branch-name>`
+✅ **Testes:** <N> passando, 0 falhas
+
+---
+
+## 🚀 Um novo VSCode foi aberto no diretório da worktree!
+
+**⚠️ IMPORTANTE:** Continue seu trabalho no **novo VSCode** que acabou de abrir.
+
+### No novo VSCode:
+1. O Claude Code terá contexto isolado da worktree
+2. Execute os comandos de desenvolvimento lá:
+   - `/plan` - para planejamento técnico
+   - `/dev` - para implementação acompanhada
+   - `/autopilot` - para implementação autônoma
+   - `/done` - para finalizar
+
+### Neste VSCode (atual):
+- Você pode continuar trabalhando em outras coisas
+- A worktree é independente - não afeta este workspace
+- Quando terminar a feature, a branch será mergeada via `/done` no outro VSCode
+
+---
+
+💡 **Dica:** Se fechar o VSCode da worktree por engano, abra novamente:
+\`\`\`bash
+code <full-path>
+\`\`\`
 ```
 
 ## Quick Reference
@@ -174,17 +225,36 @@ Ready to implement <feature-name>
 ## Example Workflow
 
 ```
-You: I'm using the using-git-worktrees skill to set up an isolated workspace.
+User: Quero trabalhar na feature de autenticação em um workspace isolado
+
+Claude: Vou usar a skill using-git-worktrees para criar um workspace isolado.
 
 [Check .worktrees/ - exists]
 [Verify .gitignore - contains .worktrees/]
-[Create worktree: git worktree add .worktrees/auth -b feature/auth]
+[Create worktree: git worktree add .worktrees/feature-F0001-auth -b feature/F0001-auth]
 [Run npm install]
 [Run npm test - 47 passing]
+[Run: code .worktrees/feature-F0001-auth]
 
-Worktree ready at /Users/jesse/myproject/.worktrees/auth
-Tests passing (47 tests, 0 failures)
-Ready to implement auth feature
+## ✅ Worktree Criada com Sucesso!
+
+📁 **Localização:** `/Users/dev/myproject/.worktrees/feature-F0001-auth`
+🌿 **Branch:** `feature/F0001-auth`
+✅ **Testes:** 47 passando, 0 falhas
+
+---
+
+## 🚀 Um novo VSCode foi aberto no diretório da worktree!
+
+**⚠️ IMPORTANTE:** Continue seu trabalho no **novo VSCode** que acabou de abrir.
+
+### No novo VSCode:
+1. O Claude Code terá contexto isolado da worktree
+2. Execute `/plan`, `/dev`, `/autopilot`, ou `/done` lá
+
+### Neste VSCode (atual):
+- Pode continuar trabalhando em outras coisas
+- A worktree é independente
 ```
 
 ## Red Flags
@@ -204,10 +274,14 @@ Ready to implement auth feature
 
 ## Integration
 
-**Called by:**
-- **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
-- Any skill needing isolated workspace
+**Esta skill é INDEPENDENTE** - não é chamada automaticamente por outros comandos.
 
-**Pairs with:**
-- **finishing-a-development-branch** - REQUIRED for cleanup after work complete
-- **executing-plans** or **subagent-driven-development** - Work happens in this worktree
+**Como usar:**
+1. Execute `/feature` primeiro (cria branch e documentação no workspace atual)
+2. Peça para usar esta skill: "Quero criar uma worktree isolada para esta feature"
+3. Continue o trabalho no **VSCode que será aberto**
+
+**Combina bem com:**
+- `/feature` → Cria a documentação antes de isolar
+- `/plan`, `/dev`, `/autopilot` → Executados no VSCode da worktree
+- `/done` → Finaliza e faz merge (executado no VSCode da worktree)

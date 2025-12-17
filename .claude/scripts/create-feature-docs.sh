@@ -1,13 +1,15 @@
 #!/bin/bash
 
 # Script to create feature documentation structure, branch, and PR
-# Usage: ./create-feature-docs.sh [branch-type] [feature-name]
+# Usage: ./create-feature-docs.sh [branch-type] [feature-name] [--worktree]
 #
 # branch-type: feature, fix, refactor, docs (default: feature)
 # feature-name: descriptive name (default: uses current branch)
+# --worktree: create in isolated worktree instead of switching branches
 #
 # Examples:
 #   ./create-feature-docs.sh feature user-authentication
+#   ./create-feature-docs.sh feature user-authentication --worktree
 #   ./create-feature-docs.sh fix
 #   ./create-feature-docs.sh
 
@@ -20,8 +22,19 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Check for --worktree flag in any position
+USE_WORKTREE=false
+ARGS=()
+for arg in "$@"; do
+    if [[ "$arg" == "--worktree" ]] || [[ "$arg" == "-w" ]]; then
+        USE_WORKTREE=true
+    else
+        ARGS+=("$arg")
+    fi
+done
+
 # Get branch type (default: feature)
-BRANCH_TYPE="${1:-feature}"
+BRANCH_TYPE="${ARGS[0]:-feature}"
 
 # Validate branch type
 if [[ ! "$BRANCH_TYPE" =~ ^(feature|fix|refactor|docs)$ ]]; then
@@ -52,7 +65,7 @@ fi
 CURRENT_BRANCH=$(git branch --show-current)
 
 # Get feature name
-if [ -z "$2" ]; then
+if [ -z "${ARGS[1]}" ]; then
     # No feature name provided
     if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; then
         echo -e "${RED}Error: You're on ${CURRENT_BRANCH} and no feature name was provided${NC}"
@@ -65,7 +78,7 @@ if [ -z "$2" ]; then
         echo -e "${BLUE}Using current branch name: ${FEATURE_NAME}${NC}"
     fi
 else
-    FEATURE_NAME="$2"
+    FEATURE_NAME="${ARGS[1]}"
     echo -e "${BLUE}Using provided feature name: ${FEATURE_NAME}${NC}"
 fi
 
@@ -81,8 +94,34 @@ echo -e "${BLUE}Branch: ${NEW_BRANCH_NAME}${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-# Create branch if on main/master
-if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; then
+# Worktree directory
+WORKTREE_DIR=".worktrees/${FEATURE_DIR}"
+WORKTREE_PATH=""
+
+# Create branch - either in worktree or regular checkout
+if [[ "$USE_WORKTREE" == true ]]; then
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}Creating ISOLATED WORKTREE${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+    # Ensure .worktrees directory exists and is in .gitignore
+    mkdir -p .worktrees
+    if ! grep -q "^\.worktrees/" .gitignore 2>/dev/null; then
+        echo ".worktrees/" >> .gitignore
+        git add .gitignore
+        git commit -m "chore: add .worktrees/ to gitignore" || true
+    fi
+
+    # Create worktree with new branch
+    echo -e "${YELLOW}Creating worktree: ${WORKTREE_DIR}${NC}"
+    git worktree add "$WORKTREE_DIR" -b "$NEW_BRANCH_NAME"
+    WORKTREE_PATH="$(pwd)/${WORKTREE_DIR}"
+    echo -e "${GREEN}✓ Worktree created at ${WORKTREE_PATH}${NC}"
+
+    # Change to worktree directory for remaining operations
+    cd "$WORKTREE_DIR"
+
+elif [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; then
     echo -e "${YELLOW}Creating new branch: ${NEW_BRANCH_NAME}${NC}"
     git checkout -b "$NEW_BRANCH_NAME"
     echo -e "${GREEN}✓ Branch created and checked out${NC}"
@@ -475,12 +514,40 @@ echo -e "${BLUE}🌿 Branch: ${NEW_BRANCH_NAME}${NC}"
 if [ -n "$PR_URL" ]; then
     echo -e "${BLUE}🔗 PR/MR: ${PR_URL}${NC}"
 fi
-echo ""
-echo -e "${YELLOW}Next steps:${NC}"
-echo -e "  1. Use /feature command to complete discovery process"
-echo -e "  2. Fill in about.md and discovery.md templates"
-echo -e "  3. Use /plan command to create technical plan"
-echo -e "  4. Use /dev command to start development"
+
+# Worktree-specific output and VSCode launch
+if [[ "$USE_WORKTREE" == true ]] && [ -n "$WORKTREE_PATH" ]; then
+    # Go back to original directory to get absolute path
+    cd - > /dev/null
+    ABSOLUTE_WORKTREE_PATH="$(cd "$WORKTREE_DIR" && pwd)"
+
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}🌿 WORKTREE ISOLADA CRIADA${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}📁 Worktree: ${ABSOLUTE_WORKTREE_PATH}${NC}"
+    echo ""
+    echo -e "${YELLOW}Abrindo VSCode no diretório da worktree...${NC}"
+    code "$ABSOLUTE_WORKTREE_PATH"
+    echo -e "${GREEN}✓ VSCode aberto!${NC}"
+    echo ""
+    echo -e "${YELLOW}⚠️  IMPORTANTE:${NC}"
+    echo -e "  Continue o desenvolvimento no NOVO VSCode que acabou de abrir!"
+    echo -e "  Este VSCode (atual) permanece no workspace principal."
+    echo ""
+    echo -e "${YELLOW}No novo VSCode, execute:${NC}"
+    echo -e "  /plan     - Para planejamento técnico"
+    echo -e "  /dev      - Para implementação acompanhada"
+    echo -e "  /autopilot - Para implementação autônoma"
+    echo -e "  /done     - Para finalizar e fazer merge"
+else
+    echo ""
+    echo -e "${YELLOW}Next steps:${NC}"
+    echo -e "  1. Use /feature command to complete discovery process"
+    echo -e "  2. Fill in about.md and discovery.md templates"
+    echo -e "  3. Use /plan command to create technical plan"
+    echo -e "  4. Use /dev command to start development"
+fi
 echo ""
 
 # === STRUCTURED OUTPUT FOR AGENT ===
@@ -501,10 +568,30 @@ if [ -n "$PR_URL" ]; then
     echo "PR_URL: ${PR_URL}"
 fi
 echo ""
+# Worktree-specific structured output
+if [[ "$USE_WORKTREE" == true ]]; then
+    echo "WORKTREE_CREATED: true"
+    echo "WORKTREE_PATH: ${ABSOLUTE_WORKTREE_PATH:-$WORKTREE_PATH}"
+    echo "VSCODE_OPENED: true"
+    echo ""
+    echo "NEXT_STEPS:"
+    echo "  1. Continue no VSCode que foi aberto na worktree"
+    echo "  2. Execute /plan, /dev ou /autopilot no novo VSCode"
+    echo "  3. Use /done para finalizar e fazer merge"
+    echo ""
+    echo "IMPORTANT: Development continues in the NEW VSCode window!"
+else
+    echo "WORKTREE_CREATED: false"
+fi
+echo ""
 echo "DOCUMENTS_TO_FILL:"
 echo "  - about.md: Objective, Scope, Business Rules, Acceptance Criteria"
 echo "  - discovery.md: Analysis, Questionnaire, Decisions, Assumptions"
 echo ""
 echo "FEATURE_PHASE: DISCOVERY"
-echo "NEXT_COMMAND: /feature"
+if [[ "$USE_WORKTREE" == true ]]; then
+    echo "NEXT_ACTION: Continue in the new VSCode window"
+else
+    echo "NEXT_COMMAND: /feature"
+fi
 echo "========================================"

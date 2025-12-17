@@ -8,6 +8,21 @@ You are now acting as a **Feature Discovery & Documentation Specialist**. Your r
 
 This command initiates the feature discovery workflow, which is the FIRST PHASE of creating a new feature.
 
+## Phase 0: Detect Worktree Request
+
+**BEFORE ANYTHING ELSE**, analyze the user's input for worktree-related keywords:
+
+**Worktree keywords:** "worktree", "worktrees"
+
+**If ANY worktree keyword is detected:**
+1. Set `USE_WORKTREE=true` internally
+2. Inform the user: "Vou criar a feature em uma **worktree isolada** com VSCode separado."
+3. Continue with normal discovery but use `--worktree` flag in Step 3
+
+**If NO worktree keyword detected:**
+1. Set `USE_WORKTREE=false`
+2. Continue with normal workflow (branch checkout)
+
 ## Phase 0-1: Unified Initialization (SINGLE SCRIPT)
 
 ### Step 1: Run Feature Init Script
@@ -62,27 +77,36 @@ Only ask for clarification if the request is genuinely ambiguous (e.g., user jus
 Run the helper script with the information gathered:
 
 ```bash
-# Create feature documentation structure, branch, and push
+# Standard: Create feature with branch checkout
 bash .claude/scripts/create-feature-docs.sh [branch-type] [feature-name]
 
-# Example:
+# With Worktree: Create feature in isolated worktree (if USE_WORKTREE=true)
+bash .claude/scripts/create-feature-docs.sh [branch-type] [feature-name] --worktree
+
+# Examples:
 # bash .claude/scripts/create-feature-docs.sh feature user-authentication
+# bash .claude/scripts/create-feature-docs.sh feature user-authentication --worktree
 ```
+
+**IMPORTANT:** If `USE_WORKTREE=true` (detected in Phase 0), ALWAYS add the `--worktree` flag!
 
 This script will:
 - Identify the last feature number in `docs/features/`
 - Determine the next feature number (F000X+1)
-- Create new branch `[type]/F[XXXX]-[feature-name]` (if on main)
+- **Standard mode:** Create new branch `[type]/F[XXXX]-[feature-name]` and checkout
+- **Worktree mode:** Create worktree in `.worktrees/F[XXXX]-[feature-name]/` with new branch
 - Create directory `docs/features/F[XXXX]-[feature-name]/`
 - Generate templated `about.md` and `discovery.md` files
 - Make initial commit
 - Push to origin
 - Extract and save PR/MR link in `git-pr.md`
+- **Worktree mode:** Open VSCode in the worktree directory
 
 **Output:** You'll see:
 - Feature directory path
 - New branch name
 - PR/MR URL (if available)
+- **Worktree mode:** Worktree path and VSCode opened confirmation
 
 **⚠️ CRITICAL CHECK:** Before proceeding, verify the requested feature doesn't already exist in the codebase. If similar functionality exists, inform the user and clarify if they want to:
 - Extend existing functionality
@@ -331,7 +355,9 @@ Before completing discovery, verify ALL items:
 
 ## Completion Message
 
-When ALL phases are complete and documentation is filled, inform the user:
+When ALL phases are complete and documentation is filled, inform the user based on the mode used:
+
+### Standard Mode (no worktree)
 
 ```markdown
 **✅ Feature Discovery Complete!**
@@ -358,4 +384,42 @@ Execute `/autopilot` - implementação 100% autônoma sem interrupções.
 ---
 
 💡 **Dica:** Para features simples e bem especificadas, `/autopilot` é ideal!
+```
+
+### Worktree Mode (USE_WORKTREE=true)
+
+```markdown
+**✅ Feature Discovery Complete!**
+
+📄 Documentação criada em `docs/features/F[XXXX]-[branch-name]/`:
+- ✓ `about.md` - Especificação da feature
+- ✓ `discovery.md` - Registro do processo
+
+🌿 **Worktree:** `.worktrees/F[XXXX]-[branch-name]/`
+
+---
+
+## 🚀 Um novo VSCode foi aberto no diretório da worktree!
+
+**⚠️ IMPORTANTE:** Continue seu trabalho no **novo VSCode** que acabou de abrir.
+
+### No novo VSCode:
+1. O Claude Code terá contexto isolado da worktree
+2. Execute os comandos de desenvolvimento lá:
+   - `/plan` - para planejamento técnico
+   - `/dev` - para implementação acompanhada
+   - `/autopilot` - para implementação autônoma
+   - `/done` - para finalizar
+
+### Neste VSCode (atual):
+- Você pode continuar trabalhando em outras coisas
+- A worktree é independente - não afeta este workspace
+- Quando terminar a feature, a branch será mergeada via `/done` no outro VSCode
+
+---
+
+💡 **Dica:** Se fechar o VSCode da worktree por engano, abra novamente:
+\`\`\`bash
+code .worktrees/F[XXXX]-[branch-name]
+\`\`\`
 ```

@@ -395,6 +395,12 @@ Always include this reference at the end:
 | `/brainstorm` | Conversar sobre ideias e gerar documento de discussão |
 | `/question` | Tire dúvidas sobre a feature atual (sem alterar código) |
 
+### Skills (Avançado)
+
+| Skill | Descrição | Como Usar |
+|-------|-----------|-----------|
+| `using-git-worktrees` | Cria workspace isolado com VSCode separado | Peça: "Crie uma worktree para essa feature" |
+
 ---
 
 ## 🔄 Fluxos de Trabalho
@@ -438,6 +444,40 @@ Always include this reference at the end:
 
 ---
 
+## 🌿 Workflow com Worktrees (Avançado)
+
+### O que são Worktrees?
+
+Worktrees permitem trabalhar em **múltiplas branches simultaneamente** em diretórios separados. Cada worktree tem seu próprio VSCode, isolamento total, e você pode:
+- Manter o servidor rodando no workspace principal
+- Trabalhar em outra feature sem afetar nada
+- Ter o Claude Code com contexto específico de cada branch
+
+### Como usar Worktrees com /feature
+
+```
+1. Execute /feature "descreva a feature que deseja" + "crie em uma worktree isolada para esta feature"
+3. Claude usa a skill using-git-worktrees
+4. Um NOVO VSCode abre no diretório da worktree
+5. Continue o desenvolvimento (/plan, /dev, /done) no NOVO VSCode
+```
+
+### Quando usar Worktrees?
+
+✅ **Use quando:**
+- Quer isolamento total para uma feature
+- Precisa manter algo rodando no workspace atual
+- Vai trabalhar em múltiplas features em paralelo
+
+❌ **Não precisa quando:**
+- Features simples e rápidas
+- Você prefere trabalhar em uma coisa por vez
+- Não se importa em trocar de branch
+
+💡 **Dica:** A skill `using-git-worktrees` cuida de tudo: verifica .gitignore, instala dependências, roda testes e abre o VSCode automaticamente.
+
+---
+
 ## 💡 Dicas
 
 1. **Comece pelo /founder** - Adapta a comunicação ao seu perfil
@@ -448,6 +488,7 @@ Always include this reference at the end:
 6. **Documente sempre** - Os comandos geram documentação automática
 7. **Rode /security antes de deploy** - Auditoria OWASP evita vulnerabilidades
 8. **Use /help** - Quando estiver perdido, volte aqui!
+9. **Worktrees para isolamento** - Se precisar manter servidor rodando, peça uma worktree
 
 ---
 
