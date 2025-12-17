@@ -202,7 +202,68 @@ Fix ALL build errors. Do not stop until build passes 100%.
 
 ---
 
-## Phase 6: Completion
+## Phase 6: API Test Generation (If Backend)
+
+**Condição:** Execute esta fase APENAS se o escopo incluir Backend API.
+
+### 6.1 Dispatch Test Generation Subagent
+
+**Use Task tool with `subagent_type: "general-purpose"`**
+
+**Subagent Prompt Template:**
+
+```
+You are generating API tests for feature ${FEATURE_ID}.
+
+## Context
+- Feature: ${FEATURE_ID}
+- Implementation: Read docs/features/${FEATURE_ID}/implementation.md for files created
+- Skill: Read and follow .claude/skills/api-testing/SKILL.md
+- Patterns: Read .claude/skills/api-testing/hurl-patterns.md
+
+## Your Tasks
+1. Read implementation.md to identify all endpoints created
+2. Read the controller files to understand request/response structure
+3. Read hurl-patterns.md for test patterns
+4. Create test directory: docs/features/${FEATURE_ID}/tests/api/
+5. Generate variables.env with placeholders
+6. Generate 00-setup.hurl for authentication
+7. Generate 01-[module]-crud.hurl for CRUD operations
+8. Generate test-plan.md documenting all test scenarios
+
+## Worker Testing (if applicable)
+If the feature includes workers:
+- Read .claude/skills/api-testing/worker-testing-guide.md
+- Add worker verification tests with appropriate delays
+
+## Deliverables
+- Report: List of test files created
+- All .hurl files following the patterns
+- test-plan.md with complete test documentation
+
+## Output Structure
+docs/features/${FEATURE_ID}/tests/
+├── api/
+│   ├── variables.env           # Template variables
+│   ├── 00-setup.hurl           # Authentication
+│   ├── 01-[module]-crud.hurl   # CRUD tests
+│   ├── 02-[module]-validation.hurl  # Validation tests (if applicable)
+│   └── test-plan.md            # Test documentation
+```
+
+### 6.2 Verify Test Files
+
+After subagent completes, verify:
+
+```bash
+ls -la "docs/features/${FEATURE_ID}/tests/api/"
+```
+
+**Expected:** At least `variables.env`, `00-setup.hurl`, and one module test file.
+
+---
+
+## Phase 7: Completion
 
 **Inform the user:**
 
@@ -221,11 +282,14 @@ Feature: ${FEATURE_ID}
 
 **Documentation:** `docs/features/${FEATURE_ID}/implementation.md`
 
+**API Tests:** `docs/features/${FEATURE_ID}/tests/api/` (if backend)
+
 **Next Steps:**
-1. Review the implementation
-2. Test the functionality
-3. Run code review: `/review`
-4. When approved, stage and commit changes
+1. Execute migration: `npm run migrate:latest`
+2. Start services: `docker-compose -f infra/docker-compose.yml up -d && npm run dev`
+3. Run API tests: `/test-api`
+4. Run code review: `/review`
+5. When approved, stage and commit changes
 ```
 
 ---
