@@ -206,6 +206,12 @@ Fix ALL build errors. Do not stop until build passes 100%.
 
 **Condição:** Execute esta fase APENAS se o escopo incluir Backend API.
 
+### 6.0 Ensure httpyac is installed
+
+```bash
+npm ls httpyac 2>/dev/null || npm install httpyac --save-dev
+```
+
 ### 6.1 Dispatch Test Generation Subagent
 
 **Use Task tool with `subagent_type: "general-purpose"`**
@@ -219,35 +225,35 @@ You are generating API tests for feature ${FEATURE_ID}.
 - Feature: ${FEATURE_ID}
 - Implementation: Read docs/features/${FEATURE_ID}/implementation.md for files created
 - Skill: Read and follow .claude/skills/api-testing/SKILL.md
-- Patterns: Read .claude/skills/api-testing/hurl-patterns.md
+- Patterns: Read .claude/skills/api-testing/httpyac-patterns.md
 
 ## Your Tasks
 1. Read implementation.md to identify all endpoints created
 2. Read the controller files to understand request/response structure
-3. Read hurl-patterns.md for test patterns
+3. Read httpyac-patterns.md for test patterns
 4. Create test directory: docs/features/${FEATURE_ID}/tests/api/
-5. Generate variables.env with placeholders
-6. Generate 00-setup.hurl for authentication
-7. Generate 01-[module]-crud.hurl for CRUD operations
+5. Generate http-client.env.json with environment variables
+6. Generate 00-setup.http for authentication
+7. Generate 01-[module]-crud.http for CRUD operations
 8. Generate test-plan.md documenting all test scenarios
 
 ## Worker Testing (if applicable)
 If the feature includes workers:
 - Read .claude/skills/api-testing/worker-testing-guide.md
-- Add worker verification tests with appropriate delays
+- Add worker verification tests with {{$sleep}} delays
 
 ## Deliverables
 - Report: List of test files created
-- All .hurl files following the patterns
+- All .http files following the patterns
 - test-plan.md with complete test documentation
 
 ## Output Structure
 docs/features/${FEATURE_ID}/tests/
 ├── api/
-│   ├── variables.env           # Template variables
-│   ├── 00-setup.hurl           # Authentication
-│   ├── 01-[module]-crud.hurl   # CRUD tests
-│   ├── 02-[module]-validation.hurl  # Validation tests (if applicable)
+│   ├── http-client.env.json    # Environment variables
+│   ├── 00-setup.http           # Authentication
+│   ├── 01-[module]-crud.http   # CRUD tests
+│   ├── 02-[module]-validation.http  # Validation tests (if applicable)
 │   └── test-plan.md            # Test documentation
 ```
 
@@ -259,7 +265,7 @@ After subagent completes, verify:
 ls -la "docs/features/${FEATURE_ID}/tests/api/"
 ```
 
-**Expected:** At least `variables.env`, `00-setup.hurl`, and one module test file.
+**Expected:** At least `http-client.env.json`, `00-setup.http`, and one module test file.
 
 ---
 

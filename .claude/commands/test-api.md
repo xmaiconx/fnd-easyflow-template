@@ -2,13 +2,13 @@
 
 > **LANGUAGE RULE:** All interaction with the user (questions, responses, summaries, error messages) MUST be in Brazilian Portuguese (PT-BR). Keep technical terms, code, and file names in English.
 
-Este comando executa testes de API usando Hurl para a feature atual.
+Este comando executa testes de API usando httpyac para a feature atual.
 
 ---
 
 ## Pre-requisitos
 
-- [Hurl](https://hurl.dev/) instalado (`hurl --version`)
+- httpyac instalado (`npm ls httpyac`)
 - Serviços rodando (API, DB, Redis)
 - Testes gerados em `docs/features/FXXXX/tests/api/`
 
@@ -16,31 +16,37 @@ Este comando executa testes de API usando Hurl para a feature atual.
 
 ## Phase 1: Environment Check
 
-### Step 1: Check Hurl Installation
+### Step 1: Check/Install httpyac
 
 ```bash
-hurl --version 2>/dev/null || echo "HURL_NOT_INSTALLED"
+# Verificar se httpyac está instalado
+npm ls httpyac 2>/dev/null || npm install httpyac --save-dev
 ```
 
-**Se Hurl não instalado:**
-```markdown
-**Hurl não encontrado!**
-
-Instale via:
-- **Windows:** `winget install Orange.Hurl` ou `scoop install hurl`
-- **macOS:** `brew install hurl`
-- **Linux:** `snap install hurl` ou baixe de https://hurl.dev/
-
-Após instalar, execute `/test-api` novamente.
+**Se não instalado, instalar automaticamente:**
+```bash
+npm install httpyac --save-dev
 ```
 
-### Step 2: Identify Feature
+### Step 2: Add npm script (if missing)
+
+Verificar se script `test:api` existe em `package.json`. Se não existir, informar ao usuário que precisa adicionar:
+
+```json
+{
+  "scripts": {
+    "test:api": "httpyac send docs/features/*/tests/api/*.http --all -e local"
+  }
+}
+```
+
+### Step 3: Identify Feature
 
 ```bash
 FEATURE_ID=$(bash .claude/scripts/identify-current-feature.sh)
 ```
 
-### Step 3: Check Test Files
+### Step 4: Check Test Files
 
 ```bash
 ls -la "docs/features/${FEATURE_ID}/tests/api/" 2>/dev/null
@@ -50,9 +56,9 @@ ls -la "docs/features/${FEATURE_ID}/tests/api/" 2>/dev/null
 ```markdown
 **Testes não encontrados!**
 
-Os testes Hurl ainda não foram gerados para esta feature.
+Os testes httpyac ainda não foram gerados para esta feature.
 
-Execute a skill `api-testing` para gerar os testes, ou crie manualmente em:
+Execute `/dev` novamente ou use a skill `api-testing` para gerar os testes em:
 `docs/features/${FEATURE_ID}/tests/api/`
 ```
 
@@ -87,44 +93,30 @@ Comandos que serão executados:
 3. `npm run dev:workers` (Workers em background) - se necessário
 ```
 
-**Se usuário confirmar**, executar:
-```bash
-docker-compose -f infra/docker-compose.yml up -d
-# Aguardar containers healthy
-sleep 10
-```
-
-**Para API/Workers**, informar que precisa ser iniciado manualmente em outro terminal ou usar o script de background.
-
 ---
 
-## Phase 3: Variables Setup
+## Phase 3: Environment Setup
 
-### Step 1: Check Variables File
-
-```bash
-cat "docs/features/${FEATURE_ID}/tests/api/variables.env"
-```
-
-### Step 2: Check Local Override
+### Step 1: Check Environment File
 
 ```bash
-ls "docs/features/${FEATURE_ID}/tests/api/variables.local.env" 2>/dev/null
+cat "docs/features/${FEATURE_ID}/tests/api/http-client.env.json"
 ```
 
-**Se `variables.local.env` não existir:**
+### Step 2: Validate Environment
+
+Verificar se as variáveis necessárias estão configuradas:
+- `API_URL` - URL da API
+- `TEST_EMAIL` - Email de teste
+- `TEST_PASSWORD` - Senha de teste
+
+**Se faltar variáveis:**
 ```markdown
-**Configuração de variáveis:**
+**Configuração incompleta:**
 
-O arquivo `variables.env` contém valores padrão.
-Para usar valores customizados, crie `variables.local.env`:
-
-```bash
-cp docs/features/${FEATURE_ID}/tests/api/variables.env \
-   docs/features/${FEATURE_ID}/tests/api/variables.local.env
-```
-
-Edite `variables.local.env` com seus valores de teste.
+Edite `docs/features/${FEATURE_ID}/tests/api/http-client.env.json` e configure:
+- TEST_EMAIL: email de um usuário de teste existente
+- TEST_PASSWORD: senha desse usuário
 
 **Deseja continuar com valores padrão?** (S/N)
 ```
@@ -136,17 +128,17 @@ Edite `variables.local.env` com seus valores de teste.
 ### Step 1: Execute Tests
 
 ```bash
-bash .claude/scripts/run-hurl-tests.sh "${FEATURE_ID}"
+npx httpyac send "docs/features/${FEATURE_ID}/tests/api/*.http" --all -e local
 ```
 
-**O script executa:**
-1. Todos os arquivos `.hurl` em ordem alfabética (00-, 01-, 02-, etc.)
-2. Gera relatório em `tests/test-report.md`
-3. Retorna exit code (0 = sucesso, 1+ = falhas)
+**Opções adicionais:**
+- `--bail` - Para no primeiro erro
+- `-v` - Verbose (mostra request/response)
+- `--junit` - Output JUnit XML
 
 ### Step 2: Display Results
 
-Mostrar output do Hurl em tempo real:
+Mostrar output em tempo real:
 - Testes passando em verde
 - Testes falhando em vermelho com detalhes
 
@@ -176,9 +168,9 @@ Analisar output e criar/atualizar `tests/test-report.md`:
 ## Failed Tests
 
 ### [Test Name]
-- **File:** XX-module.hurl:XX
-- **Expected:** HTTP 200
-- **Actual:** HTTP 500
+- **File:** XX-module.http
+- **Expected:** status == 200
+- **Actual:** status == 500
 - **Response:**
 ```json
 { "error": "..." }
@@ -186,8 +178,8 @@ Analisar output e criar/atualizar `tests/test-report.md`:
 
 ## Passed Tests
 
-- [x] 00-setup.hurl - Authentication (Xms)
-- [x] 01-crud.hurl - Create resource (Xms)
+- [x] 00-setup.http - Authentication (Xms)
+- [x] 01-crud.http - Create resource (Xms)
 ...
 ```
 
@@ -219,8 +211,8 @@ Analisar output e criar/atualizar `tests/test-report.md`:
 **Result:** XX/XX testes passaram, YY falharam
 
 **Falhas encontradas:**
-1. `01-crud.hurl:15` - POST /api/v1/resources → HTTP 500 (expected 201)
-2. `02-validation.hurl:8` - Missing field validation not working
+1. `01-crud.http` - POST /api/v1/resources → status 500 (expected 201)
+2. `02-validation.http` - Missing field validation not working
 
 **Report completo:** `docs/features/${FEATURE_ID}/tests/test-report.md`
 
@@ -234,22 +226,29 @@ Analisar output e criar/atualizar `tests/test-report.md`:
 ### Run Specific Test File
 
 ```bash
-# Sintaxe: /test-api [filename]
-# Exemplo: /test-api 01-crud.hurl
+# Executar arquivo específico
+npx httpyac send "docs/features/${FEATURE_ID}/tests/api/01-crud.http" --all -e local
 ```
 
 ### Verbose Mode
 
 ```bash
-# Sintaxe: /test-api --verbose
-# Mostra request/response completos
+# Com detalhes de request/response
+npx httpyac send "docs/features/${FEATURE_ID}/tests/api/*.http" --all -e local -v
 ```
 
-### Generate Only (No Execute)
+### Bail on First Failure
 
 ```bash
-# Sintaxe: /test-api --generate
-# Apenas gera testes, não executa
+# Parar no primeiro erro
+npx httpyac send "docs/features/${FEATURE_ID}/tests/api/*.http" --all -e local --bail
+```
+
+### JUnit Output (CI)
+
+```bash
+# Output para CI/CD
+npx httpyac send "docs/features/${FEATURE_ID}/tests/api/*.http" --all -e local --junit > test-results.xml
 ```
 
 ---
@@ -261,28 +260,34 @@ Analisar output e criar/atualizar `tests/test-report.md`:
 - Execute `npm run dev:api` em outro terminal
 
 ### "401 Unauthorized"
-- Verifique credenciais em `variables.env`
+- Verifique credenciais em `http-client.env.json`
 - Certifique-se que o usuário de teste existe no banco
+- Verifique se `00-setup.http` está sendo executado primeiro
 
-### "Hurl not found"
-- Instale Hurl: https://hurl.dev/docs/installation.html
+### "httpyac not found"
+- Execute: `npm install httpyac --save-dev`
 
 ### "No test files"
 - Execute a skill `api-testing` para gerar testes
-- Ou crie arquivos `.hurl` manualmente
+- Ou crie arquivos `.http` manualmente
+
+### "Environment not found"
+- Crie `http-client.env.json` com ambiente `local`
+- Ou use: `npx httpyac send ... -e local --var API_URL=http://localhost:3001/api/v1`
 
 ---
 
 ## Critical Rules
 
 **DO:**
+- Verificar/instalar httpyac antes de executar
 - Verificar serviços antes de executar
 - Mostrar progresso em tempo real
 - Gerar relatório mesmo se falhar
 - Sugerir próximos passos
 
 **DO NOT:**
-- Executar sem verificar Hurl instalado
+- Executar sem verificar se API está rodando
 - Ignorar falhas silenciosamente
 - Modificar código baseado em falhas (apenas reportar)
 - Commitar sem todos os testes passando

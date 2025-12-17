@@ -1,6 +1,6 @@
 # Worker Testing Guide
 
-> Estratégias para testar workers BullMQ através de testes Hurl.
+> Estratégias para testar workers BullMQ através de testes httpyac.
 
 ---
 
@@ -17,39 +17,38 @@ API Request → Job Enqueued → Worker Processes → Side Effect
 
 ## Estratégias de Teste
 
-### Estratégia 1: Delay + Verificação de Efeito
+### Estratégia 1: Sleep + Verificação de Efeito
 
 **Quando usar:** O worker causa um efeito verificável (DB, email, etc.)
 
-```hurl
-# ===========================================
-# WORKER TEST: Email notification
-# ===========================================
+```http
+### WORKER TEST: Email notification
 
 # 1. Trigger action that queues email
-POST {{API_URL}}/users/{{user_id}}/invite
+# @name triggerEmail
+POST {{API_URL}}/users/{{userId}}/invite
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
 {
   "email": "newuser@test.com",
   "role": "member"
 }
-HTTP 200
-[Asserts]
-jsonpath "$.message" contains "invitation"
 
-# 2. Wait for worker to process
-# Hurl doesn't have native delay, use retry with interval
-[Options]
-delay: 3000
+?? status == 200
+?? body.message includes "invitation"
 
-# 3. Verify the side effect (invitation created in DB)
+### 2. Wait for worker to process
+# httpyac sleep (3 seconds)
+{{$sleep 3000}}
+
+### 3. Verify the side effect
 GET {{API_URL}}/invitations?email=newuser@test.com
 Authorization: Bearer {{token}}
-HTTP 200
-[Asserts]
-jsonpath "$.data" count >= 1
-jsonpath "$.data[0].status" == "sent"
+
+?? status == 200
+?? body.data length >= 1
+?? body.data[0].status == "sent"
 ```
 
 ---
@@ -58,36 +57,46 @@ jsonpath "$.data[0].status" == "sent"
 
 **Quando usar:** Se existir endpoint admin para stats da fila.
 
-```hurl
-# ===========================================
-# WORKER TEST: Via Queue Stats
-# ===========================================
+```http
+### WORKER TEST: Via Queue Stats
 
 # 1. Get initial queue stats
+# @name initialStats
 GET {{API_URL}}/admin/queues/email/stats
 Authorization: Bearer {{ADMIN_TOKEN}}
-HTTP 200
-[Captures]
-initial_completed: jsonpath "$.completed"
 
-# 2. Trigger action
+?? status == 200
+
+###
+@initialCompleted = {{initialStats.completed}}
+
+### 2. Trigger action
 POST {{API_URL}}/auth/forgot-password
 Content-Type: application/json
+
 {
   "email": "{{TEST_EMAIL}}"
 }
-HTTP 200
 
-# 3. Wait for processing
-[Options]
-delay: 5000
+?? status == 200
 
-# 4. Verify job was processed
+### 3. Wait for processing
+{{$sleep 5000}}
+
+### 4. Verify job was processed
 GET {{API_URL}}/admin/queues/email/stats
 Authorization: Bearer {{ADMIN_TOKEN}}
-HTTP 200
-[Asserts]
-jsonpath "$.completed" > {{initial_completed}}
+
+?? status == 200
+
+{{
+  const { test, expect } = require('httpyac');
+
+  test('should have processed new job', () => {
+    const initial = parseInt('{{initialCompleted}}');
+    expect(response.body.completed).toBeGreaterThan(initial);
+  });
+}}
 ```
 
 ---
@@ -96,36 +105,37 @@ jsonpath "$.completed" > {{initial_completed}}
 
 **Quando usar:** Worker envia webhook ou atualiza status.
 
-```hurl
-# ===========================================
-# WORKER TEST: Webhook Processing
-# ===========================================
+```http
+### WORKER TEST: Webhook Processing
 
 # 1. Simulate webhook (Stripe, etc.)
 POST {{API_URL}}/webhooks/stripe
 Content-Type: application/json
 Stripe-Signature: {{STRIPE_TEST_SIGNATURE}}
+
 {
-  "type": "invoice.paid",
+  "id": "evt_test_{{$timestamp}}",
+  "type": "customer.subscription.created",
   "data": {
     "object": {
-      "customer": "cus_test123"
+      "id": "sub_test_{{$timestamp}}",
+      "customer": "cus_test_123",
+      "status": "active"
     }
   }
 }
-HTTP 200
 
-# 2. Wait for webhook worker
-[Options]
-delay: 3000
+?? status == 200
 
-# 3. Verify webhook was processed
+### 2. Wait for webhook worker
+{{$sleep 3000}}
+
+### 3. Verify webhook was processed
 GET {{API_URL}}/admin/webhooks?type=stripe&status=processed
 Authorization: Bearer {{ADMIN_TOKEN}}
-HTTP 200
-[Asserts]
-jsonpath "$.data" count >= 1
-jsonpath "$.data[0].status" == "processed"
+
+?? status == 200
+?? body.data length >= 1
 ```
 
 ---
@@ -134,34 +144,55 @@ jsonpath "$.data[0].status" == "processed"
 
 **Quando usar:** Resultado eventual, tempo variável.
 
-```hurl
-# ===========================================
-# WORKER TEST: Async processing with polling
-# ===========================================
+```http
+### WORKER TEST: Async processing with polling
 
 # 1. Start async operation
+# @name startReport
 POST {{API_URL}}/reports/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
 {
   "type": "monthly",
   "month": "2024-01"
 }
-HTTP 202
-[Captures]
-report_id: jsonpath "$.data.id"
-[Asserts]
-jsonpath "$.data.status" == "processing"
 
-# 2. Poll for completion (Hurl retry)
-GET {{API_URL}}/reports/{{report_id}}
+?? status == 202
+?? body.data.status == "processing"
+
+###
+@reportId = {{startReport.data.id}}
+
+### 2. Wait and poll (attempt 1)
+{{$sleep 2000}}
+
+### Poll for status
+# @name pollReport
+GET {{API_URL}}/reports/{{reportId}}
 Authorization: Bearer {{token}}
-[Options]
-retry: 10
-retry-interval: 2000
-HTTP 200
-[Asserts]
-jsonpath "$.data.status" == "completed"
+
+{{
+  const { test } = require('httpyac');
+
+  // Store status for conditional next request
+  exports.reportStatus = response.body.data.status;
+
+  test('should be processing or completed', () => {
+    const validStatuses = ['processing', 'completed'];
+    expect(validStatuses).toContain(response.body.data.status);
+  });
+}}
+
+### 3. If still processing, wait more
+{{$sleep 3000}}
+
+### Final check
+GET {{API_URL}}/reports/{{reportId}}
+Authorization: Bearer {{token}}
+
+?? status == 200
+?? body.data.status == "completed"
 ```
 
 ---
@@ -170,127 +201,138 @@ jsonpath "$.data.status" == "completed"
 
 ### Email Worker
 
-```hurl
-# Trigger email
+```http
+### EMAIL WORKER: Trigger notification
 POST {{API_URL}}/notifications/send
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
 {
   "type": "welcome",
-  "userId": "{{user_id}}"
+  "userId": "{{userId}}"
 }
-HTTP 200
 
-[Options]
-delay: 3000
+?? status == 200
 
-# Verify via notification log (if exists)
-GET {{API_URL}}/users/{{user_id}}/notifications
+### Wait for processing
+{{$sleep 3000}}
+
+### Verify via notification log
+GET {{API_URL}}/users/{{userId}}/notifications
 Authorization: Bearer {{token}}
-HTTP 200
-[Asserts]
-jsonpath "$.data[0].type" == "welcome"
-jsonpath "$.data[0].status" == "sent"
+
+?? status == 200
+?? body.data[0].type == "welcome"
+?? body.data[0].status == "sent"
 ```
 
 ### Audit Worker
 
-```hurl
-# Perform action that triggers audit
-DELETE {{API_URL}}/resources/{{resource_id}}
+```http
+### AUDIT WORKER: Perform action that triggers audit
+DELETE {{API_URL}}/resources/{{resourceId}}
 Authorization: Bearer {{token}}
-HTTP 200
 
-[Options]
-delay: 2000
+?? status == 200
 
-# Verify audit log
-GET {{API_URL}}/audit?entity=resource&entityId={{resource_id}}
+### Wait for audit log processing
+{{$sleep 2000}}
+
+### Verify audit log
+GET {{API_URL}}/audit?entity=resource&entityId={{resourceId}}
 Authorization: Bearer {{ADMIN_TOKEN}}
-HTTP 200
-[Asserts]
-jsonpath "$.data[0].action" == "DELETE"
-jsonpath "$.data[0].entityId" == "{{resource_id}}"
+
+?? status == 200
+?? body.data[0].action == "DELETE"
 ```
 
 ### Stripe Webhook Worker
 
-```hurl
-# Note: In tests, use Stripe test mode signatures
-
-# Simulate subscription created
+```http
+### STRIPE WORKER: Simulate subscription webhook
+# Note: Use Stripe test mode signatures in local env
 POST {{API_URL}}/webhooks/stripe
 Content-Type: application/json
 Stripe-Signature: {{STRIPE_SIGNATURE}}
+
 {
-  "id": "evt_test_123",
+  "id": "evt_test_{{$uuid}}",
   "type": "customer.subscription.created",
   "data": {
     "object": {
-      "id": "sub_test_123",
+      "id": "sub_test_{{$uuid}}",
       "customer": "cus_test_123",
       "status": "active"
     }
   }
 }
-HTTP 200
 
-[Options]
-delay: 3000
+?? status == 200
 
-# Verify subscription created
-GET {{API_URL}}/subscriptions?stripeId=sub_test_123
+### Wait for worker
+{{$sleep 3000}}
+
+### Verify subscription created in DB
+GET {{API_URL}}/admin/subscriptions?stripeCustomerId=cus_test_123
 Authorization: Bearer {{ADMIN_TOKEN}}
-HTTP 200
-[Asserts]
-jsonpath "$.data" count >= 1
-jsonpath "$.data[0].status" == "active"
+
+?? status == 200
+?? body.data length >= 1
 ```
 
 ---
 
-## Script Auxiliar: check-worker-result.sh
+## Script Auxiliar
 
-Para casos complexos, use o script auxiliar:
+Para casos complexos, use o script auxiliar via terminal:
 
 ```bash
-# Usage from Hurl (via exec)
-# Not directly in Hurl, but as post-test validation
-
+# Verificar resultado do worker
 bash .claude/scripts/check-worker-result.sh \
   --queue email \
-  --job-id "job_123" \
-  --expected-status completed
+  --wait 10 \
+  --expected completed
 ```
 
 ---
 
 ## Boas Práticas
 
-1. **Timeouts adequados:** Workers podem levar tempo. Use delays/retries generosos.
+1. **Timeouts adequados:** Use `{{$sleep}}` com valores realistas (3-10s).
 
-2. **Idempotência:** Testes devem ser repetíveis. Use dados únicos por execução.
+2. **Idempotência:** Use `{{$uuid}}` ou `{{$timestamp}}` para dados únicos.
 
-3. **Cleanup:** Se criar dados, considere cleanup no final (ou use DB de teste).
+3. **Cleanup:** Considere deletar dados de teste no final.
 
-4. **Ordem de execução:** Teste de workers geralmente vem após testes CRUD.
+4. **Ordem:** Testes de workers devem vir após testes CRUD básicos.
 
-5. **Ambiente isolado:** Workers de produção não devem processar jobs de teste.
+5. **Ambiente:** Configure `ADMIN_TOKEN` no env para acessar stats.
 
 ---
 
-## Limitações
+## Variáveis de Ambiente para Workers
 
-- Hurl não tem `delay` nativo (use `[Options] retry-interval`)
-- Não é possível executar scripts shell diretamente
-- Verificação de logs requer endpoint dedicado ou script externo
+Adicione ao `http-client.env.json`:
+
+```json
+{
+  "local": {
+    "API_URL": "http://localhost:3001/api/v1",
+    "TEST_EMAIL": "test@example.com",
+    "TEST_PASSWORD": "Test123!",
+    "ADMIN_TOKEN": "admin-token-here",
+    "STRIPE_SIGNATURE": "test-signature"
+  }
+}
+```
 
 ---
 
 ## Checklist de Worker Testing
 
 - [ ] Identificar qual ação da API enfileira o job
-- [ ] Definir tempo máximo de espera (delay/retry)
+- [ ] Definir tempo de espera adequado ({{$sleep}})
 - [ ] Identificar efeito colateral verificável
 - [ ] Criar endpoint de verificação se não existir
+- [ ] Adicionar variáveis de admin no env
 - [ ] Documentar dependências (Redis up, worker running)

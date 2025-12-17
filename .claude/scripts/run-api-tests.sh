@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # =============================================================================
-# run-hurl-tests.sh - Execute Hurl API tests for a feature
+# run-api-tests.sh - Execute httpyac API tests for a feature
 # =============================================================================
-# Usage: bash .claude/scripts/run-hurl-tests.sh [FEATURE_ID] [OPTIONS]
+# Usage: bash .claude/scripts/run-api-tests.sh [FEATURE_ID] [OPTIONS]
 #
 # Arguments:
 #   FEATURE_ID  - Feature identifier (e.g., F0001-user-auth)
@@ -12,8 +12,10 @@
 # Options:
 #   --verbose   - Show detailed request/response
 #   --file FILE - Run only specific test file
+#   --bail      - Stop on first failure
 #   --report    - Generate markdown report (default: yes)
 #   --no-report - Skip report generation
+#   --env ENV   - Environment to use (default: local)
 #
 # Returns:
 #   Exit code 0 if all tests pass, 1+ if any fail
@@ -35,17 +37,23 @@ NC='\033[0m'
 FEATURE_ID=""
 VERBOSE=false
 SINGLE_FILE=""
+BAIL=false
 GENERATE_REPORT=true
+ENVIRONMENT="local"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --verbose)
+        --verbose|-v)
             VERBOSE=true
             shift
             ;;
         --file)
             SINGLE_FILE="$2"
             shift 2
+            ;;
+        --bail)
+            BAIL=true
+            shift
             ;;
         --no-report)
             GENERATE_REPORT=false
@@ -54,6 +62,10 @@ while [[ $# -gt 0 ]]; do
         --report)
             GENERATE_REPORT=true
             shift
+            ;;
+        --env|-e)
+            ENVIRONMENT="$2"
+            shift 2
             ;;
         -*)
             echo "Unknown option: $1"
@@ -77,7 +89,7 @@ if [ -z "$FEATURE_ID" ]; then
 
     if [ -z "$FEATURE_ID" ]; then
         echo "ERROR: Could not detect feature ID"
-        echo "Usage: bash .claude/scripts/run-hurl-tests.sh [FEATURE_ID]"
+        echo "Usage: bash .claude/scripts/run-api-tests.sh [FEATURE_ID]"
         exit 1
     fi
 fi
@@ -87,8 +99,7 @@ fi
 # =============================================================================
 
 TESTS_DIR="docs/features/${FEATURE_ID}/tests/api"
-VARIABLES_FILE="${TESTS_DIR}/variables.env"
-VARIABLES_LOCAL="${TESTS_DIR}/variables.local.env"
+ENV_FILE="${TESTS_DIR}/http-client.env.json"
 REPORT_FILE="docs/features/${FEATURE_ID}/tests/test-report.md"
 
 # =============================================================================
@@ -96,28 +107,23 @@ REPORT_FILE="docs/features/${FEATURE_ID}/tests/test-report.md"
 # =============================================================================
 
 echo "========================================"
-echo "HURL TEST RUNNER"
+echo "HTTPYAC API TEST RUNNER"
 echo "========================================"
 echo ""
 echo "Feature: ${FEATURE_ID}"
 echo "Tests Dir: ${TESTS_DIR}"
+echo "Environment: ${ENVIRONMENT}"
 echo ""
 
-# Check Hurl installation
-if ! command -v hurl &> /dev/null; then
-    echo "ERROR: Hurl is not installed"
+# Check httpyac installation
+if ! npm ls httpyac > /dev/null 2>&1; then
+    echo "httpyac not found. Installing..."
+    npm install httpyac --save-dev
     echo ""
-    echo "Install via:"
-    echo "  Windows: winget install Orange.Hurl"
-    echo "  macOS: brew install hurl"
-    echo "  Linux: snap install hurl"
-    echo ""
-    echo "More info: https://hurl.dev/docs/installation.html"
-    exit 1
 fi
 
-HURL_VERSION=$(hurl --version | head -1)
-echo "Hurl Version: ${HURL_VERSION}"
+HTTPYAC_VERSION=$(npx httpyac --version 2>/dev/null || echo "unknown")
+echo "httpyac Version: ${HTTPYAC_VERSION}"
 echo ""
 
 # Check test directory exists
@@ -129,44 +135,41 @@ if [ ! -d "$TESTS_DIR" ]; then
 fi
 
 # Check for test files
-HURL_FILES=$(find "$TESTS_DIR" -name "*.hurl" -type f 2>/dev/null | sort)
+HTTP_FILES=$(find "$TESTS_DIR" -name "*.http" -type f 2>/dev/null | sort)
 
-if [ -z "$HURL_FILES" ]; then
-    echo "ERROR: No .hurl test files found in ${TESTS_DIR}"
+if [ -z "$HTTP_FILES" ]; then
+    echo "ERROR: No .http test files found in ${TESTS_DIR}"
     exit 1
 fi
 
 # =============================================================================
-# Variables Setup
+# Environment Setup
 # =============================================================================
 
-VARS_ARGS=""
+ENV_ARGS=""
 
-if [ -f "$VARIABLES_LOCAL" ]; then
-    echo "Using variables: ${VARIABLES_LOCAL}"
-    VARS_ARGS="--variables-file ${VARIABLES_LOCAL}"
-elif [ -f "$VARIABLES_FILE" ]; then
-    echo "Using variables: ${VARIABLES_FILE}"
-    VARS_ARGS="--variables-file ${VARIABLES_FILE}"
+if [ -f "$ENV_FILE" ]; then
+    echo "Using environment file: ${ENV_FILE}"
+    echo "Selected environment: ${ENVIRONMENT}"
 else
-    echo "WARNING: No variables file found"
+    echo "WARNING: No environment file found (http-client.env.json)"
+    echo "Using default environment variables"
 fi
 
 echo ""
 
 # =============================================================================
-# Build Hurl Command Options
+# Build httpyac Command Options
 # =============================================================================
 
-HURL_OPTS="--test"
+HTTPYAC_OPTS="--all -e ${ENVIRONMENT}"
 
 if [ "$VERBOSE" = true ]; then
-    HURL_OPTS="$HURL_OPTS --verbose"
+    HTTPYAC_OPTS="$HTTPYAC_OPTS -v"
 fi
 
-# Add color if terminal supports it
-if [ -t 1 ]; then
-    HURL_OPTS="$HURL_OPTS --color"
+if [ "$BAIL" = true ]; then
+    HTTPYAC_OPTS="$HTTPYAC_OPTS --bail"
 fi
 
 # =============================================================================
@@ -187,32 +190,33 @@ START_TIME=$(date +%s)
 # Determine which files to run
 if [ -n "$SINGLE_FILE" ]; then
     if [ -f "${TESTS_DIR}/${SINGLE_FILE}" ]; then
-        HURL_FILES="${TESTS_DIR}/${SINGLE_FILE}"
+        HTTP_FILES="${TESTS_DIR}/${SINGLE_FILE}"
     else
         echo "ERROR: Test file not found: ${SINGLE_FILE}"
         exit 1
     fi
 fi
 
-# Run each test file
-for hurl_file in $HURL_FILES; do
-    filename=$(basename "$hurl_file")
+# Count files
+for http_file in $HTTP_FILES; do
     TOTAL_FILES=$((TOTAL_FILES + 1))
-
-    echo "--- Running: ${filename} ---"
-
-    # Execute Hurl
-    if hurl $HURL_OPTS $VARS_ARGS "$hurl_file"; then
-        echo -e "${GREEN}PASSED${NC}"
-        PASSED_FILES=$((PASSED_FILES + 1))
-    else
-        echo -e "${RED}FAILED${NC}"
-        FAILED_FILES=$((FAILED_FILES + 1))
-        FAILED_LIST+=("$filename")
-    fi
-
-    echo ""
 done
+
+echo "Running $TOTAL_FILES test file(s)..."
+echo ""
+
+# Execute all tests together (httpyac handles ordering)
+echo "--- Executing: All test files ---"
+
+if npx httpyac send "${TESTS_DIR}/*.http" $HTTPYAC_OPTS; then
+    echo -e "${GREEN}ALL TESTS PASSED${NC}"
+    PASSED_FILES=$TOTAL_FILES
+else
+    echo -e "${RED}SOME TESTS FAILED${NC}"
+    # httpyac doesn't easily tell us which files failed, so we mark as partial
+    FAILED_FILES=1
+    FAILED_LIST+=("See output above for details")
+fi
 
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
@@ -221,23 +225,21 @@ DURATION=$((END_TIME - START_TIME))
 # Results Summary
 # =============================================================================
 
+echo ""
 echo "========================================"
 echo "TEST RESULTS"
 echo "========================================"
 echo ""
 echo "Total Files: ${TOTAL_FILES}"
-echo -e "Passed: ${GREEN}${PASSED_FILES}${NC}"
-echo -e "Failed: ${RED}${FAILED_FILES}${NC}"
 echo "Duration: ${DURATION}s"
-echo ""
 
-if [ ${#FAILED_LIST[@]} -gt 0 ]; then
-    echo "Failed Tests:"
-    for failed in "${FAILED_LIST[@]}"; do
-        echo "  - ${failed}"
-    done
-    echo ""
+if [ "$FAILED_FILES" -eq 0 ]; then
+    echo -e "Status: ${GREEN}PASSED${NC}"
+else
+    echo -e "Status: ${RED}FAILED${NC}"
 fi
+
+echo ""
 
 # =============================================================================
 # Generate Report
@@ -261,6 +263,7 @@ if [ "$GENERATE_REPORT" = true ]; then
 
 **Executed:** $(date -Iseconds 2>/dev/null || date)
 **Duration:** ${DURATION}s
+**Environment:** ${ENVIRONMENT}
 **Result:** ${RESULT_EMOJI} ${RESULT_STATUS}
 
 ## Summary
@@ -268,37 +271,29 @@ if [ "$GENERATE_REPORT" = true ]; then
 | Metric | Value |
 |--------|-------|
 | Total Files | ${TOTAL_FILES} |
-| Passed | ${PASSED_FILES} |
-| Failed | ${FAILED_FILES} |
-| Success Rate | $(( PASSED_FILES * 100 / TOTAL_FILES ))% |
+| Status | ${RESULT_STATUS} |
 
 EOF
 
     # Add failed tests section if any
     if [ ${#FAILED_LIST[@]} -gt 0 ]; then
         cat >> "$REPORT_FILE" << EOF
-## Failed Tests
+## Notes
+
+Some tests failed. Check the console output for details.
 
 EOF
-        for failed in "${FAILED_LIST[@]}"; do
-            echo "- \`${failed}\`" >> "$REPORT_FILE"
-        done
-        echo "" >> "$REPORT_FILE"
     fi
 
     # Add test files list
     cat >> "$REPORT_FILE" << EOF
-## Test Files Executed
+## Test Files
 
 EOF
 
-    for hurl_file in $HURL_FILES; do
-        filename=$(basename "$hurl_file")
-        if [[ " ${FAILED_LIST[*]} " =~ " ${filename} " ]]; then
-            echo "- [ ] \`${filename}\` - FAILED" >> "$REPORT_FILE"
-        else
-            echo "- [x] \`${filename}\` - PASSED" >> "$REPORT_FILE"
-        fi
+    for http_file in $HTTP_FILES; do
+        filename=$(basename "$http_file")
+        echo "- \`${filename}\`" >> "$REPORT_FILE"
     done
 
     cat >> "$REPORT_FILE" << EOF
@@ -308,13 +303,23 @@ EOF
 ## Re-run Tests
 
 \`\`\`bash
-bash .claude/scripts/run-hurl-tests.sh ${FEATURE_ID}
+# All tests
+bash .claude/scripts/run-api-tests.sh ${FEATURE_ID}
+
+# Or via npm
+npx httpyac send "docs/features/${FEATURE_ID}/tests/api/*.http" --all -e local
 \`\`\`
 
 ## Run Single Test
 
 \`\`\`bash
-bash .claude/scripts/run-hurl-tests.sh ${FEATURE_ID} --file [filename].hurl
+bash .claude/scripts/run-api-tests.sh ${FEATURE_ID} --file 01-crud.http
+\`\`\`
+
+## Verbose Mode
+
+\`\`\`bash
+bash .claude/scripts/run-api-tests.sh ${FEATURE_ID} --verbose
 \`\`\`
 EOF
 
@@ -323,7 +328,7 @@ fi
 
 echo ""
 echo "========================================"
-echo "END_HURL_TESTS"
+echo "END_API_TESTS"
 echo "========================================"
 
 # Exit with appropriate code

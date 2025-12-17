@@ -1,10 +1,39 @@
 # API Testing Skill
 
-> **Trigger:** Use this skill after `/dev` completes to generate Hurl test files for the implemented API endpoints. Also use when user asks to create API tests, generate test files, or test backend endpoints.
+> **Trigger:** Use this skill after `/dev` completes to generate httpyac test files for the implemented API endpoints. Also use when user asks to create API tests, generate test files, or test backend endpoints.
 
 ## Purpose
 
-Generate comprehensive [Hurl](https://hurl.dev/) test files for API endpoints based on the feature implementation. This skill analyzes the implemented code and creates executable test scripts.
+Generate comprehensive [httpyac](https://httpyac.github.io/) test files (`.http`) for API endpoints based on the feature implementation. This skill analyzes the implemented code and creates executable test scripts.
+
+**Why httpyac?**
+- npm-based (`npm install httpyac`) - auto-installable
+- Uses `.http` format (VS Code REST Client compatible)
+- JavaScript assertions (familiar to devs)
+- VS Code extension for debugging
+
+---
+
+## Phase 0: Ensure httpyac is installed
+
+### Step 1: Check/Install httpyac
+
+```bash
+# Check if httpyac exists in devDependencies
+grep -q '"httpyac"' package.json || npm install httpyac --save-dev
+```
+
+### Step 2: Add npm script (if not exists)
+
+Check `package.json` and add if missing:
+
+```json
+{
+  "scripts": {
+    "test:api": "httpyac send docs/features/*/tests/api/*.http --all -e local"
+  }
+}
+```
 
 ---
 
@@ -43,33 +72,34 @@ For each controller, extract:
 mkdir -p "docs/features/${FEATURE_ID}/tests/api"
 ```
 
-### Step 2: Generate Variables File
+### Step 2: Generate Environment File
 
-Create `tests/api/variables.env`:
+Create `tests/api/http-client.env.json`:
 
-```env
-# API Testing Variables
-# Copy to variables.local.env and fill with real values
-
-API_URL=http://localhost:3001/api/v1
-TEST_EMAIL=test@example.com
-TEST_PASSWORD=TestPassword123!
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=AdminPassword123!
-
-# Tokens (captured during test execution)
-# TOKEN will be captured from auth endpoint
+```json
+{
+  "local": {
+    "API_URL": "http://localhost:3001/api/v1",
+    "TEST_EMAIL": "test@example.com",
+    "TEST_PASSWORD": "TestPassword123!"
+  },
+  "staging": {
+    "API_URL": "https://staging-api.example.com/api/v1",
+    "TEST_EMAIL": "test@example.com",
+    "TEST_PASSWORD": "TestPassword123!"
+  }
+}
 ```
 
-### Step 3: Generate Hurl Test Files
+### Step 3: Generate httpyac Test Files
 
-Read `.claude/skills/api-testing/hurl-patterns.md` for patterns.
+Read `.claude/skills/api-testing/httpyac-patterns.md` for patterns.
 
-**File naming convention:** `[NN]-[endpoint-group].hurl`
-- `00-setup.hurl` - Authentication and setup
-- `01-[module]-crud.hurl` - CRUD operations
-- `02-[module]-validation.hurl` - Validation tests
-- `03-[module]-edge-cases.hurl` - Edge cases
+**File naming convention:** `[NN]-[endpoint-group].http`
+- `00-setup.http` - Authentication and setup
+- `01-[module]-crud.http` - CRUD operations
+- `02-[module]-validation.http` - Validation tests
+- `03-[module]-edge-cases.http` - Edge cases
 
 ### Step 4: Generate Test Plan
 
@@ -110,7 +140,7 @@ Create `tests/api/test-plan.md`:
 If the feature includes workers, read `.claude/skills/api-testing/worker-testing-guide.md` and:
 
 1. Identify which endpoints trigger worker jobs
-2. Add delay and verification steps
+2. Add delay and verification steps using `{{$sleep 3000}}`
 3. Include Redis queue checks if admin endpoint exists
 
 ---
@@ -119,9 +149,11 @@ If the feature includes workers, read `.claude/skills/api-testing/worker-testing
 
 ### Checklist Before Completion
 
+- [ ] httpyac installed as devDependency
+- [ ] npm script `test:api` added
 - [ ] All endpoints from implementation.md have tests
-- [ ] Authentication flow is tested first (00-setup.hurl)
-- [ ] Variables file has all required placeholders
+- [ ] Authentication flow is tested first (00-setup.http)
+- [ ] Environment file has all required variables
 - [ ] Test plan documents all scenarios
 - [ ] Edge cases are covered
 - [ ] Worker jobs have verification (if applicable)
@@ -133,10 +165,10 @@ If the feature includes workers, read `.claude/skills/api-testing/worker-testing
 ```
 docs/features/FXXXX-feature/tests/
 ├── api/
-│   ├── variables.env           # Template variables
-│   ├── 00-setup.hurl           # Auth + setup
-│   ├── 01-[module]-crud.hurl   # Main CRUD tests
-│   ├── 02-[module]-edge.hurl   # Edge cases
+│   ├── http-client.env.json    # Environment variables
+│   ├── 00-setup.http           # Auth + setup
+│   ├── 01-[module]-crud.http   # Main CRUD tests
+│   ├── 02-[module]-edge.http   # Edge cases
 │   └── test-plan.md            # Test documentation
 └── test-report.md              # Generated after execution
 ```
@@ -147,23 +179,28 @@ docs/features/FXXXX-feature/tests/
 
 When called from `/dev` or `/autopilot`:
 
-1. Automatically detect implemented endpoints
-2. Generate all test files
-3. Report: "Testes Hurl gerados em `docs/features/FXXXX/tests/api/`"
-4. Suggest: "Execute `/test-api` para rodar os testes"
+1. Ensure httpyac is installed (`npm install httpyac -D`)
+2. Add npm script if not exists
+3. Automatically detect implemented endpoints
+4. Generate all test files
+5. Report: "Testes httpyac gerados em `docs/features/FXXXX/tests/api/`"
+6. Suggest: "Execute `npm run test:api` ou `/test-api` para rodar os testes"
 
 ---
 
 ## Critical Rules
 
 **DO:**
+- Ensure httpyac is installed before generating tests
 - Generate tests based on ACTUAL implementation (read the code)
 - Include both success and error scenarios
 - Use meaningful assertions (status codes, response structure)
 - Document what each test validates
+- Use `.http` extension (VS Code compatible)
 
 **DO NOT:**
 - Generate tests for endpoints that don't exist
 - Skip authentication in protected endpoints
-- Hardcode sensitive data (use variables)
+- Hardcode sensitive data (use environment variables)
 - Forget to test validation rules from about.md
+- Use `.hurl` extension (we use httpyac, not Hurl)
