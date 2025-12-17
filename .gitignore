@@ -154,3 +154,6 @@ build-matrix.json
 
 # Vercel
 .vercel
+
+# Git Worktrees
+.worktrees/
