@@ -117,7 +117,13 @@ prompt: |
 
   ## Instructions
   Follow ALL instructions from: .claude/commands/plan.md
-  (The command includes PRE-DOCUMENTATION CHECKPOINT - follow it)
+
+  ## PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
+  Execute BEFORE starting to write plan.md:
+  1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
+  2. Execute: cat .claude/skills/documentation-style/SKILL.md
+  3. Apply hybrid structure (human-readable + token-efficient) to plan.md
+  4. TodoWrite: Mark item as completed AFTER writing plan.md
 
   ## AUTOPILOT OVERRIDES (CRITICAL)
   These rules OVERRIDE any conflicting instructions in plan.md:
@@ -304,8 +310,14 @@ description: "Review feature ${FEATURE_ID}"
 prompt: |
   You are executing the REVIEW phase for feature ${FEATURE_ID}.
 
+  ## PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
+  Execute BEFORE running code-review skill:
+  1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
+  2. Execute: cat .claude/skills/documentation-style/SKILL.md
+  3. Apply hybrid structure (human-readable + token-efficient) to review.md
+  4. TodoWrite: Mark item as completed AFTER writing review.md
+
   ## Primary Tool: code-review Skill
-  (The review.md command includes PRE-DOCUMENTATION CHECKPOINT - follow it)
 
   You MUST use the `code-review` skill to perform comprehensive review.
 
@@ -389,10 +401,11 @@ prompt: |
   You are a **Documentation Specialist** creating implementation documentation for feature ${FEATURE_ID}.
 
   ## PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
+  Execute BEFORE starting to write implementation.md:
   1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
   2. Execute: cat .claude/skills/documentation-style/SKILL.md
-  3. Apply hybrid structure to implementation.md
-  4. TodoWrite: Mark item as completed after writing
+  3. Apply hybrid structure (human-readable + token-efficient) to implementation.md
+  4. TodoWrite: Mark item as completed AFTER writing implementation.md
 
   ## Instructions
   Follow the documentation format from: .claude/commands/dev.md (Phase 5: Documentation section)

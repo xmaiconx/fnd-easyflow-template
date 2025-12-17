@@ -13,6 +13,39 @@ Este comando analisa o codebase e atualiza a seção Technical Spec do CLAUDE.md
 
 ---
 
+## Phase 0: Automated Discovery (INITIAL SCAN)
+
+### Step 1: Run Discovery Script
+
+Execute o script de descoberta automática que varre o codebase:
+
+```bash
+bash .claude/scripts/architecture-discover.sh
+```
+
+**O script faz:**
+1. Varre recursivamente respeitando .gitignore (ignora node_modules, dist, etc)
+2. Coleta `package.json`, `turbo.json`, `tsconfig*.json`, `.env.example`
+3. Lista estrutura de diretórios com profundidade 3
+4. Mapeia controllers (*.controller.ts)
+5. Mapeia endpoints e rotas
+6. Cria documento temporário: `.claude/temp/architecture-discovery.md`
+7. Retorna paths para próximas fases
+
+**Output:** Arquivo temporário com estrutura completa do projeto.
+
+### Step 2: PRE-DISCOVERY CHECKPOINT
+
+```
+1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
+2. Execute: cat .claude/skills/documentation-style/SKILL.md
+3. Read discovery document: cat .claude/temp/architecture-discovery.md
+4. Proceed with Phase 1+ using discovery data as foundation
+5. TodoWrite: Mark item as completed after CLAUDE.md is generated
+```
+
+---
+
 ## Phase 1: Verificação Inicial
 
 ### Step 1: Check CLAUDE.md
@@ -23,88 +56,97 @@ grep "## Technical Spec" CLAUDE.md 2>/dev/null
 
 **Se CLAUDE.md não existir:** Criar arquivo completo.
 **Se seção Technical Spec não existir:** Adicionar seção.
-**Se existir:** Perguntar se deseja atualizar.
-
-### Step 2: Identify Project Type
-```bash
-ls package.json apps/ libs/ src/ 2>/dev/null
-```
-**Classificar:** Monorepo | SingleApp | Custom
+**Se existir:** Atualizar com dados novos.
 
 ---
 
-## Phase 2: Stack Detection
+## Phase 2: Review Stack Detection Results
 
-### 2.1 Package Manager & Build
-```bash
-ls package-lock.json yarn.lock pnpm-lock.yaml bun.lockb 2>/dev/null
-cat package.json | grep -E '"workspaces"|"turbo"|"nx"'
+**O script já coletou tudo. Revise a seção 2.5 do documento temporário:**
+```
+.claude/temp/architecture-discovery.md → Section 2.5: Stack Detection
 ```
 
-### 2.2 Frameworks & Dependencies
-```bash
-# Backend
-grep -r "@nestjs\|express\|fastify\|hono" package.json */package.json 2>/dev/null
+**O que procurar:**
+- Backend frameworks encontrados
+- Frontend frameworks encontrados
+- Database & ORM
+- Infrastructure services (Redis, Kafka, etc)
 
-# Frontend
-grep -r '"react"\|"vue"\|"@angular/core"\|"next"' package.json */package.json 2>/dev/null
-
-# Database
-grep -r '"kysely"\|"typeorm"\|"drizzle-orm"\|"prisma"\|"knex"' package.json */package.json 2>/dev/null
-
-# Auth
-grep -r '"@supabase/supabase-js"\|"firebase"\|"passport"\|"next-auth"' package.json */package.json 2>/dev/null
-
-# Infra
-grep -r '"bullmq"\|"redis"\|"ioredis"\|"resend"\|"stripe"' package.json */package.json 2>/dev/null
+**Documento no CLAUDE.md:**
+```json
+{"pkg":"[detected]","build":"[detected]","lang":"[detected]"}
+{"backend":{"framework":"[detected]","version":"[detected]"}}
+{"frontend":{"framework":"[detected]","version":"[detected]"}}
+{"database":{"engine":"[detected]","orm":"[detected]"}}
 ```
 
 ---
 
-## Phase 3: Pattern Detection
+## Phase 3: Review Architectural Patterns
 
-```bash
-# CQRS
-find . -type d \( -name "commands" -o -name "queries" \) 2>/dev/null | grep -v node_modules | head -5
+**O script já encontrou tudo. Revise a seção 3 do documento temporário:**
+```
+.claude/temp/architecture-discovery.md → Section 3: Architectural Patterns
+```
 
-# Repository
-find . -type f -iname "*repository*" 2>/dev/null | grep -v node_modules | head -10
+**O que procurar:**
+- CQRS directories (commands, queries)
+- Repository/DAO files
+- Services found
+- DI decorators/patterns
 
-# Services
-find . -type f -name "*.service.ts" 2>/dev/null | grep -v node_modules | head -10
-
-# DI
-grep -rh "^export interface I[A-Z]" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -10
+**Documento no CLAUDE.md:**
+```json
+{"identified":["pattern1","pattern2","pattern3"]}
+{"conventions":{"files":"[detected]","classes":"[detected]"}}
 ```
 
 ---
 
-## Phase 4: Domain Analysis
+## Phase 4: Review Domain Models
 
-```bash
-# Entities
-find . -type f \( -name "*.entity.ts" -o -path "*/entities/*.ts" \) 2>/dev/null | grep -v node_modules
+**O script já listou tudo. Revise a seção 4 do documento temporário:**
+```
+.claude/temp/architecture-discovery.md → Section 4: Domain Models & Entities
+```
 
-# Enums
-find . -type f -path "*/enums/*.ts" 2>/dev/null | grep -v node_modules
+**O que procurar:**
+- Entity/Model files (top 5-10 importantes)
+- Enums encontrados
+- DTOs/Schemas
+- Padrão de naming usado
 
-# DTOs
-find . -type f \( -name "*.dto.ts" -o -path "*/dtos/*.ts" \) 2>/dev/null | grep -v node_modules | head -15
+**Documento no CLAUDE.md:**
+```json
+{"models":["entity1","entity2","entity3"],"location":"[path]"}
+{"enums":["enum1","enum2"],"location":"[path]"}
 ```
 
 ---
 
-## Phase 5: Critical Files
+## Phase 5: Review Infrastructure & Routes
 
-```bash
-# Entry points
-find . -name "main.ts" -o -name "app.ts" 2>/dev/null | grep -v node_modules | head -10
+**O script já mapeou tudo. Revise seções 5 e 5.5 do documento temporário:**
+```
+.claude/temp/architecture-discovery.md → Section 5: Infrastructure & Configuration
+.claude/temp/architecture-discovery.md → Section 5.5: Routes & Endpoints
+```
 
-# Modules
-find . -name "*.module.ts" 2>/dev/null | grep -v node_modules | head -10
+**O que procurar:**
+- Entry points (main.ts, app.py, etc)
+- Configuration files location
+- Controllers/Routes encontrados
+- Global API prefix (if any)
+- Versioning strategy
+- Inconsistencies (if any)
 
-# Workers
-find . -name "*.worker.ts" 2>/dev/null | grep -v node_modules
+**Documento no CLAUDE.md:**
+```json
+{"globalPrefix":"[detected]","prefixLocation":"[path]"}
+{"routes":[{"module":"[name]","prefix":"[prefix]","endpoints":["endpoints"]}]}
+{"consistency":"[all-relative|all-absolute|mixed-note]"}
+{"entryPoints":["path - description"]}
 ```
 
 ---
@@ -124,66 +166,75 @@ find . -name "*.worker.ts" 2>/dev/null | grep -v node_modules
 Se existir `## Technical Spec`, substituir conteúdo até próximo `## `.
 Se não existir, adicionar antes de `## Design Principles` ou no final.
 
-### Formato da Seção Technical Spec
+### Formato da Seção Technical Spec (Template Genérico)
 
 ```markdown
 ## Technical Spec
 
 > Seção otimizada para consumo por IA. Formato token-efficient.
 
-**Generated:** YYYY-MM-DD | **Type:** [Monorepo|SingleApp]
+**Generated:** YYYY-MM-DD | **Type:** [Monorepo|SingleApp|Custom]
 
 ### Stack
-{"pkg":"npm","build":"turbo","ts":"5.0+"}
-{"backend":{"framework":"NestJS 10","db":"PostgreSQL 15","orm":"Kysely 0.27","migrations":"Knex 3.0","auth":"Supabase","queue":"BullMQ 5.0","cache":"Redis 7","email":"Resend 2.0","payments":"Stripe"}}
-{"frontend":{"framework":"React 18.2","bundler":"Vite 4.4","ui":"Shadcn+Tailwind","state":"Zustand 4.4","forms":"RHF+Zod","http":"Axios 1.5"}}
+{"pkg":"[npm|yarn|pnpm|bun|other]","build":"[turbo|nx|gradle|make|other]","lang":"[typescript|python|java|rust|mixed]"}
+{"backend":{"framework":"[NestJS|Express|Django|FastAPI|Rails|Spring|other]","version":"X.Y.Z"}}
+{"frontend":{"framework":"[React|Vue|Angular|Next|other]","version":"X.Y.Z"}}
+{"database":{"engine":"[PostgreSQL|MySQL|MongoDB|SQLite|other]","orm":"[Kysely|Prisma|TypeORM|SQLAlchemy|other]"}}
 
 ### Structure
-{"paths":{"backend":"apps/backend","frontend":"apps/frontend","domain":"libs/domain","database":"libs/app-database","interfaces":"libs/backend","migrations":"libs/app-database/migrations","workers":"apps/backend/src/workers"}}
+{"paths":{"backend":"path/to/backend","frontend":"path/to/frontend","domain":"path/to/domain","database":"path/to/db","etc":"other/key/paths"}}
 
-### Layers
-domain → interfaces → database → api
-- domain: Entities, Enums, Types (zero deps)
-- interfaces: Service contracts (deps: domain)
-- database: Repositories (deps: domain, interfaces)
-- api: Controllers, Services, Handlers (deps: all)
+### Layers (if using layered architecture)
+- Describe: domain → infrastructure → application → api (or actual structure found)
+- List responsibilities of each layer
 
 ### Patterns
-{"identified":["CQRS","Repository","DI","EventDriven","CleanArchitecture"]}
-{"conventions":{"files":"kebab-case","classes":"PascalCase","interfaces":"I+PascalCase","dbColumns":"snake_case","variables":"camelCase"}}
-{"diTokens":{"ILoggerService":"WinstonLoggerService","IEmailService":"ResendEmailService","IConfigurationService":"ConfigurationService","IQueueService":"BullMQQueueAdapter","DATABASE":"Kysely"}}
+{"identified":["CQRS","Repository","DI","EventDriven","Layered","Other patterns found..."]}
+{"conventions":{"files":"[kebab-case|PascalCase|snake_case]","classes":"[PascalCase|snake_case]","functions":"[camelCase|snake_case]"}}
 
 ### Domain
-{"entitiesPath":"libs/domain/src/entities","entities":["Account","User","Workspace","WorkspaceUser","AuditLog","Plan","PlanPrice","Subscription","WebhookEvent"]}
-{"enumsPath":"libs/domain/src/enums","enums":[{"name":"EntityStatus","values":"active|inactive|deleted"},{"name":"UserRole","values":"owner|admin|member"},{"name":"OnboardingStatus","values":"pending|completed"},{"name":"PlanCode","values":"free|pro|enterprise"},{"name":"SubscriptionStatus","values":"active|canceled|past_due"},{"name":"WebhookStatus","values":"pending|processed|failed"},{"name":"WebhookType","values":"stripe|supabase"}]}
-{"dtosPath":"apps/backend/src/api/modules/*/dtos","conventions":{"input":"[Action][Entity]Dto","response":"[Entity]ResponseDto"}}
+{"models":"[list main entities, 5-10 names]","location":"path/where/models/live"}
+{"enums":"[list main enums if applicable]","location":"path/to/enums"}
 
-### Config
-{"envAccess":"IConfigurationService","configFile":"apps/backend/src/shared/services/configuration.service.ts","envExample":".env.example"}
-
-### Security
-{"multiTenancy":{"enabled":true,"strategy":"account_id","filter":"ALWAYS filter by account_id"}}
-{"auth":{"provider":"Supabase","strategy":"JWT","guards":"apps/backend/src/api/guards"}}
+### API Routes
+{"globalPrefix":"[/api|/api/v1|none|other]","prefixLocation":"path/to/where/prefix/is/defined"}
+{"routes":[{"module":"module-name","prefix":"/prefix","endpoints":["GET /","POST /","etc"]}]}
+{"consistency":"[all-relative|all-absolute|mixed-note-inconsistencies]"}
 
 ### Critical Files
-{"backendCore":["apps/backend/src/main.ts - Dispatcher NODE_MODE","apps/backend/src/shared/shared.module.ts - DI central"]}
-{"services":["apps/backend/src/shared/services/configuration.service.ts - Env access","apps/backend/src/shared/services/supabase.service.ts - Auth client"]}
-{"workers":["apps/backend/src/workers/email.worker.ts - Email queue","apps/backend/src/workers/audit.worker.ts - Audit logs","apps/backend/src/workers/stripe-webhook.worker.ts - Stripe events"]}
-{"database":["libs/app-database/src/types/Database.ts - Kysely schema","libs/app-database/src/kysely.ts - DB connection"]}
-{"frontend":["apps/frontend/src/App.tsx - Root component","apps/frontend/src/stores/auth-store.ts - Auth state","apps/frontend/src/lib/api.ts - HTTP client"]}
+{"entryPoints":["path/to/main/file - brief description"]}
+{"config":["path/to/config - brief description"]}
+{"core":["path/to/core/file - brief description"]}
 
-### Business Rules
-- Multi-tenancy: SEMPRE filtrar queries por account_id
-- JWT contém accountId claim injetado pelo Supabase
-- Super Admin: SUPER_ADMIN_EMAIL tem acesso cross-tenant
-- Repositories retornam domain entities, NUNCA DTOs
-- Commands para escrita, Queries direto nos Repositories
-- Event Handlers devem ser idempotentes
+### Business Rules (if any)
+- [Rule 1 - brief]
+- [Rule 2 - brief]
 ```
+
+**Guidelines for filling this template:**
+- Use JSON format (minified, one line per object)
+- Maximum 10 words per description
+- Document what EXISTS, not what "should" exist
+- If a section doesn't apply, skip it
+- Be specific about paths and versions
 
 ---
 
-## Phase 7: Completion
+## Phase 7: Cleanup & Completion
+
+### Step 1: Remove Temporary Discovery Document
+
+```bash
+# Cleanup discovery document
+rm -f .claude/temp/architecture-discovery.md
+```
+
+**Verification:**
+```bash
+ls -la .claude/temp/ 2>/dev/null || echo "✅ Cleanup complete"
+```
+
+### Step 2: Final Report
 
 ```markdown
 ✅ Architecture analysis complete!
@@ -191,13 +242,20 @@ domain → interfaces → database → api
 **Updated:** CLAUDE.md → Section "Technical Spec"
 **Format:** Token-efficient (AI consumption)
 
-**Detected:**
+**Discovered:**
 - Type: [Monorepo|SingleApp]
 - Backend: [framework]
 - Frontend: [framework]
 - Patterns: [list]
+- Controllers: [N] mapped
+- API Prefix: [prefix]
 
-**Next:** Run `/review` to validate code against these patterns.
+**Temporary Files:** Cleaned up ✅
+
+**Next Steps:**
+1. Review CLAUDE.md Technical Spec section
+2. Run `/review` to validate code against these patterns
+3. Run `/feature` to create new features using detected architecture
 ```
 
 ---
@@ -205,16 +263,29 @@ domain → interfaces → database → api
 ## Critical Rules
 
 **DO:**
+- ✅ Executar Phase 0 script PRIMEIRO (automated discovery)
+- ✅ Ler documento temporário em PRE-DISCOVERY CHECKPOINT
+- ✅ Ser agnóstico a framework/linguagem (buscar padrões, não paths fixos)
+- ✅ Adaptar as buscas ao que você encontrar (Django? Python? Express? Rust?)
+- ✅ Mapear TODOS os endpoints/routes (seja qual for o padrão usado)
+- ✅ Validar CONSISTÊNCIA de rotas (se misturadas, documentar)
 - ✅ Atualizar seção dentro do CLAUDE.md (não criar arquivo separado)
-- ✅ JSON minificado em uma linha
+- ✅ JSON minificado em uma linha (format token-efficient)
 - ✅ Máximo 10 palavras por descrição
-- ✅ Documentar o que EXISTE
+- ✅ Documentar o que EXISTE (não o que "deveria" existir)
+- ✅ Cleanup documento temporário ao final
+- ✅ Skip sections that don't apply (not all apps have workers, etc)
 
 **DO NOT:**
-- ❌ Criar technical-spec.md separado
-- ❌ JSON formatado/indentado
+- ❌ Criar technical-spec.md ou arquivos separados
+- ❌ JSON formatado/indentado (minified only)
 - ❌ Blocos de código > 3 linhas
-- ❌ Inventar padrões não encontrados
+- ❌ Inventar padrões não encontrados no código
+- ❌ Deixar documento temporário após execução
+- ❌ Assumir arquitetura específica (NestJS/Django/Rails/etc)
+- ❌ Fixar paths/padrões para um framework único
+- ❌ Ignorar projetos ou partes do codebase (Phase 0 varre TUDO)
+- ❌ Incluir paths hardcoded em instruções (sempre use alternativas genéricas)
 
 ---
 
