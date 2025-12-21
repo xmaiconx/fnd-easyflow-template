@@ -310,58 +310,75 @@ description: "Review feature ${FEATURE_ID}"
 prompt: |
   You are executing the REVIEW phase for feature ${FEATURE_ID}.
 
-  ## PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
-  Execute BEFORE running code-review skill:
+  ## STEP 1: IDENTIFY ALL CHANGED FILES (MANDATORY)
+
+  **FIRST**, run the detection script to get ALL files modified in the branch:
+
+  ```bash
+  bash .claude/scripts/detect-project-state.sh --branch-changes
+  ```
+
+  This returns:
+  - COMMITTED_FILES - Files already committed on the branch
+  - STAGED_FILES - Files ready to commit
+  - UNSTAGED_FILES - Modified but not staged
+  - UNTRACKED_FILES - New files not tracked
+  - FILES_TO_REVIEW - Consolidated list of ALL files to review
+  - CHANGES_BY_AREA - Statistics by directory
+
+  **CRITICAL:** Review ALL files in FILES_TO_REVIEW, not just implementation.md mentions.
+
+  ## STEP 2: PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
+  Execute BEFORE running code-review:
   1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
   2. Execute: cat .claude/skills/documentation-style/SKILL.md
   3. Apply hybrid structure (human-readable + token-efficient) to review.md
   4. TodoWrite: Mark item as completed AFTER writing review.md
 
-  ## Primary Tool: code-review Skill
+  ## STEP 3: Follow review.md Instructions
 
-  You MUST use the `code-review` skill to perform comprehensive review.
+  Execute ALL phases from: .claude/commands/review.md
 
-  **Invoke the skill with:**
-  ```typescript
-  await invokeSkill('code-review', {
-    featureId: '${FEATURE_ID}',
-    mode: 'autopilot',  // auto-fix enabled
-    context: {
-      aboutMd: await readFile('docs/features/${FEATURE_ID}/about.md'),
-      planMd: await readFile('docs/features/${FEATURE_ID}/plan.md'),
-      implementationMd: await readFile('docs/features/${FEATURE_ID}/implementation.md'),
-      technicalSpec: await readFile('docs/architecture/technical-spec.md')  // or CLAUDE.md if not exists
-    }
-  });
-  ```
+  **CRITICAL PHASES:**
+  - Phase 2: Project-Specific Patterns Validation
+  - Phase 3: Architecture & SOLID Analysis
+  - Phase 4: Security Validation
+  - Phase 5: Code Quality Checks
+  - **Phase 5.5: Contract & Runtime Validation** (NEW - MANDATORY)
+    - Validate frontend/backend DTO contracts match
+    - Check for library misuse (Kysely JSONB, Supabase Auth, etc.)
+    - Detect runtime errors (JSON.parse on already-parsed JSONB, etc.)
+  - Phase 6: Apply Fixes (AUTO-CORRECTION)
 
   ## AUTOPILOT OVERRIDES (CRITICAL)
 
-  The skill already handles auto-fix in autopilot mode, but ensure:
-
   1. **NO QUESTIONS:** Do not ask any questions
-     - The skill will proceed with review automatically
+     - Proceed with review automatically
 
   2. **AUTO-FIX ALL ISSUES:**
-     - Pass mode: 'autopilot' to the skill
-     - Skill will fix ALL violations automatically
+     - Fix ALL violations automatically
+     - Contract violations are CRITICAL
+     - Runtime errors are CRITICAL
 
   3. **BUILD MUST PASS:**
-     - After skill completes, verify build passes
+     - After fixes, verify build passes
      - If not, fix remaining issues
 
   ## Context
   - Feature ID: ${FEATURE_ID}
   - Plan: docs/features/${FEATURE_ID}/plan.md
   - Architecture: technical-spec.md or CLAUDE.md
+  - Files to Review: Output from detect-project-state.sh --branch-changes
 
   ## Output
-  The skill creates: docs/features/${FEATURE_ID}/review.md
+  Create: docs/features/${FEATURE_ID}/review.md
+  Following the exact structure from .claude/commands/review.md
 
   ## Report Back
-  - Issues found (count)
+  - Total files reviewed (from script output)
+  - Issues found (count by category)
   - Issues fixed (count)
-  - Final score (from skill output)
+  - Final score (including Contract & Runtime category)
   - Build status (MUST be passing)
 ```
 
@@ -380,8 +397,10 @@ npm run build
 ✅ Phase 4: Code Review concluído
 
 🔍 Review Summary:
+- Arquivos revisados: [N]
 - Issues encontrados: [X]
 - Issues corrigidos: [X]
+- Contract & Runtime issues: [Z]
 - Score final: [Y/10]
 
 Gerando documentação...

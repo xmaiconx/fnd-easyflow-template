@@ -21,41 +21,55 @@ Use subagents when feature has **multiple independent components** or `plan.md` 
 
 ---
 
-## Phase 1: Identify Feature & Load Context
+## Phase 1: Load All Context (SINGLE SCRIPT)
 
-### Step 1: Detect Current Feature
-```bash
-FEATURE_ID=$(bash .claude/scripts/identify-current-feature.sh)
-```
-
-- **Feature identified:** Display and proceed automatically
-- **No feature:** If ONE exists, use it; if MULTIPLE, ask user (only acceptable interruption)
-
-### Step 2: Load Feature Documentation
-```bash
-ls -la "docs/features/${FEATURE_ID}/"
-```
-
-**Load in priority order:**
-1. **plan.md** (if exists) - SOURCE OF TRUTH
-2. **about.md** (ALWAYS)
-3. **discovery.md** (ALWAYS)
-
-**No plan.md?** Proceed with about.md + discovery.md (simple feature mode)
-
-### Step 3: Load Project Architecture Reference
+### Step 1: Run Context Mapper
 
 ```bash
-# Verificar se existe technical-spec.md (fonte primária)
-ls docs/architecture/technical-spec.md 2>/dev/null
+bash .claude/scripts/identify-current-feature.sh
 ```
 
-**Hierarquia de referência:**
-1. **`docs/architecture/technical-spec.md`** (preferencial)
-2. **`CLAUDE.md`** (fallback)
+This script provides ALL context needed:
+- **BRANCH**: Feature ID, branch type, current phase
+- **FEATURE_DOCS**: Which docs exist (HAS_PLAN, HAS_DESIGN, HAS_IMPLEMENTATION)
+- **DESIGN_SYSTEM**: HAS_FOUNDATIONS, FOUNDATIONS_PATH
+- **FRONTEND**: Path, component counts, folder structure
+- **PROJECT_CONTEXT**: ARCHITECTURE_REF (technical-spec.md or CLAUDE.md)
+- **ALL_FEATURES**: FEATURE_COUNT, list if need to choose
 
-- Search for similar modules (API, workers, frontend)
-- Read spec for architecture patterns and conventions
+### Step 2: Parse Key Variables
+
+From the script output:
+- `FEATURE_ID` - If empty and FEATURE_COUNT=1, use that; if multiple, ask user
+- `CURRENT_PHASE` - Should be `discovery_done`, `design_done`, or `planning_done`
+- `HAS_PLAN` - If true, use plan.md as SOURCE OF TRUTH
+- `HAS_DESIGN` - If true, use design.md for UI implementation
+- `HAS_FOUNDATIONS` - If true, use foundations.md for design tokens
+- `ARCHITECTURE_REF` - Path to read for patterns
+
+### Step 3: Load Feature Documentation
+
+```bash
+FEATURE_DIR="docs/features/${FEATURE_ID}"
+
+# Load based on script flags
+cat "${FEATURE_DIR}/plan.md" 2>/dev/null       # If HAS_PLAN=true
+cat "${FEATURE_DIR}/design.md" 2>/dev/null     # If HAS_DESIGN=true
+cat "${FEATURE_DIR}/about.md"                   # ALWAYS
+cat "${FEATURE_DIR}/discovery.md"               # ALWAYS
+cat "${ARCHITECTURE_REF}"                       # From script output
+cat "docs/design-system/foundations.md" 2>/dev/null  # If HAS_FOUNDATIONS=true
+```
+
+**Decision based on script flags:**
+
+| HAS_PLAN | HAS_DESIGN | Mode |
+|----------|------------|------|
+| true | - | Use plan.md as source of truth |
+| false | true | Use design.md + about.md (design-first mode) |
+| false | false | Use about.md + discovery.md (simple feature mode) |
+
+**If HAS_DESIGN=true:** Follow mobile-first layouts, component specs, design tokens
 
 ---
 
@@ -96,6 +110,7 @@ You are implementing the ${AREA} for feature ${FEATURE_ID}.
 ## Context
 - Feature: ${FEATURE_ID}
 - Plan: [paste relevant sections from plan.md]
+- Design: [paste from design.md if frontend AND file exists]
 - Architecture: Follow CLAUDE.md patterns
 
 ## Your Tasks
@@ -103,6 +118,12 @@ ${TASK_LIST}
 
 ## Patterns to Follow
 ${PATTERNS}
+
+## Design System (Frontend only)
+- Read: docs/design-system/foundations.md
+- Mobile-first: Design for 320px, scale UP with min-width
+- Touch targets: 44x44px minimum
+- Input font-size: 16px+ (prevents iOS zoom)
 
 ## Deliverables
 - Report: List of files created/modified
@@ -122,6 +143,7 @@ ${PATTERNS}
 **Backend Tasks:** Module structure, DTOs, Commands, Events, Controller, Service, register in app.module.ts
 **Worker Tasks:** Worker, Processor, queue config, error handling, register in worker.module.ts
 **Frontend Tasks:** Pages, Components, Zustand store, Hooks, mirror DTOs, API integration, forms
+- **If design.md exists:** Follow mobile-first layouts, use design tokens, implement specified states
 
 ### 3.4 Subagent Dispatch
 

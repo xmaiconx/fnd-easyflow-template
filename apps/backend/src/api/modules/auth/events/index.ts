@@ -1,4 +1,9 @@
 export { AccountCreatedEvent } from './AccountCreatedEvent';
-export { ConfirmationEmailResentEvent } from './ConfirmationEmailResentEvent';
+export { LoginSuccessEvent } from './LoginSuccessEvent';
+export { LoginFailureEvent } from './LoginFailureEvent';
+export { PasswordResetRequestedEvent } from './PasswordResetRequestedEvent';
+export { PasswordChangedEvent } from './PasswordChangedEvent';
+export { SessionRevokedEvent } from './SessionRevokedEvent';
+export { VerificationEmailResentEvent } from './VerificationEmailResentEvent';
 
 export * from './handlers';

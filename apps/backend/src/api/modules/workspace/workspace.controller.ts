@@ -11,19 +11,19 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { SupabaseAuthGuard } from '../../guards/supabase-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { WorkspaceFeatureGuard } from '../../guards/workspace-feature.guard';
 import { WorkspaceService } from './workspace.service';
 
 @Controller('workspaces')
-@UseGuards(SupabaseAuthGuard, WorkspaceFeatureGuard)
+@UseGuards(JwtAuthGuard, WorkspaceFeatureGuard)
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createWorkspace(@Body() dto: { accountId: string; name: string; settings?: object }, @Request() req: any) {
-    return await this.workspaceService.createWorkspace(dto, req.user.userId);
+    return await this.workspaceService.createWorkspace(dto, req.user.id);
   }
 
   @Get()
@@ -33,7 +33,7 @@ export class WorkspaceController {
 
   @Get('my')
   async findMyWorkspaces(@Request() req: any) {
-    return await this.workspaceService.findWorkspacesByUser(req.user.userId);
+    return await this.workspaceService.findWorkspacesByUser(req.user.id);
   }
 
   @Get(':id')
@@ -75,7 +75,7 @@ export class WorkspaceController {
         userId: dto.userId,
         role: dto.role,
       },
-      req.user.userId,
+      req.user.id,
     );
   }
 

@@ -370,10 +370,13 @@ When ALL phases are complete and documentation is filled, inform the user based 
 
 **📌 Próximos Passos:**
 
-### Opção 1: Planejamento Técnico (Recomendado para features complexas)
+### Opção 1: Design UX (Recomendado para features com frontend)
+Execute `/design` para criar especificações de layout mobile-first.
+
+### Opção 2: Planejamento Técnico
 Execute `/plan` para criar o plano técnico detalhado.
 
-### Opção 2: Implementação Direta
+### Opção 3: Implementação Direta
 
 **Se quer acompanhar o desenvolvimento:**
 Execute `/dev` - você vai ver o progresso em tempo real.
@@ -383,7 +386,7 @@ Execute `/autopilot` - implementação 100% autônoma sem interrupções.
 
 ---
 
-💡 **Dica:** Para features simples e bem especificadas, `/autopilot` é ideal!
+💡 **Dica:** Para features com UI, use `/design` primeiro para garantir consistência mobile-first!
 ```
 
 ### Worktree Mode (USE_WORKTREE=true)
@@ -406,6 +409,7 @@ Execute `/autopilot` - implementação 100% autônoma sem interrupções.
 ### No novo VSCode:
 1. O Claude Code terá contexto isolado da worktree
 2. Execute os comandos de desenvolvimento lá:
+   - `/design` - para especificação UX mobile-first
    - `/plan` - para planejamento técnico
    - `/dev` - para implementação acompanhada
    - `/autopilot` - para implementação autônoma

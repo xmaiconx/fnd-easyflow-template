@@ -25,26 +25,48 @@ cat docs/founder_profile.md
 
 ---
 
-## Phase 1: Identify Feature & Load Context
+## Phase 1: Load All Context (SINGLE SCRIPT)
 
-### Step 1: Detect Current Feature
+### Step 1: Run Context Mapper
+
 ```bash
-FEATURE_ID=$(bash .claude/scripts/identify-current-feature.sh)
+bash .claude/scripts/identify-current-feature.sh
 ```
 
-- **Feature identified:** Display and proceed automatically
-- **No feature:** If ONE exists, use it; if MULTIPLE, ask user
+This script provides ALL context needed:
+- **BRANCH**: Feature ID, branch type, current phase
+- **FEATURE_DOCS**: Which docs exist (HAS_PLAN, HAS_IMPLEMENTATION, HAS_FIXES)
+- **ALL_FEATURES**: If no feature detected, list to choose from
+- **GIT_STATUS**: Modified/staged files count
+- **PROJECT_CONTEXT**: ARCHITECTURE_REF path
 
-### Step 2: Load Feature Documentation
+### Step 2: Parse Key Variables
+
+From the script output:
+- `FEATURE_ID` - If empty and FEATURE_COUNT=1, use that; if multiple, ask user
+- `FEATURE_DIR` - Path to feature docs
+- `HAS_IMPLEMENTATION` - **CRITICAL: Must be true for fix context**
+- `HAS_FIXES` - If true, append to existing fixes.md
+- `ARCHITECTURE_REF` - Path to patterns reference
+- `FILES` - List of all feature files (includes tests)
+
+### Step 3: Load Feature Documentation
+
 ```bash
-ls -la "docs/features/${FEATURE_ID}/"
+FEATURE_DIR="docs/features/${FEATURE_ID}"
+
+# Load ALL documents for bug context
+cat "${FEATURE_DIR}/about.md"              # Expected behavior
+cat "${FEATURE_DIR}/discovery.md"          # Business rules
+cat "${FEATURE_DIR}/plan.md" 2>/dev/null   # Technical contracts (if HAS_PLAN=true)
+cat "${FEATURE_DIR}/implementation.md"     # CRITICAL: Files created/modified
+cat "${FEATURE_DIR}/fixes.md" 2>/dev/null  # Previous fixes (if HAS_FIXES=true)
+cat "${ARCHITECTURE_REF}"                  # Project patterns
 ```
 
-**Load ALL documents:**
-1. **about.md** - Expected behavior
-2. **discovery.md** - Business rules
-3. **plan.md** - Technical contracts (if exists)
-4. **implementation.md** - **CRITICAL: Files created/modified**
+**Key files for investigation:**
+- `implementation.md` → Lists ALL files to investigate
+- `fixes.md` → Previous bugs/fixes for patterns
 
 ---
 
@@ -85,7 +107,7 @@ Files to investigate (from implementation.md):
 
 ### 3.1 Apply Fix
 
-**Follow project patterns from CLAUDE.md:**
+**Follow project patterns from ARCHITECTURE_REF (from script output):**
 - Fix root cause, not symptom
 - Follow existing code patterns
 - Add defensive checks if needed
@@ -213,6 +235,6 @@ Feature: ${FEATURE_ID}
 **DO:**
 - Investigate autonomously first
 - Fix root cause
-- Follow CLAUDE.md patterns
+- Follow ARCHITECTURE_REF patterns
 - Document with revision history
 - Verify build passes 100%

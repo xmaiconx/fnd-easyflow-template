@@ -8,3 +8,7 @@ export { WebhookEventTable } from './WebhookEventTable';
 export { PlanTable } from './PlanTable';
 export { PlanPriceTable } from './PlanPriceTable';
 export { SubscriptionTable } from './SubscriptionTable';
+export { SessionsTable } from './SessionsTable';
+export { LoginAttemptsTable } from './LoginAttemptsTable';
+export { AuthTokensTable } from './AuthTokensTable';
+export { ImpersonateSessionsTable } from './ImpersonateSessionsTable';

@@ -31,24 +31,43 @@ cat docs/founder_profile.md
 
 ---
 
-## Phase 1: Identify Feature (AUTOMATIC)
+## Phase 1: Load All Context (SINGLE SCRIPT)
 
-### Step 1: Detect Current Feature
+### Step 1: Run Context Mapper
 
 ```bash
-FEATURE_ID=$(bash .claude/scripts/identify-current-feature.sh)
+bash .claude/scripts/identify-current-feature.sh
 ```
 
-**If feature identified:** Display and ask confirmation
-**If no feature:** List available features and ask user
+This script provides ALL context needed:
+- **BRANCH**: Feature ID, branch type, current phase
+- **FEATURE_DOCS**: Which docs exist (HAS_DESIGN, HAS_PLAN, etc.)
+- **DESIGN_SYSTEM**: If foundations.md exists
+- **FRONTEND**: Component structure (for scope detection)
+- **ALL_FEATURES**: List of all features if need to choose
 
-### Step 2: Load Feature Context
+### Step 2: Parse Key Variables
+
+From the script output:
+- `FEATURE_ID` - If empty, list ALL_FEATURES and ask user
+- `CURRENT_PHASE` - Verify it's `discovery_done` or `design_done`
+- `HAS_DESIGN` - If true, use design.md as input for frontend planning
+- `HAS_FOUNDATIONS` - If true, use for design tokens
+
+**If feature identified:** Display and proceed
+**If no feature:** Show FEATURES list from script output and ask user
+
+### Step 3: Load Feature Documentation
 
 ```bash
 FEATURE_DIR="docs/features/${FEATURE_ID}"
 cat "${FEATURE_DIR}/about.md"
 cat "${FEATURE_DIR}/discovery.md"
+cat "${FEATURE_DIR}/design.md" 2>/dev/null  # If HAS_DESIGN=true
+cat "docs/design-system/foundations.md" 2>/dev/null  # If HAS_FOUNDATIONS=true
 ```
+
+**If HAS_DESIGN=true:** Use design.md to inform backend contracts (endpoints serve the UI needs)
 
 ---
 
@@ -249,11 +268,15 @@ You are the FRONTEND SPECIALIST planning for feature ${FEATURE_ID}.
 Read these files:
 - docs/features/${FEATURE_ID}/about.md
 - docs/features/${FEATURE_ID}/discovery.md
+- docs/features/${FEATURE_ID}/design.md (if exists - USE THIS AS PRIMARY SOURCE)
+- docs/design-system/foundations.md (if exists - design tokens and conventions)
 - docs/features/${FEATURE_ID}/.plan-backend.md (if exists, for API contracts)
 - CLAUDE.md (frontend section)
 
 ## Your Task
-Create the frontend planning section. Search the codebase for similar pages/components to use as references.
+Create the frontend planning section.
+**If design.md exists:** Follow its layout specs, component inventory, and mobile-first requirements.
+**If not:** Search the codebase for similar pages/components to use as references.
 
 ## Output Format
 Write to: docs/features/${FEATURE_ID}/.plan-frontend.md

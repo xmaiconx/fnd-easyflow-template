@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { APP_NAME } from '@/lib/constants'
-import { useConfirmEmail } from '@/hooks/use-auth'
+import { useVerifyEmail } from '@/hooks/use-auth'
 
 type ConfirmationState = 'loading' | 'success' | 'error'
 
@@ -13,7 +13,7 @@ export function ConfirmEmailPage() {
   const navigate = useNavigate()
   const [state, setState] = useState<ConfirmationState>('loading')
   const [errorMessage, setErrorMessage] = useState<string>('')
-  const confirmEmailMutation = useConfirmEmail()
+  const verifyEmailMutation = useVerifyEmail()
 
   useEffect(() => {
     const token = searchParams.get('token')
@@ -31,7 +31,7 @@ export function ConfirmEmailPage() {
   const handleConfirmation = async (token: string) => {
     try {
       setState('loading')
-      await confirmEmailMutation.mutateAsync({ token })
+      await verifyEmailMutation.mutateAsync({ token })
       setState('success')
 
       // Redirect to login after 3 seconds
@@ -126,9 +126,9 @@ export function ConfirmEmailPage() {
                     onClick={handleRetryConfirmation}
                     variant="outline"
                     className="w-full"
-                    disabled={confirmEmailMutation.isPending}
+                    disabled={verifyEmailMutation.isPending}
                   >
-                    {confirmEmailMutation.isPending ? 'Tentando novamente...' : 'Tentar Novamente'}
+                    {verifyEmailMutation.isPending ? 'Tentando novamente...' : 'Tentar Novamente'}
                   </Button>
                 )}
 

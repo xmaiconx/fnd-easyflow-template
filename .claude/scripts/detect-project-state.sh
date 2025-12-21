@@ -1,10 +1,26 @@
 #!/bin/bash
 
 # Script para detectar o estado atual do projeto
-# Uso: bash .claude/scripts/detect-project-state.sh
-# Retorna informações completas sobre PRD, features, branch atual, recomendações
+# Uso: bash .claude/scripts/detect-project-state.sh [--branch-changes]
+#
+# Opções:
+#   --branch-changes    Lista TODOS os arquivos modificados na branch atual
+#                       (commits desde divergência + staged + unstaged + untracked)
+#
+# Retorna informações completas sobre Product Blueprint, features, branch atual, recomendações
 
 set -e
+
+# Parse arguments
+SHOW_BRANCH_CHANGES=false
+for arg in "$@"; do
+    case $arg in
+        --branch-changes)
+            SHOW_BRANCH_CHANGES=true
+            shift
+            ;;
+    esac
+done
 
 # Function to count non-empty lines
 count_lines() {
@@ -68,8 +84,8 @@ detect_feature_phase() {
     fi
 }
 
-# Function to check PRD completion
-check_prd_completion() {
+# Function to check Product Blueprint completion
+check_product_completion() {
     local file="$1"
     if [ ! -f "$file" ]; then
         echo "NONE"
@@ -104,14 +120,14 @@ echo "========================================"
 echo "PROJECT STATE"
 echo "========================================"
 
-# 1. PRD Status
-PRD_FILE="docs/prd.md"
-PRD_STATUS=$(check_prd_completion "$PRD_FILE")
+# 1. Product Blueprint Status
+PRODUCT_FILE="docs/product.md"
+PRODUCT_STATUS=$(check_product_completion "$PRODUCT_FILE")
 echo ""
-echo "--- PRD ---"
-echo "PRD_EXISTS: $([ -f "$PRD_FILE" ] && echo "YES" || echo "NO")"
-echo "PRD_STATUS: $PRD_STATUS"
-[ -f "$PRD_FILE" ] && echo "PRD_PATH: $PRD_FILE"
+echo "--- PRODUCT BLUEPRINT ---"
+echo "PRODUCT_EXISTS: $([ -f "$PRODUCT_FILE" ] && echo "YES" || echo "NO")"
+echo "PRODUCT_STATUS: $PRODUCT_STATUS"
+[ -f "$PRODUCT_FILE" ] && echo "PRODUCT_PATH: $PRODUCT_FILE"
 
 # 2. Founder Profile Status
 PROFILE_STATUS=$(check_founder_profile)
@@ -228,7 +244,181 @@ if [ -n "$RECENT_COMMITS" ]; then
     echo "$RECENT_COMMITS" | sed 's/^/  /'
 fi
 
-# 7. Recommendations based on state
+# 7. Branch Changes (when --branch-changes flag is passed)
+if [ "$SHOW_BRANCH_CHANGES" = true ]; then
+    echo ""
+    echo "========================================"
+    echo "BRANCH CHANGES DETAIL"
+    echo "========================================"
+
+    # Find merge base with main branch
+    MERGE_BASE=$(git merge-base "$CURRENT_BRANCH" "$MAIN_BRANCH" 2>/dev/null || echo "")
+
+    if [ -n "$MERGE_BASE" ] && [ "$CURRENT_BRANCH" != "$MAIN_BRANCH" ] && [ "$CURRENT_BRANCH" != "master" ]; then
+        echo ""
+        echo "--- COMMITTED CHANGES (since divergence from $MAIN_BRANCH) ---"
+        echo "MERGE_BASE: $MERGE_BASE"
+
+        # Files added/modified/deleted in commits since divergence
+        COMMITTED_FILES=$(git diff --name-status "$MERGE_BASE"..HEAD 2>/dev/null || echo "")
+        if [ -n "$COMMITTED_FILES" ]; then
+            echo "COMMITTED_FILES:"
+            echo "$COMMITTED_FILES" | while read status file; do
+                case $status in
+                    A) echo "  [ADDED]    $file" ;;
+                    M) echo "  [MODIFIED] $file" ;;
+                    D) echo "  [DELETED]  $file" ;;
+                    R*) echo "  [RENAMED]  $file" ;;
+                    C*) echo "  [COPIED]   $file" ;;
+                    *) echo "  [$status]  $file" ;;
+                esac
+            done
+
+            # Count by status
+            COMMITTED_ADDED=$(echo "$COMMITTED_FILES" | grep -c "^A" || echo "0")
+            COMMITTED_MODIFIED=$(echo "$COMMITTED_FILES" | grep -c "^M" || echo "0")
+            COMMITTED_DELETED=$(echo "$COMMITTED_FILES" | grep -c "^D" || echo "0")
+            echo ""
+            echo "COMMITTED_SUMMARY: +$COMMITTED_ADDED ~$COMMITTED_MODIFIED -$COMMITTED_DELETED"
+        else
+            echo "COMMITTED_FILES: (none)"
+        fi
+
+        # Commits on this branch
+        echo ""
+        echo "--- COMMITS ON BRANCH ---"
+        BRANCH_COMMITS=$(git log --oneline "$MERGE_BASE"..HEAD 2>/dev/null || echo "")
+        if [ -n "$BRANCH_COMMITS" ]; then
+            COMMIT_COUNT=$(echo "$BRANCH_COMMITS" | wc -l | tr -d ' ')
+            echo "COMMIT_COUNT: $COMMIT_COUNT"
+            echo "COMMITS:"
+            echo "$BRANCH_COMMITS" | sed 's/^/  /'
+        else
+            echo "COMMIT_COUNT: 0"
+        fi
+    else
+        echo ""
+        echo "--- COMMITTED CHANGES ---"
+        echo "(On main branch or no divergence point found)"
+    fi
+
+    # Staged changes (ready to commit)
+    echo ""
+    echo "--- STAGED CHANGES (ready to commit) ---"
+    STAGED_FILES=$(git diff --cached --name-status 2>/dev/null || echo "")
+    if [ -n "$STAGED_FILES" ]; then
+        echo "STAGED_FILES:"
+        echo "$STAGED_FILES" | while read status file; do
+            case $status in
+                A) echo "  [ADDED]    $file" ;;
+                M) echo "  [MODIFIED] $file" ;;
+                D) echo "  [DELETED]  $file" ;;
+                R*) echo "  [RENAMED]  $file" ;;
+                *) echo "  [$status]  $file" ;;
+            esac
+        done
+    else
+        echo "STAGED_FILES: (none)"
+    fi
+
+    # Unstaged changes (modified but not staged)
+    echo ""
+    echo "--- UNSTAGED CHANGES (modified, not staged) ---"
+    UNSTAGED_FILES=$(git diff --name-status 2>/dev/null || echo "")
+    if [ -n "$UNSTAGED_FILES" ]; then
+        echo "UNSTAGED_FILES:"
+        echo "$UNSTAGED_FILES" | while read status file; do
+            case $status in
+                M) echo "  [MODIFIED] $file" ;;
+                D) echo "  [DELETED]  $file" ;;
+                *) echo "  [$status]  $file" ;;
+            esac
+        done
+    else
+        echo "UNSTAGED_FILES: (none)"
+    fi
+
+    # Untracked files
+    echo ""
+    echo "--- UNTRACKED FILES (new, not added to git) ---"
+    UNTRACKED_FILES=$(git ls-files --others --exclude-standard 2>/dev/null || echo "")
+    if [ -n "$UNTRACKED_FILES" ]; then
+        echo "UNTRACKED_FILES:"
+        echo "$UNTRACKED_FILES" | while read file; do
+            echo "  [NEW]      $file"
+        done
+    else
+        echo "UNTRACKED_FILES: (none)"
+    fi
+
+    # Combined summary for review
+    echo ""
+    echo "--- ALL CHANGES SUMMARY ---"
+
+    # Get unique list of all changed files (for review purposes)
+    ALL_CHANGED_FILES=""
+
+    # Add committed files
+    if [ -n "$COMMITTED_FILES" ]; then
+        ALL_CHANGED_FILES="$COMMITTED_FILES"
+    fi
+
+    # Create a comprehensive list excluding deleted files (only files that exist now)
+    echo "FILES_TO_REVIEW:"
+
+    # Committed files (exclude deleted)
+    if [ -n "$COMMITTED_FILES" ]; then
+        echo "$COMMITTED_FILES" | grep -v "^D" | while read status file; do
+            if [ -f "$file" ]; then
+                echo "  $file"
+            fi
+        done
+    fi
+
+    # Staged files (exclude deleted)
+    if [ -n "$STAGED_FILES" ]; then
+        echo "$STAGED_FILES" | grep -v "^D" | while read status file; do
+            if [ -f "$file" ]; then
+                echo "  $file"
+            fi
+        done
+    fi
+
+    # Unstaged files (exclude deleted)
+    if [ -n "$UNSTAGED_FILES" ]; then
+        echo "$UNSTAGED_FILES" | grep -v "^D" | while read status file; do
+            if [ -f "$file" ]; then
+                echo "  $file"
+            fi
+        done
+    fi
+
+    # Untracked files
+    if [ -n "$UNTRACKED_FILES" ]; then
+        echo "$UNTRACKED_FILES" | while read file; do
+            if [ -f "$file" ]; then
+                echo "  $file"
+            fi
+        done
+    fi
+
+    echo ""
+    echo "--- FILE STATISTICS ---"
+
+    # Count TypeScript files
+    TS_FILES=$(git diff --name-only "$MERGE_BASE"..HEAD 2>/dev/null | grep -E "\.tsx?$" | wc -l | tr -d ' ' || echo "0")
+    echo "TYPESCRIPT_FILES_CHANGED: $TS_FILES"
+
+    # Count by directory
+    echo "CHANGES_BY_AREA:"
+    git diff --name-only "$MERGE_BASE"..HEAD 2>/dev/null | while read file; do
+        echo "$file" | cut -d'/' -f1-2
+    done | sort | uniq -c | sort -rn | head -10 | while read count path; do
+        echo "  $path: $count files"
+    done
+fi
+
+# 8. Recommendations based on state
 echo ""
 echo "========================================"
 echo "RECOMMENDATIONS"
@@ -236,11 +426,11 @@ echo "========================================"
 
 RECOMMENDATIONS=()
 
-# PRD recommendations
-if [ "$PRD_STATUS" == "NONE" ]; then
-    RECOMMENDATIONS+=("CREATE_PRD: Run /prd to create Product Requirements Document")
-elif [ "$PRD_STATUS" == "TEMPLATE" ]; then
-    RECOMMENDATIONS+=("FILL_PRD: PRD exists but needs to be filled with product details")
+# Product Blueprint recommendations
+if [ "$PRODUCT_STATUS" == "NONE" ]; then
+    RECOMMENDATIONS+=("CREATE_PRODUCT: Run /product to create Product Blueprint")
+elif [ "$PRODUCT_STATUS" == "TEMPLATE" ]; then
+    RECOMMENDATIONS+=("FILL_PRODUCT: Product Blueprint exists but needs to be filled with product details")
 fi
 
 # Profile recommendations
@@ -301,9 +491,9 @@ fi
 echo ""
 echo "--- SUGGESTED COMMAND ---"
 
-if [ "$PRD_STATUS" == "NONE" ]; then
-    echo "NEXT_COMMAND: /prd"
-    echo "REASON: No PRD found. Start by defining your product."
+if [ "$PRODUCT_STATUS" == "NONE" ]; then
+    echo "NEXT_COMMAND: /product"
+    echo "REASON: No Product Blueprint found. Start by defining your product."
 elif [ "$BRANCH_TYPE" == "main" ]; then
     echo "NEXT_COMMAND: /feature"
     echo "REASON: Create or select a feature to work on."

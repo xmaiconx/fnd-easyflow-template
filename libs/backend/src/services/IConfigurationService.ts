@@ -9,11 +9,8 @@ export interface IConfigurationService {
   isSuperAdminEmail(email: string): boolean;
   getFeatureFlags(): IFeatureFlags;
 
-  // Supabase Auth configuration
-  getSupabaseUrl(): string;
-  getSupabasePublishableKey(): string;
-  getSupabaseSecretKey(): string;
-  getSupabaseWebhookSecret(): string;
+  // JWT configuration
+  getJwtSecret(): string;
 
   // Stripe configuration
   getStripeSecretKey(): string;
@@ -26,4 +23,7 @@ export interface IConfigurationService {
 
   // Node mode configuration
   getNodeMode(): 'api' | 'workers' | 'hybrid';
+
+  // Environment detection
+  isTestEnvironment(): boolean;
 }

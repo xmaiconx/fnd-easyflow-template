@@ -7,12 +7,12 @@ import {
   Request,
   NotFoundException,
 } from '@nestjs/common';
-import { SupabaseAuthGuard } from '../../guards/supabase-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { AuditService } from './audit.service';
 import { QueryAuditLogsDto } from './dtos';
 
 @Controller('audit-logs')
-@UseGuards(SupabaseAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 

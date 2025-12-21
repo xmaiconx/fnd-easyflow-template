@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import Redis from 'ioredis';
-import { IQueueService, QueueOptions, ILoggerService } from '@fnd/backend';
+import { IQueueService, QueueOptions, ILoggerService, IJobQueue, JobOptions } from '@fnd/backend';
 import { REDIS_CONNECTION } from '../providers/redis.provider';
 
 /**
- * BullMQ implementation of IQueueService
+ * BullMQ implementation of IQueueService and IJobQueue
  * Routes tasks to appropriate BullMQ queues based on taskName
  *
  * Supported queues:
@@ -14,7 +14,7 @@ import { REDIS_CONNECTION } from '../providers/redis.provider';
  * - stripe-webhook: Stripe webhook processing tasks
  */
 @Injectable()
-export class BullMQQueueAdapter implements IQueueService {
+export class BullMQQueueAdapter implements IQueueService, IJobQueue {
   private readonly queues: Map<string, Queue> = new Map();
 
   constructor(
@@ -211,6 +211,28 @@ export class BullMQQueueAdapter implements IQueueService {
       );
       throw error;
     }
+  }
+
+  /**
+   * IJobQueue.add implementation
+   * Alias for enqueue to support legacy interface
+   */
+  async add(jobName: string, data: any, options?: JobOptions): Promise<void> {
+    await this.enqueue(jobName, data, {
+      retries: options?.attempts,
+    });
+  }
+
+  /**
+   * IJobQueue.process implementation
+   * Note: This is a no-op in API mode. Workers should be started separately.
+   */
+  async process(jobName: string, handler: (data: any) => Promise<void>): Promise<void> {
+    this.logger.warn(`process() called in API mode - this is a no-op. Start workers separately.`, {
+      operation: 'bullmq.queue.process.noop',
+      jobName,
+    });
+    // No-op: Workers should be started separately
   }
 
   /**

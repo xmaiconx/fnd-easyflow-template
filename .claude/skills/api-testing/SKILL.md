@@ -1,39 +1,45 @@
 # API Testing Skill
 
-> **Trigger:** Use this skill after `/dev` completes to generate httpyac test files for the implemented API endpoints. Also use when user asks to create API tests, generate test files, or test backend endpoints.
+> **Trigger:** Use this skill after `/dev` completes to generate Hurl test files for the implemented API endpoints. Also use when user asks to create API tests, generate test files, or test backend endpoints.
 
 ## Purpose
 
-Generate comprehensive [httpyac](https://httpyac.github.io/) test files (`.http`) for API endpoints based on the feature implementation. This skill analyzes the implemented code and creates executable test scripts.
+Generate comprehensive [Hurl](https://hurl.dev/) test files (`.hurl`) for API endpoints based on the feature implementation. This skill analyzes the implemented code and creates executable test scripts.
 
-**Why httpyac?**
-- npm-based (`npm install httpyac`) - auto-installable
-- Uses `.http` format (VS Code REST Client compatible)
-- JavaScript assertions (familiar to devs)
-- VS Code extension for debugging
+**Why Hurl?**
+- npm-based (`npm install @orangeopensource/hurl`) - auto-installable
+- Built specifically for API testing (not adapted from HTTP client)
+- **Super readable** - empreendedores não-devs conseguem entender facilmente
+- **Variables work natively** across requests (no workarounds needed)
+- Excellent error messages with line numbers
+- Multiple output formats (HTML, JUnit, TAP)
+- Fast execution (Rust-based binary)
 
 ---
 
-## Phase 0: Ensure httpyac is installed
+## Phase 0: Ensure Hurl is installed
 
-### Step 1: Check/Install httpyac
+### Step 1: Check/Install Hurl
 
 ```bash
-# Check if httpyac exists in devDependencies
-grep -q '"httpyac"' package.json || npm install httpyac --save-dev
+# Check if Hurl exists in devDependencies
+grep -q '"@orangeopensource/hurl"' package.json || npm install @orangeopensource/hurl --save-dev
 ```
 
-### Step 2: Add npm script (if not exists)
+### Step 2: Verify npm scripts exist
 
-Check `package.json` and add if missing:
+Scripts já existem no template. Se faltarem, adicionar:
 
 ```json
 {
   "scripts": {
-    "test:api": "httpyac send docs/features/*/tests/api/*.http --all -e local"
+    "test:infra:start": "node .claude/scripts/start-test-infra.js",
+    "test:infra:stop": "node .claude/scripts/stop-test-infra.js"
   }
 }
 ```
+
+**Execução via /test-api:** O comando `/test-api` usa os scripts em `.claude/scripts/` para levantar infra isolada (porta 5433/6380) e executar testes interativamente.
 
 ---
 
@@ -72,34 +78,25 @@ For each controller, extract:
 mkdir -p "docs/features/${FEATURE_ID}/tests/api"
 ```
 
-### Step 2: Generate Environment File
+### Step 2: NO environment file needed
 
-Create `tests/api/http-client.env.json`:
+**Important:** Hurl uses variables passed via CLI, not environment files.
+O script `.claude/scripts/run-single-hurl.js` injeta automaticamente as variáveis.
 
-```json
-{
-  "local": {
-    "API_URL": "http://localhost:3001/api/v1",
-    "TEST_EMAIL": "test@example.com",
-    "TEST_PASSWORD": "TestPassword123!"
-  },
-  "staging": {
-    "API_URL": "https://staging-api.example.com/api/v1",
-    "TEST_EMAIL": "test@example.com",
-    "TEST_PASSWORD": "TestPassword123!"
-  }
-}
-```
+### Step 3: Generate Hurl Test Files
 
-### Step 3: Generate httpyac Test Files
+**File naming convention:** `[NN]-[endpoint-group].hurl`
+- `00-setup.hurl` - Authentication and setup
+- `01-[module]-crud.hurl` - CRUD operations
+- `02-[module]-validation.hurl` - Validation tests
+- `03-[module]-edge-cases.hurl` - Edge cases
 
-Read `.claude/skills/api-testing/httpyac-patterns.md` for patterns.
-
-**File naming convention:** `[NN]-[endpoint-group].http`
-- `00-setup.http` - Authentication and setup
-- `01-[module]-crud.http` - CRUD operations
-- `02-[module]-validation.http` - Validation tests
-- `03-[module]-edge-cases.http` - Edge cases
+**Key differences from httpyac:**
+- Extension: `.hurl` (not `.http`)
+- No `@name` needed - use `[Captures]` directly
+- No `###` separator - use blank lines
+- Assertions use `[Asserts]` block instead of `??`
+- No JavaScript blocks - use filters instead
 
 ### Step 4: Generate Test Plan
 
@@ -137,11 +134,11 @@ Create `tests/api/test-plan.md`:
 
 ## Phase 3: Worker Testing (If Applicable)
 
-If the feature includes workers, read `.claude/skills/api-testing/worker-testing-guide.md` and:
+If the feature includes workers:
 
 1. Identify which endpoints trigger worker jobs
-2. Add delay and verification steps using `{{$sleep 3000}}`
-3. Include Redis queue checks if admin endpoint exists
+2. Note: Hurl doesn't have `$sleep` - tests must verify job completion differently
+3. Consider separate verification requests after async operations
 
 ---
 
@@ -149,11 +146,11 @@ If the feature includes workers, read `.claude/skills/api-testing/worker-testing
 
 ### Checklist Before Completion
 
-- [ ] httpyac installed as devDependency
-- [ ] npm script `test:api` added
+- [ ] Hurl installed as devDependency (`@orangeopensource/hurl`)
+- [ ] npm script `test:api:e2e` exists
 - [ ] All endpoints from implementation.md have tests
-- [ ] Authentication flow is tested first (00-setup.http)
-- [ ] Environment file has all required variables
+- [ ] **Test files named with numeric prefix (00-, 01-, 02-) for correct execution order**
+- [ ] Authentication flow is tested first (00-setup.hurl)
 - [ ] Test plan documents all scenarios
 - [ ] Edge cases are covered
 - [ ] Worker jobs have verification (if applicable)
@@ -165,13 +162,22 @@ If the feature includes workers, read `.claude/skills/api-testing/worker-testing
 ```
 docs/features/FXXXX-feature/tests/
 ├── api/
-│   ├── http-client.env.json    # Environment variables
-│   ├── 00-setup.http           # Auth + setup
-│   ├── 01-[module]-crud.http   # Main CRUD tests
-│   ├── 02-[module]-edge.http   # Edge cases
-│   └── test-plan.md            # Test documentation
-└── test-report.md              # Generated after execution
+│   ├── 00-setup.hurl                  # Auth + setup (runs first)
+│   ├── 01-[module]-crud.hurl          # Main CRUD tests
+│   ├── 02-[module]-edge.hurl          # Edge cases
+│   ├── test-plan.md                   # Test documentation
+│   └── README.md                      # Quick start guide
+└── test-results-[timestamp].md        # Generated by /test-api
 ```
+
+**How test execution works (via /test-api):**
+1. O agente levanta a infra: `node .claude/scripts/start-test-infra.js`
+2. Sobe o backend em background (porta 3099)
+3. Executa cada teste individualmente: `node .claude/scripts/run-single-hurl.js <feature-id> <file.hurl>`
+4. Cada teste salva output em `<file>-result.txt` para diagnóstico
+5. Ao final, limpa a infra: `node .claude/scripts/stop-test-infra.js`
+
+**Nota sobre test-results:** O arquivo `test-results-[YYYYMMDD-HHMMSS].md` é gerado automaticamente pelo comando `/test-api`. Segue formato híbrido (human-readable + token-efficient) para integração com `/fix`.
 
 ---
 
@@ -179,28 +185,124 @@ docs/features/FXXXX-feature/tests/
 
 When called from `/dev` or `/autopilot`:
 
-1. Ensure httpyac is installed (`npm install httpyac -D`)
-2. Add npm script if not exists
+1. Ensure Hurl is installed (`npm install @orangeopensource/hurl -D`)
+2. Verify npm scripts exist
 3. Automatically detect implemented endpoints
-4. Generate all test files
-5. Report: "Testes httpyac gerados em `docs/features/FXXXX/tests/api/`"
-6. Suggest: "Execute `npm run test:api` ou `/test-api` para rodar os testes"
+4. Generate all test files in `.hurl` format
+5. Report: "Testes Hurl gerados em `docs/features/FXXXX/tests/api/`"
+6. Suggest: "Execute `/test-api` para rodar os testes em ambiente isolado"
+
+---
+
+## Integration with /test-api
+
+O comando `/test-api` executa testes de forma **interativa**:
+
+1. Levanta infra isolada (Docker + PostgreSQL:5433 + Redis:6380)
+2. Sobe backend em background (porta 3099)
+3. Executa cada teste individualmente, vendo output completo
+4. Salva output de cada teste em `<arquivo>-result.txt`
+5. Se erro de **infraestrutura** → auto-corrige e reinicia
+6. Se erro de **funcionalidade** → documenta em `test-results-[timestamp].md`
+7. Limpa infra ao final
+
+**Scripts usados:**
+- `.claude/scripts/start-test-infra.js` - Levanta Docker + migrations + seed
+- `.claude/scripts/run-single-hurl.js` - Executa um teste, salva output
+- `.claude/scripts/stop-test-infra.js` - Para e remove containers
+
+**Fluxo recomendado:**
+```
+/dev → gera código + testes
+/test-api → executa testes interativamente, documenta resultados
+/fix → corrige falhas baseado no test-results e arquivos -result.txt
+```
 
 ---
 
 ## Critical Rules
 
 **DO:**
-- Ensure httpyac is installed before generating tests
+- Ensure Hurl is installed before generating tests
+- **ALWAYS use numeric prefix for test files (00-, 01-, 02-) to control execution order**
+- Put authentication/setup in `00-setup.hurl` to run first
 - Generate tests based on ACTUAL implementation (read the code)
 - Include both success and error scenarios
 - Use meaningful assertions (status codes, response structure)
 - Document what each test validates
-- Use `.http` extension (VS Code compatible)
+- Use `.hurl` extension (not `.http`)
+- Use `[Captures]` for variables, `[Asserts]` for validations
 
 **DO NOT:**
 - Generate tests for endpoints that don't exist
 - Skip authentication in protected endpoints
-- Hardcode sensitive data (use environment variables)
+- Hardcode sensitive data (use variables passed via CLI)
 - Forget to test validation rules from about.md
-- Use `.hurl` extension (we use httpyac, not Hurl)
+- Use `.http` extension (we use Hurl, not httpyac)
+- Name test files without numeric prefix (script won't find them)
+- Create files starting with `_` (reserved for temporary files)
+- Use JavaScript blocks (Hurl doesn't support - use filters instead)
+- Use `@name` or `###` separators (httpyac syntax - not needed in Hurl)
+
+---
+
+## Example: Simple Auth Test
+
+```hurl
+# ===========================================
+# Feature: F0001 - Internal Auth
+# File: 00-setup.hurl
+# ===========================================
+
+# Health check
+GET {{API_URL}}/
+HTTP 200
+[Asserts]
+jsonpath "$.status" == "healthy"
+
+# Super Admin Login
+POST {{API_URL}}/auth/signin
+Content-Type: application/json
+{
+  "email": "{{SUPER_ADMIN_EMAIL}}",
+  "password": "{{SUPER_ADMIN_PASSWORD}}"
+}
+
+HTTP 200
+[Captures]
+superAdminToken: jsonpath "$.accessToken"
+superAdminUserId: jsonpath "$.user.id"
+
+[Asserts]
+jsonpath "$.accessToken" exists
+jsonpath "$.user.email" == "{{SUPER_ADMIN_EMAIL}}"
+
+# Get current user
+GET {{API_URL}}/auth/me
+Authorization: Bearer {{superAdminToken}}
+
+HTTP 200
+[Asserts]
+jsonpath "$.id" == "{{superAdminUserId}}"
+```
+
+---
+
+## Migration Guide: httpyac → Hurl
+
+| httpyac | Hurl |
+|---------|------|
+| `### Request name`<br>`# @name foo` | `# Request name`<br>(no @name needed) |
+| `###`<br>(separator) | (blank line) |
+| `@token = {{foo.token}}` | `[Captures]`<br>`token: jsonpath "$.token"` |
+| `?? status == 200` | `HTTP 200` |
+| `?? body.name == "value"` | `[Asserts]`<br>`jsonpath "$.name" == "value"` |
+| `?? body.field exists` | `jsonpath "$.field" exists` |
+| `?? body.msg includes "text"` | `jsonpath "$.msg" contains "text"` |
+| `?? body.items length == 5` | `jsonpath "$.items" count == 5` |
+| `{{ require('httpyac') }}` | ❌ (use filters instead) |
+
+---
+
+**Created:** 2025-12-19
+**Status:** Active - Hurl-based testing

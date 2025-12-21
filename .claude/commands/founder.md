@@ -186,7 +186,7 @@ Based on identified level, show appropriate message:
 
 ---
 
-**📌 Próximo passo:** Use `/prd` para começar a documentar sua ideia de produto!
+**📌 Próximo passo:** Use `/product` para começar a documentar sua ideia de produto!
 ```
 
 **For INTERMEDIÁRIO:**
@@ -206,7 +206,7 @@ Based on identified level, show appropriate message:
 
 ---
 
-**📌 Próximo passo:** Use `/prd` para começar a documentar sua ideia de produto!
+**📌 Próximo passo:** Use `/product` para começar a documentar sua ideia de produto!
 ```
 
 **For TÉCNICO:**
@@ -226,7 +226,7 @@ Based on identified level, show appropriate message:
 
 ---
 
-**📌 Próximo passo:** Use `/prd` para começar a documentar sua ideia de produto!
+**📌 Próximo passo:** Use `/product` para começar a documentar sua ideia de produto!
 ```
 
 ---

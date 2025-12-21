@@ -11,7 +11,7 @@ export const signInSchema = z.object({
 })
 
 export const signUpSchema = z.object({
-  fullName: z
+  name: z
     .string()
     .min(2, 'Nome deve ter pelo menos 2 caracteres')
     .max(100, 'Nome deve ter no máximo 100 caracteres'),
@@ -23,10 +23,34 @@ export const signUpSchema = z.object({
     .string()
     .min(6, 'Senha deve ter pelo menos 6 caracteres')
     .max(100, 'Senha deve ter no máximo 100 caracteres'),
+  workspaceName: z
+    .string()
+    .min(2, 'Nome do workspace deve ter pelo menos 2 caracteres')
+    .max(100, 'Nome do workspace deve ter no máximo 100 caracteres'),
   confirmPassword: z
     .string()
     .min(1, 'Confirmação de senha é obrigatória'),
 }).refine((data) => data.password === data.confirmPassword, {
+  message: 'Senhas não coincidem',
+  path: ['confirmPassword'],
+})
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email é obrigatório')
+    .email('Email deve ser válido'),
+})
+
+export const resetPasswordSchema = z.object({
+  newPassword: z
+    .string()
+    .min(6, 'Senha deve ter pelo menos 6 caracteres')
+    .max(100, 'Senha deve ter no máximo 100 caracteres'),
+  confirmPassword: z
+    .string()
+    .min(1, 'Confirmação de senha é obrigatória'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
   message: 'Senhas não coincidem',
   path: ['confirmPassword'],
 })
@@ -44,5 +68,7 @@ export const resendConfirmationSchema = z.object({
 
 export type SignInInput = z.infer<typeof signInSchema>
 export type SignUpInput = z.infer<typeof signUpSchema>
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 export type ConfirmEmailInput = z.infer<typeof confirmEmailSchema>
 export type ResendConfirmationInput = z.infer<typeof resendConfirmationSchema>

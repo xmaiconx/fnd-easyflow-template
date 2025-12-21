@@ -16,7 +16,10 @@ export class EmailQueueService implements IEmailQueueService {
       recipientEmail: command.to,
     });
 
-    await this.jobQueue.add(QUEUE_COMMANDS.SEND_EMAIL, command);
+    await this.jobQueue.add(QUEUE_COMMANDS.SEND_EMAIL, {
+      type: 'SEND_EMAIL',
+      ...command,
+    });
   }
 
   async sendEmailTemplateAsync(command: SendEmailTemplateCommand): Promise<void> {
@@ -27,6 +30,9 @@ export class EmailQueueService implements IEmailQueueService {
       templateId: command.templateId,
     });
 
-    await this.jobQueue.add(QUEUE_COMMANDS.SEND_EMAIL_TEMPLATE, command);
+    await this.jobQueue.add(QUEUE_COMMANDS.SEND_EMAIL_TEMPLATE, {
+      type: 'SEND_EMAIL_TEMPLATE',
+      ...command,
+    });
   }
 }

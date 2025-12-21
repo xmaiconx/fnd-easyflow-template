@@ -17,8 +17,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Update user data when /me query succeeds
   useEffect(() => {
-    if (meData?.user && token) {
-      useAuthStore.getState().setAuth(meData.user, token)
+    if (meData && token) {
+      const refreshToken = useAuthStore.getState().refreshToken
+      if (refreshToken) {
+        useAuthStore.getState().setAuth(meData, token, refreshToken)
+      }
     }
   }, [meData, token])
 

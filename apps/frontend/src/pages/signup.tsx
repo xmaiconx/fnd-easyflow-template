@@ -3,38 +3,33 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormField, LoadingButton } from '@/components/forms'
-import { useSupabaseAuth } from '@/hooks/use-supabase-auth'
-import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
+import { useSignUp } from '@/hooks/use-auth'
 import { signUpSchema, type SignUpInput } from '@/lib/validations'
 import { APP_NAME } from '@/lib/constants'
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 export function SignUpPage() {
   const navigate = useNavigate()
-  const { signUp } = useSupabaseAuth()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const signUp = useSignUp()
 
   const form = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      fullName: '',
+      name: '',
       email: '',
       password: '',
+      workspaceName: '',
       confirmPassword: '',
     },
   })
 
   const onSubmit = async (data: SignUpInput) => {
     try {
-      setIsSubmitting(true)
-      await signUp({
-        email: data.email,
-        password: data.password,
-        fullName: data.fullName,
-      })
+      // Remove confirmPassword before sending to backend
+      const { confirmPassword, ...signUpData } = data
+      await signUp.mutateAsync(signUpData)
       toast.success('Conta criada com sucesso!')
 
       // Redirect to signup success page
@@ -47,13 +42,12 @@ export function SignUpPage() {
       console.error('Signup error:', error)
       const message = error.message || 'Erro ao criar conta'
 
-      if (message.includes('already registered')) {
+      if (message.toLowerCase().includes('já existe') ||
+          message.toLowerCase().includes('already')) {
         toast.error('Este email já está cadastrado')
       } else {
         toast.error(message)
       }
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -77,7 +71,7 @@ export function SignUpPage() {
           <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
               <FormField
-                name="fullName"
+                name="name"
                 label="Nome completo"
                 type="text"
                 placeholder="Seu nome completo"
@@ -90,6 +84,14 @@ export function SignUpPage() {
                 type="email"
                 placeholder="seu@email.com"
                 autoComplete="email"
+              />
+
+              <FormField
+                name="workspaceName"
+                label="Nome do Workspace"
+                type="text"
+                placeholder="Nome da sua empresa ou projeto"
+                autoComplete="organization"
               />
 
               <FormField
@@ -112,24 +114,11 @@ export function SignUpPage() {
               <LoadingButton
                 type="submit"
                 className="w-full"
-                loading={isSubmitting}
+                loading={signUp.isPending}
                 loadingText="Criando conta..."
               >
                 Criar Conta
               </LoadingButton>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Ou continue com
-                  </span>
-                </div>
-              </div>
-
-              <GoogleSignInButton fullWidth disabled={isSubmitting} />
             </form>
           </FormProvider>
         </CardContent>

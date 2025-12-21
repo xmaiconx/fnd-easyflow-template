@@ -7,3 +7,7 @@ export { WebhookEvent } from './WebhookEvent';
 export { Plan } from './Plan';
 export { PlanPrice } from './PlanPrice';
 export { Subscription } from './Subscription';
+export { Session } from './Session';
+export { LoginAttempt } from './LoginAttempt';
+export { AuthToken } from './AuthToken';
+export { ImpersonateSession } from './ImpersonateSession';

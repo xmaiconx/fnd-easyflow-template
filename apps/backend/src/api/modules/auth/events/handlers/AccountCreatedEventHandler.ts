@@ -16,35 +16,31 @@ export class AccountCreatedEventHandler implements IEventHandler<AccountCreatedE
     this.logger.info('Processing AccountCreatedEvent', {
       operation: 'auth.account_created.start',
       module: 'AccountCreatedEventHandler',
-      accountId: event.accountId,
       userId: event.userId,
-      email: event.userEmail,
+      email: event.email,
     });
 
     try {
       await this.emailQueueService.sendEmailTemplateAsync({
-        to: event.userEmail,
-        templateId: 'email-confirmation',
+        to: event.email,
+        templateId: 'email-verification',
         variables: {
-          name: event.userFullName,
-          confirmationUrl: `${this.configurationService.getFrontendUrl()}/confirm-email?token=${event.emailVerificationToken}`,
+          verificationUrl: `${this.configurationService.getFrontendUrl()}/verify-email?token=${event.verificationToken}`,
         },
       });
 
-      this.logger.info('Email confirmation queued successfully', {
+      this.logger.info('Email verification queued successfully', {
         operation: 'auth.account_created.email_queued',
         module: 'AccountCreatedEventHandler',
-        accountId: event.accountId,
         userId: event.userId,
-        email: event.userEmail,
+        email: event.email,
       });
     } catch (error) {
-      this.logger.error('Failed to queue email confirmation', error instanceof Error ? error : new Error(String(error)), {
+      this.logger.error('Failed to queue email verification', error instanceof Error ? error : new Error(String(error)), {
         operation: 'auth.account_created.email_failed',
         module: 'AccountCreatedEventHandler',
-        accountId: event.accountId,
         userId: event.userId,
-        email: event.userEmail,
+        email: event.email,
       });
       throw error;
     }

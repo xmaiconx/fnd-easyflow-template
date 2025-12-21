@@ -8,9 +8,14 @@ import { StartupLoggerService } from '../shared/services/startup-logger.service'
 export async function api() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
+  // Enable CORS for multiple frontends
+  const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    process.env.MANAGER_URL || 'http://localhost:3002',
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true,
   });
 

@@ -1,2 +1,5 @@
 export * from './AccountCreatedEventHandler';
-export * from './ConfirmationEmailResentEventHandler';
+export * from './LoginSuccessEventHandler';
+export * from './LoginFailureEventHandler';
+export * from './PasswordResetRequestedEventHandler';
+export * from './PasswordChangedEventHandler';

@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Brand Colors */
+    --brand-primary: 15 90% 50%;            /* Laranja #F56B00 */
+    --brand-primary-hover: 15 90% 45%;
+    --brand-primary-foreground: 0 0% 100%;
+    --brand-secondary: 230 70% 50%;         /* Azul #2667E5 */
+    --brand-secondary-hover: 230 70% 45%;
+    --brand-secondary-foreground: 0 0% 100%;
+
+    /* Primary (using brand orange) */
+    --primary: 15 90% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Muted */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent (using brand pink) */
+    --accent: 340 85% 55%;                  /* Rosa #F0447A */
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 15 90% 50%;
+    --radius: 0.5rem;
+
+    /* Status Colors */
+    --status-post: 230 70% 50%;             /* Azul */
+    --status-carrossel: 340 85% 55%;        /* Rosa */
+    --status-reels: 15 90% 50%;             /* Laranja */
+    --status-stories: 142 76% 36%;          /* Verde */
+    --status-bio: 280 70% 50%;              /* Roxo */
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary (keeping brand orange) */
+    --primary: 15 90% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* Muted */
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent (keeping brand pink) */
+    --accent: 340 85% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 15 90% 50%;
+
+    /* Status Colors (same in dark mode) */
+    --status-post: 230 70% 50%;
+    --status-carrossel: 340 85% 55%;
+    --status-reels: 15 90% 50%;
+    --status-stories: 142 76% 36%;
+    --status-bio: 280 70% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

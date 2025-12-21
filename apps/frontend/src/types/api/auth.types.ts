@@ -4,9 +4,10 @@
  */
 
 export interface SignUpDto {
-  fullName: string;
+  name: string;
   email: string;
   password: string;
+  workspaceName: string;
 }
 
 export interface SignInDto {
@@ -14,11 +15,69 @@ export interface SignInDto {
   password: string;
 }
 
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: UserProfile;
+}
+
+export interface SignUpResponse {
+  message: string;
+  user: {
+    id: string;
+    email: string;
+    fullName: string;
+  };
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  emailVerified: boolean;
+  accountId: string;
+}
+
+export interface RefreshTokenDto {
+  refreshToken: string;
+}
+
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  newPassword: string;
+}
+
+export interface VerifyEmailDto {
+  token: string;
+}
+
+export interface Session {
+  id: string;
+  deviceName?: string;
+  ipAddress: string;
+  lastActivityAt: string;
+  createdAt: string;
+}
+
+export interface ImpersonateDto {
+  targetUserId: string;
+}
+
+export interface ImpersonateData {
+  adminUserId: string;
+  targetUserId: string;
+  expiresAt: string;
+}
+
 export interface ConfirmEmailDto {
   token: string;
 }
 
-export interface ResendConfirmationDto {
+export interface ResendVerificationDto {
   email: string;
 }
 

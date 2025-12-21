@@ -38,25 +38,16 @@ export class UserRepository implements IUserRepository {
     return result ? this.mapToUser(result) : null;
   }
 
-  async findByAuthUserId(authUserId: string): Promise<User | null> {
-    const result = await this.db
-      .selectFrom('users')
-      .selectAll()
-      .where('auth_user_id', '=', authUserId)
-      .executeTakeFirst();
-
-    return result ? this.mapToUser(result) : null;
-  }
-
   async create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     const now = new Date();
     const result = await this.db
       .insertInto('users')
       .values({
         account_id: user.accountId,
-        auth_user_id: user.authUserId,
         full_name: user.fullName,
         email: user.email,
+        password_hash: user.passwordHash || null,
+        email_verified: user.emailVerified,
         role: user.role,
         created_at: now,
         updated_at: now,
@@ -73,10 +64,12 @@ export class UserRepository implements IUserRepository {
       updated_at: new Date(),
     };
 
-    if (user.authUserId !== undefined) updateData.auth_user_id = user.authUserId;
+    if (user.passwordHash !== undefined) updateData.password_hash = user.passwordHash;
+    if (user.emailVerified !== undefined) updateData.email_verified = user.emailVerified;
     if (user.fullName !== undefined) updateData.full_name = user.fullName;
     if (user.email !== undefined) updateData.email = user.email;
     if (user.role !== undefined) updateData.role = user.role;
+    if (user.status !== undefined) updateData.status = user.status;
 
     const result = await this.db
       .updateTable('users')
@@ -99,9 +92,10 @@ export class UserRepository implements IUserRepository {
     return {
       id: row.id,
       accountId: row.account_id,
-      authUserId: row.auth_user_id || null,
       fullName: row.full_name,
       email: row.email,
+      passwordHash: row.password_hash || null,
+      emailVerified: row.email_verified,
       role: row.role,
       status: row.status,
       createdAt: row.created_at,

@@ -1,21 +1,26 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Workspace } from '@/types/domain/entities'
+import type { ImpersonateData } from '@/types/api/auth.types'
 
 export interface User {
   id: string
   email: string
-  name: string
+  fullName: string
   accountId: string
+  emailVerified?: boolean
 }
 
 interface AuthState {
   user: User | null
   token: string | null
+  refreshToken: string | null
+  impersonateData: ImpersonateData | null
   isAuthenticated: boolean
   currentWorkspace: Workspace | null
   workspaceList: Workspace[]
-  setAuth: (user: User, token: string) => void
+  setAuth: (user: User, token: string, refreshToken: string) => void
+  setImpersonate: (data: ImpersonateData | null) => void
   clearAuth: () => void
   setCurrentWorkspace: (workspace: Workspace) => void
   setWorkspaceList: (workspaces: Workspace[]) => void
@@ -29,19 +34,28 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      refreshToken: null,
+      impersonateData: null,
       isAuthenticated: false,
       currentWorkspace: null,
       workspaceList: [],
-      setAuth: (user, token) =>
+      setAuth: (user, token, refreshToken) =>
         set({
           user,
           token,
+          refreshToken,
           isAuthenticated: true,
+        }),
+      setImpersonate: (data) =>
+        set({
+          impersonateData: data,
         }),
       clearAuth: () =>
         set({
           user: null,
           token: null,
+          refreshToken: null,
+          impersonateData: null,
           isAuthenticated: false,
           currentWorkspace: null,
           workspaceList: [],
@@ -75,6 +89,8 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        refreshToken: state.refreshToken,
+        impersonateData: state.impersonateData,
         isAuthenticated: state.isAuthenticated,
         currentWorkspace: state.currentWorkspace,
         workspaceList: state.workspaceList,

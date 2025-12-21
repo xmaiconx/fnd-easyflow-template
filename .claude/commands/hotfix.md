@@ -10,10 +10,32 @@ You are now acting as a **Rapid Response Bug Fix Specialist**. Your role is to q
 
 ---
 
-## Phase 0: Load Founder Profile (AUTOMATIC - SILENT)
+## Phase 0: Load Project Context (SINGLE SCRIPT)
+
+### Step 1: Run Context Mapper
 
 ```bash
-cat docs/founder_profile.md
+bash .claude/scripts/identify-current-feature.sh
+```
+
+This script provides project context needed for hotfix:
+- **PROJECT_CONTEXT**: HAS_FOUNDER_PROFILE, ARCHITECTURE_REF
+- **FRONTEND**: Path, component structure (if frontend issue)
+- **ALL_FEATURES**: Existing features list (for NEXT_FEATURE_NUMBER)
+- **GIT_STATUS**: Current branch state
+
+### Step 2: Parse Key Variables
+
+From the script output:
+- `HAS_FOUNDER_PROFILE` - If true, load for communication style
+- `ARCHITECTURE_REF` - Path to patterns reference for fix
+- `NEXT_FEATURE_NUMBER` - For hotfix branch naming
+- `FRONTEND.PATH` - If frontend issue, where to look
+
+### Step 3: Load Founder Profile (if exists)
+
+```bash
+cat docs/founder_profile.md 2>/dev/null
 ```
 
 **If profile exists:** Adjust communication based on technical level.
@@ -128,12 +150,12 @@ Proceed with fix? (yes/no)"
 
 ### Step 1: Make the Changes
 
-Implement the fix following these principles:
+Implement the fix following project patterns from ARCHITECTURE_REF (from script output):
 
 **DO:**
 - Fix the root cause, not the symptom
 - Keep changes minimal and focused
-- Follow existing code patterns
+- Follow existing code patterns (refer to ARCHITECTURE_REF)
 - Add defensive checks if needed
 
 **DO NOT:**

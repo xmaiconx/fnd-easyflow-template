@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { WorkspaceModule } from './modules/workspace/workspace.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { ManagerModule } from './modules/manager/manager.module';
 import { SharedModule } from '../shared/shared.module';
 import { WorkersModule } from '../workers/workers.module';
 import { AppController } from './app.controller';
@@ -37,6 +38,7 @@ const imports = [
   AuthModule,
   WorkspaceModule,
   BillingModule,
+  ManagerModule,
 ];
 
 // Add WorkersModule only in workers or hybrid mode

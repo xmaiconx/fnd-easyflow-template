@@ -55,8 +55,8 @@ git branch --show-current
 # 3. Load CLAUDE.md for architecture understanding
 cat CLAUDE.md
 
-# 4. Check PRD if exists
-if [ -f "docs/prd.md" ]; then cat docs/prd.md; fi
+# 4. Check Product Blueprint if exists
+if [ -f "docs/product.md" ]; then cat docs/product.md; fi
 ```
 
 ### Step 3: Build Mental Map (SILENT)
@@ -64,7 +64,7 @@ if [ -f "docs/prd.md" ]; then cat docs/prd.md; fi
 Create a mental inventory of:
 - **Implemented Features:** What's in `docs/features/`
 - **Project Architecture:** From CLAUDE.md
-- **Business Context:** From PRD (if available)
+- **Business Context:** From Product Blueprint (if available)
 - **Current Work:** From branch name and recent commits
 
 ---
@@ -122,7 +122,7 @@ Carreguei o contexto do seu projeto e estou pronto para ajudar.
 **O que já sei:**
 - [X] features implementadas
 - Arquitetura: [resumo breve baseado no nível técnico]
-- [Informações do PRD se disponível]
+- [Informações do Blueprint se disponível]
 
 **Sobre o que você gostaria de conversar?**
 
@@ -494,7 +494,7 @@ Execute `/fix` para investigar e corrigir o problema.
 
 Para transformar essa ideia em um plano de ação:
 
-1. `/prd` - Se você ainda não tem um documento de requisitos do produto
+1. `/product` - Se você ainda não tem um documento de requisitos do produto
 2. `/feature` - Para iniciar o discovery de uma nova funcionalidade
 3. `/plan` - Se já tem uma feature criada e quer planejar a implementação
 ```

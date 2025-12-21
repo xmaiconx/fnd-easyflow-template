@@ -88,8 +88,8 @@ if [ -f "${FEATURE_DIR}/fixes.md" ]; then
     cat "${FEATURE_DIR}/fixes.md"    # Bugs fixed
 fi
 
-# Also load PRD for context
-cat "docs/prd.md"
+# Also load Product Blueprint for context
+cat "docs/product.md"
 ```
 
 ---

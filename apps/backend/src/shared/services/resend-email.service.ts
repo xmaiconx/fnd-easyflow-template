@@ -27,6 +27,7 @@ export class ResendEmailService implements IEmailService {
     const templates = {
       'welcome': this.getWelcomeTemplate(variables),
       'email-confirmation': this.getEmailConfirmationTemplate(variables),
+      'email-verification': this.getEmailVerificationTemplate(variables),
       'password-reset': this.getPasswordResetTemplate(variables),
     };
 
@@ -74,6 +75,21 @@ export class ResendEmailService implements IEmailService {
         <a href="${variables.resetUrl}">Redefinir Senha</a>
         <p>Este link expira em 1 hora.</p>
         <p>Se você não solicitou isso, ignore este email.</p>
+        <p>Equipe Rugido Digital</p>
+      `,
+    };
+  }
+
+  private getEmailVerificationTemplate(variables: Record<string, any>) {
+    return {
+      subject: 'Verifique seu email - Rugido Digital',
+      html: `
+        <h1>Verifique seu email</h1>
+        <p>Obrigado por criar sua conta!</p>
+        <p>Por favor, verifique seu email clicando no link abaixo:</p>
+        <a href="${variables.verificationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px;">Verificar Email</a>
+        <p>Este link expira em 24 horas.</p>
+        <p>Se você não criou uma conta, ignore este email.</p>
         <p>Equipe Rugido Digital</p>
       `,
     };

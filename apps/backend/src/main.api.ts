@@ -18,9 +18,14 @@ export async function bootstrapApi() {
     logger: ['error', 'warn', 'log'],
   });
 
-  // Enable CORS
+  // Enable CORS for multiple frontends
+  const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    process.env.MANAGER_URL || 'http://localhost:3002',
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true,
   });
 

@@ -1,8 +1,10 @@
 export { SignUpDto } from './SignUpDto';
 export { SignInDto } from './SignInDto';
-export { ConfirmEmailDto } from './ConfirmEmailDto';
-export { ResendConfirmationDto } from './ResendConfirmationDto';
-export { UserResponseDto } from './UserResponseDto';
-export { CreateUserDto } from './CreateUserDto';
-export { CreateAccountDto } from './CreateAccountDto';
-export { UpdateAccountDto } from './UpdateAccountDto';
+export { RefreshTokenDto } from './RefreshTokenDto';
+export { ForgotPasswordDto } from './ForgotPasswordDto';
+export { ResetPasswordDto } from './ResetPasswordDto';
+export { VerifyEmailDto } from './VerifyEmailDto';
+export { ResendVerificationDto } from './ResendVerificationDto';
+export { AuthResponseDto } from './AuthResponseDto';
+export { UserProfileResponseDto } from './UserProfileResponseDto';
+export { SessionResponseDto } from './SessionResponseDto';

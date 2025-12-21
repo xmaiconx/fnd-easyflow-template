@@ -17,14 +17,29 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "migrate:latest": "cd libs/app-database && npm run migrate:latest",
-    "migrate:rollback": "cd libs/app-database && npm run migrate:rollback",
-    "seed:run": "cd libs/app-database && npm run seed:run"
+    "migrate:latest": "cd libs/app-database && npx knex migrate:latest",
+    "migrate:rollback": "cd libs/app-database && npx knex migrate:rollback",
+    "seed:run": "cd libs/app-database && npx knex seed:run",
+    "test:infra:start": "node .claude/scripts/start-test-infra.js",
+    "test:infra:stop": "node .claude/scripts/stop-test-infra.js"
   },
   "devDependencies": {
+    "@orangeopensource/hurl": "^7.1.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/passport-local": "^1.0.38",
+    "httpyac": "^6.16.7",
     "rimraf": "^5.0.0",
     "supabase": "^2.66.0",
     "turbo": "^2.0.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
+    "bcryptjs": "^3.0.3",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0"
   }
 }

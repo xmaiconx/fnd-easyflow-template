@@ -3,18 +3,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormField, LoadingButton } from '@/components/forms'
-import { useSupabaseAuth } from '@/hooks/use-supabase-auth'
-import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
+import { useSignIn } from '@/hooks/use-auth'
 import { signInSchema, type SignInInput } from '@/lib/validations'
 import { APP_NAME } from '@/lib/constants'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { signIn } = useSupabaseAuth()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const signIn = useSignIn()
 
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
@@ -26,8 +24,7 @@ export function LoginPage() {
 
   const onSubmit = async (data: SignInInput) => {
     try {
-      setIsSubmitting(true)
-      await signIn(data)
+      await signIn.mutateAsync(data)
       toast.success('Login realizado com sucesso!')
 
       // Redirect to the intended page or dashboard
@@ -36,29 +33,33 @@ export function LoginPage() {
     } catch (error: any) {
       console.error('Login error:', error)
 
-      // Handle Supabase Auth errors
-      const errorMessage = error.message || 'Erro ao fazer login'
-
-      if (errorMessage.includes('Email not confirmed')) {
+      // Check for specific error codes first
+      if (error.errorCode === 'EMAIL_NOT_VERIFIED') {
         navigate('/email-not-verified', {
           state: {
             email: data.email,
           },
         })
-      } else if (errorMessage.includes('Invalid login credentials')) {
+        return
+      }
+
+      const errorMessage = error.message || 'Erro ao fazer login'
+
+      if (errorMessage.toLowerCase().includes('inválid') ||
+          errorMessage.toLowerCase().includes('invalid')) {
         toast.error('Email ou senha incorretos')
       } else {
         toast.error(errorMessage)
       }
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
-  // Show success message if redirected from signup
+  // Show success message if redirected from password reset or signup
   useEffect(() => {
     if (location.state?.message) {
       toast.success(location.state.message)
+      // Clear state to prevent duplicate toasts on re-renders (React StrictMode)
+      window.history.replaceState({}, document.title)
     }
   }, [location.state])
 
@@ -100,30 +101,17 @@ export function LoginPage() {
               <LoadingButton
                 type="submit"
                 className="w-full"
-                loading={isSubmitting}
+                loading={signIn.isPending}
                 loadingText="Entrando..."
               >
                 Entrar
               </LoadingButton>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Ou continue com
-                  </span>
-                </div>
-              </div>
-
-              <GoogleSignInButton fullWidth disabled={isSubmitting} />
             </form>
           </FormProvider>
 
           <div className="mt-4 text-center text-sm">
             <Link
-              to="/auth/reset-password"
+              to="/forgot-password"
               className="text-primary hover:underline"
             >
               Esqueceu sua senha?

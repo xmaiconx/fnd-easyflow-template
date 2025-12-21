@@ -7,6 +7,10 @@ import { WebhookEventTable } from './WebhookEventTable';
 import { PlanTable } from './PlanTable';
 import { PlanPriceTable } from './PlanPriceTable';
 import { SubscriptionTable } from './SubscriptionTable';
+import { SessionsTable } from './SessionsTable';
+import { LoginAttemptsTable } from './LoginAttemptsTable';
+import { AuthTokensTable } from './AuthTokensTable';
+import { ImpersonateSessionsTable } from './ImpersonateSessionsTable';
 
 export interface Database {
   accounts: AccountTable;
@@ -18,4 +22,8 @@ export interface Database {
   plans: PlanTable;
   plan_prices: PlanPriceTable;
   subscriptions: SubscriptionTable;
+  sessions: SessionsTable;
+  login_attempts: LoginAttemptsTable;
+  auth_tokens: AuthTokensTable;
+  impersonate_sessions: ImpersonateSessionsTable;
 }

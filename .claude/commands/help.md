@@ -17,7 +17,7 @@ bash .claude/scripts/detect-project-state.sh
 ### Step 2: Analyze Output
 
 Parse the output to understand:
-- **PRD_STATUS**: Does a PRD exist? Is it filled?
+- **PRODUCT_STATUS**: Does a Product Blueprint exist? Is it filled?
 - **CURRENT_BRANCH**: Which branch is the user on?
 - **BRANCH_TYPE**: main, feature, fix, etc.
 - **FEATURE_COUNT**: How many features exist?
@@ -29,7 +29,7 @@ Parse the output to understand:
 
 ## Phase 2: Present Status Based on Scenario
 
-### Scenario A: No PRD (Fresh Project)
+### Scenario A: No Product Blueprint (Fresh Project)
 
 ```markdown
 ## 👋 Bem-vindo ao SaaS Builder!
@@ -41,16 +41,18 @@ Parece que você está começando um projeto novo. Vamos definir seu produto pri
 ## 🚀 Fluxo Completo de Desenvolvimento
 
 ```
-/prd → /feature → /plan → /dev → /done
+/product → /feature → /design → /plan → /dev → /done
+                         ↑
+                    (opcional)
 ```
 
-Você está aqui: **Início** (sem PRD definido)
+Você está aqui: **Início** (sem Blueprint definido)
 
 ---
 
-## 📋 O que é o `/prd`?
+## 📋 O que é o `/product`?
 
-O comando `/prd` te ajuda a definir seu produto de forma estruturada:
+O comando `/product` te ajuda a definir seu produto de forma estruturada:
 
 - **Visão do Produto** - O que é, para quem, que problema resolve
 - **Escopo do MVP** - O mínimo para validar a ideia e conseguir os primeiros clientes
@@ -58,33 +60,33 @@ O comando `/prd` te ajuda a definir seu produto de forma estruturada:
 - **Usuários e Permissões** - Quem usa e o que pode fazer
 - **Roadmap** - Ordem de construção das features
 
-**Importante:** O PRD foca no MVP - o mínimo necessário para começar a vender e captar os primeiros assinantes!
+**Importante:** O Blueprint foca no MVP - o mínimo necessário para começar a vender e captar os primeiros assinantes!
 
 ---
 
 ## ▶️ Próximo Passo
 
-**Execute `/prd`** para definir seu produto!
+**Execute `/product`** para definir seu produto!
 
 Você pode começar assim:
 > "Quero criar um sistema de agendamento para clínicas"
 
-Ou simplesmente digite `/prd` e eu vou te guiar com perguntas.
+Ou simplesmente digite `/product` e eu vou te guiar com perguntas.
 ```
 
 ---
 
-### Scenario B: Has PRD (Template Only - Not Filled)
+### Scenario B: Has Blueprint (Template Only - Not Filled)
 
 ```markdown
 ## 📍 Status Atual
 
-**PRD:** Criado, mas não preenchido
+**Blueprint:** Criado, mas não preenchido
 
 ---
 
 ## ⏳ Pendente
-- [ ] **Preencher PRD** ← Você está aqui
+- [ ] **Preencher Blueprint** ← Você está aqui
 - [ ] Criar features
 - [ ] Planejar
 - [ ] Desenvolver
@@ -93,26 +95,26 @@ Ou simplesmente digite `/prd` e eu vou te guiar com perguntas.
 
 ## ▶️ Próximo Passo
 
-Você tem um template de PRD em `docs/prd.md`, mas ele ainda não foi preenchido.
+Você tem um template de Blueprint em `docs/product.md`, mas ele ainda não foi preenchido.
 
-**Execute `/prd`** para completar a definição do seu produto!
+**Execute `/product`** para completar a definição do seu produto!
 ```
 
 ---
 
-### Scenario C: Has PRD, No Features (On Main Branch)
+### Scenario C: Has Blueprint, No Features (On Main Branch)
 
 ```markdown
 ## 📍 Status Atual
 
-**PRD:** ✅ Definido
+**Blueprint:** ✅ Definido
 **Branch:** `main`
 **Features:** Nenhuma criada ainda
 
 ---
 
 ## ✅ Concluído
-- [x] PRD definido (`docs/prd.md`)
+- [x] Blueprint definido (`docs/product.md`)
 
 ## ⏳ Pendente
 - [ ] **Criar primeira feature** ← Você está aqui
@@ -123,11 +125,11 @@ Você tem um template de PRD em `docs/prd.md`, mas ele ainda não foi preenchido
 
 ## 🎯 Próximo Passo
 
-Seu PRD está pronto! Agora é hora de começar a construir.
+Seu Blueprint está pronto! Agora é hora de começar a construir.
 
 **Execute `/feature`** para iniciar o discovery da primeira funcionalidade do seu MVP.
 
-💡 **Dica:** Comece pela feature mais crítica/bloqueante do seu roadmap no PRD!
+💡 **Dica:** Comece pela feature mais crítica/bloqueante do seu roadmap no Blueprint!
 ```
 
 ---
@@ -137,7 +139,7 @@ Seu PRD está pronto! Agora é hora de começar a construir.
 ```markdown
 ## 📍 Status Atual
 
-**PRD:** ✅ Definido
+**Blueprint:** ✅ Definido
 **Branch:** `main`
 **Features Existentes:** [X] features
 
@@ -182,7 +184,7 @@ Se há um bug crítico em produção:
 
 **Feature:** `[FEATURE_ID]`
 **Branch:** `[CURRENT_BRANCH]`
-**Fase:** Discovery completo, aguardando planejamento
+**Fase:** Discovery completo, aguardando próximo passo
 
 ---
 
@@ -192,7 +194,8 @@ Se há um bug crítico em produção:
 - [x] Questões respondidas (`discovery.md`)
 
 ## ⏳ Pendente
-- [ ] **Planejamento técnico** ← Você está aqui
+- [ ] **Design UX** ← (recomendado para features com UI)
+- [ ] Planejamento técnico
 - [ ] Desenvolvimento
 - [ ] Merge
 
@@ -200,9 +203,13 @@ Se há um bug crítico em produção:
 
 ## ▶️ Próximo Passo
 
+### Se a feature tem interface (frontend):
+**Execute `/design`** para criar especificações mobile-first.
+
+### Se é backend-only ou feature simples:
 **Execute `/plan`** para criar o planejamento técnico.
 
-Ou, se for uma feature simples:
+### Se é muito simples:
 **Execute `/dev`** diretamente (pula planejamento).
 ```
 
@@ -361,16 +368,17 @@ Always include this reference at the end:
 | Comando | Descrição | Quando Usar |
 |---------|-----------|-------------|
 | `/founder` | Cria seu perfil de comunicação | **Uma vez**, antes de começar (adapta a linguagem) |
-| `/prd` | Define o produto/MVP | **Uma vez**, no início do projeto |
+| `/product` | Define o produto/MVP | **Uma vez**, no início do projeto |
 
 ### Fluxo Principal (Construção de Features)
 
 | Comando | Descrição | Quando Usar |
 |---------|-----------|-------------|
 | `/feature` | Discovery de uma feature | Início de cada funcionalidade |
-| `/plan` | Planejamento técnico | Após discovery (opcional para features simples) |
-| `/dev` | Implementação manual | Após discovery ou plan (você acompanha) |
-| `/autopilot` | Implementação autônoma | Após discovery ou plan (Claude faz tudo) |
+| `/design` | Especificação UX mobile-first | Após discovery (recomendado para features com UI) |
+| `/plan` | Planejamento técnico | Após discovery ou design (opcional para features simples) |
+| `/dev` | Implementação manual | Após discovery, design ou plan (você acompanha) |
+| `/autopilot` | Implementação autônoma | Após discovery, design ou plan (Claude faz tudo) |
 | `/review` | Revisar implementação | Após `/dev` ou `/autopilot` |
 | `/done` | Finaliza e merge | Quando feature está pronta |
 
@@ -386,6 +394,12 @@ Always include this reference at the end:
 | Comando | Descrição | Quando Usar |
 |---------|-----------|-------------|
 | `/security` | Auditoria de segurança (OWASP) | Validar codebase antes de deploy |
+
+### Deploy e Produção
+
+| Ação | Descrição | Quando Usar |
+|------|-----------|-------------|
+| Deploy Railway | Deploy rápido do MVP para produção | Quando o MVP estiver pronto para ir ao ar |
 
 ### Utilitários
 
@@ -407,19 +421,29 @@ Always include this reference at the end:
 
 ### Setup Inicial (uma vez)
 ```
-/founder → /prd
+/founder → /product
 ```
 
-### Desenvolvimento Normal
+### Desenvolvimento Completo (com UI)
+```
+/feature → /design → /plan → /dev ou /autopilot → /review → /done
+              ↑         ↑
+         (frontend) (complexas)
+```
+
+### Desenvolvimento Normal (sem design spec)
 ```
 /feature → /plan → /dev ou /autopilot → /review → /done
-                ↘                    ↗
-                  (opcional)
 ```
 
 ### Feature Simples (sem planejamento)
 ```
 /feature → /autopilot → /done
+```
+
+### Feature com UI (direto para dev)
+```
+/feature → /design → /dev → /done
 ```
 
 ### Correção Durante Desenvolvimento
@@ -440,6 +464,11 @@ Always include this reference at the end:
 ### Exploração de Ideias
 ```
 /brainstorm → (documentar?) → docs/brainstorm/*.md → /feature
+```
+
+### Deploy para Produção
+```
+/security → Railway Deploy → configurar env vars → testar produção
 ```
 
 ---
@@ -481,14 +510,15 @@ Worktrees permitem trabalhar em **múltiplas branches simultaneamente** em diret
 ## 💡 Dicas
 
 1. **Comece pelo /founder** - Adapta a comunicação ao seu perfil
-2. **Depois o PRD** - Defina seu produto antes de codar
+2. **Depois o Blueprint** - Defina seu produto antes de codar
 3. **MVP primeiro** - Foque no mínimo para validar e vender
 4. **Uma feature por vez** - Complete antes de começar outra
 5. **Use /autopilot** - Para implementação autônoma sem precisar acompanhar
 6. **Documente sempre** - Os comandos geram documentação automática
 7. **Rode /security antes de deploy** - Auditoria OWASP evita vulnerabilidades
-8. **Use /help** - Quando estiver perdido, volte aqui!
-9. **Worktrees para isolamento** - Se precisar manter servidor rodando, peça uma worktree
+8. **Deploy no Railway** - Um clique e seu MVP está no ar para os primeiros clientes
+9. **Use /help** - Quando estiver perdido, volte aqui!
+10. **Worktrees para isolamento** - Se precisar manter servidor rodando, peça uma worktree
 
 ---
 
@@ -499,6 +529,7 @@ Construir um **MVP funcional** pronto para:
 - ✅ Captar os primeiros assinantes
 - ✅ Validar a ideia de negócio
 - ✅ Iterar com feedback real
+- ✅ Deploy em produção com um clique no Railway
 
 ---
 
@@ -513,10 +544,10 @@ Construir um **MVP funcional** pronto para:
 
 If user asks "o que o /feature faz?" or similar, provide detailed explanation:
 
-#### About `/prd`
+#### About `/product`
 
 ```markdown
-## 📋 Comando `/prd`
+## 📋 Comando `/product`
 
 **Propósito:** Definir seu produto antes de começar a desenvolver.
 
@@ -532,17 +563,17 @@ If user asks "o que o /feature faz?" or similar, provide detailed explanation:
    - Você confirma ou corrige
 
 3. **Documentação:**
-   - Cria `docs/prd.md` com tudo documentado
+   - Cria `docs/product.md` com tudo documentado
    - Visão, escopo MVP, features, roadmap
 
 ### Resultado
-- `docs/prd.md` - Documento completo do produto
+- `docs/product.md` - Documento completo do produto
 
 ### Quando usar
 - **Uma vez**, no início do projeto
 - Quando quiser reformular o produto
 
-**Quer executar agora?** Digite `/prd`
+**Quer executar agora?** Digite `/product`
 ```
 
 #### About `/founder`
@@ -608,10 +639,52 @@ If user asks "o que o /feature faz?" or similar, provide detailed explanation:
 
 ### Quando usar
 - Início de cada nova funcionalidade
-- Após definir o PRD
+- Após definir o Blueprint
 
 **Quer executar agora?** Digite `/feature`
 ```
+
+#### About `/design`
+
+```markdown
+## 🎨 Comando `/design`
+
+**Propósito:** Criar especificações de design mobile-first para features com interface.
+
+### O que acontece quando você executa:
+
+1. **Análise do frontend:**
+   - Detecta estrutura existente de componentes
+   - Mapeia padrões de código
+   - Extrai tokens de design (cores, espaçamentos)
+
+2. **Especificação de layouts:**
+   - Define layouts mobile-first (320px base)
+   - Lista componentes existentes reutilizáveis
+   - Especifica novos componentes necessários
+   - Define estados (loading, empty, error)
+
+3. **Documentação:**
+   - `design.md` - Especificações de UX
+   - `foundations.md` - Design system (se não existir)
+
+### Resultado
+- `docs/features/F000X-nome/design.md` - Layout specs
+- `docs/design-system/foundations.md` - Tokens e convenções
+
+### Quando usar
+- Após `/feature`, antes de `/plan` ou `/dev`
+- Para features que têm interface (frontend)
+- Recomendado para garantir consistência mobile-first
+
+### Diferença do `/plan`:
+- `/design` = COMO o usuário vê e interage (UX)
+- `/plan` = COMO construir tecnicamente (API, DB, etc)
+
+**Quer executar agora?** Digite `/design`
+```
+
+---
 
 #### About `/plan`
 
@@ -996,6 +1069,59 @@ If user asks "o que o /feature faz?" or similar, provide detailed explanation:
 **Quer executar agora?** Digite `/question`
 ```
 
+#### About Deploy Railway
+
+```markdown
+## 🚀 Deploy no Railway
+
+**Propósito:** Colocar seu MVP em produção de forma rápida e fácil.
+
+### O que é o Railway?
+
+Railway é uma plataforma de hospedagem que permite fazer deploy de aplicações full-stack com apenas alguns cliques. Ideal para MVPs e produtos em fase inicial.
+
+### Como fazer deploy:
+
+1. **Clique no botão abaixo:**
+
+   [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/zEp1yo?referralCode=td8iG1&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+2. **Configure as variáveis de ambiente:**
+   - O Railway vai solicitar configuração de variáveis de ambiente
+   - Consulte o arquivo `.env.example` do projeto para saber quais variáveis configurar
+
+3. **Aguarde o deploy:**
+   - O Railway vai automaticamente:
+     - Criar o banco de dados PostgreSQL
+     - Configurar o Redis
+     - Fazer build do backend e frontend
+     - Rodar as migrations
+     - Iniciar a aplicação
+
+### Resultado
+- Aplicação rodando em produção
+- URLs públicas para API e Frontend
+- Banco de dados PostgreSQL gerenciado
+- Redis configurado
+- Logs e monitoramento disponíveis
+
+### Quando usar
+- MVP pronto para validação
+- Quer mostrar para clientes potenciais
+- Precisa de um ambiente de homologação
+- Quer começar a captar os primeiros assinantes
+
+### Próximos passos após deploy
+1. Configure domínio personalizado (opcional)
+2. Configure variáveis de ambiente de produção (Stripe, Supabase, Resend)
+3. Teste a aplicação em produção
+4. Compartilhe com os primeiros usuários
+
+💡 **Dica:** Rode `/security` antes de fazer deploy para garantir que não há vulnerabilidades!
+
+**Quer fazer deploy agora?** Clique no botão acima!
+```
+
 ---
 
 ### User is Lost
@@ -1015,7 +1141,7 @@ Exemplos:
 
 Ou escolha uma opção:
 
-1. **Começar projeto novo** → Execute `/prd`
+1. **Começar projeto novo** → Execute `/product`
 2. **Adicionar funcionalidade** → Execute `/feature`
 3. **Corrigir bug** → Execute `/fix` ou `/hotfix`
 4. **Ver onde parei** → Eu mostro seu status atual

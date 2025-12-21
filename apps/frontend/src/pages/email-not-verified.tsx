@@ -2,17 +2,17 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { LoadingButton } from '@/components/forms'
-import { Mail, AlertTriangle, Clock } from 'lucide-react'
+import { Mail, AlertTriangle, RefreshCw } from 'lucide-react'
 import { APP_NAME } from '@/lib/constants'
-import { useResendConfirmation } from '@/hooks/use-auth'
+import { useResendVerification } from '@/hooks/use-auth'
 import { toast } from 'sonner'
 
 export function EmailNotVerifiedPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const [email, setEmail] = useState<string>('')
-  const resendConfirmationMutation = useResendConfirmation()
+  const [cooldown, setCooldown] = useState<number>(0)
+  const resendVerification = useResendVerification()
 
   useEffect(() => {
     // Get email from location state or redirect to login
@@ -23,15 +23,23 @@ export function EmailNotVerifiedPage() {
     }
   }, [location.state, navigate])
 
-  const handleResendConfirmation = async () => {
-    if (!email) return
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [cooldown])
+
+  const handleResendEmail = async () => {
+    if (cooldown > 0 || !email) return
 
     try {
-      await resendConfirmationMutation.mutateAsync({ email })
-      toast.success('Email de confirmação reenviado com sucesso!')
+      await resendVerification.mutateAsync({ email })
+      toast.success('Email de verificação reenviado com sucesso!')
+      setCooldown(60) // 60 seconds cooldown
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Erro ao reenviar email'
-      toast.error(message)
+      toast.error(error.message || 'Erro ao reenviar email')
     }
   }
 
@@ -50,62 +58,61 @@ export function EmailNotVerifiedPage() {
 
       <Card>
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-            <AlertTriangle className="w-6 h-6 text-amber-600" />
+          <div className="mx-auto mb-4">
+            <AlertTriangle className="w-10 h-10 text-orange-500" />
           </div>
-          <CardTitle className="text-amber-900">Confirmação Necessária</CardTitle>
+          <CardTitle>Confirme seu email</CardTitle>
           <CardDescription>
-            Você precisa confirmar seu email antes de fazer login
+            Enviamos um link de verificação para seu email
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Mail className="w-4 h-4" />
-              <span>Email cadastrado:</span>
-            </div>
-            <div className="font-medium text-center">{email}</div>
+        <CardContent className="space-y-5">
+          <div className="flex items-center justify-center gap-2 py-3 px-4 bg-muted rounded-lg">
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            <span className="font-medium">{email}</span>
           </div>
 
-          <div className="bg-amber-50 p-4 rounded-lg space-y-2">
-            <div className="flex items-center gap-2 text-amber-800">
-              <Clock className="w-4 h-4" />
-              <span className="font-medium text-sm">Email de confirmação</span>
-            </div>
-            <p className="text-sm text-amber-700">
-              Verifique sua caixa de entrada (incluindo spam) e clique no link de confirmação.
-              Se não encontrou o email, você pode solicitar um novo abaixo.
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Verifique sua caixa de entrada (incluindo spam). O link é válido por 24 horas.
+          </p>
 
           <div className="space-y-3">
-            <LoadingButton
-              onClick={handleResendConfirmation}
-              className="w-full"
-              loading={resendConfirmationMutation.isPending}
-              loadingText="Reenviando..."
-            >
-              Reenviar Email de Confirmação
-            </LoadingButton>
-
             <Link to="/login">
-              <Button variant="outline" className="w-full">
+              <Button className="w-full">
                 Voltar ao Login
               </Button>
             </Link>
+
+            <div className="text-center">
+              <span className="text-sm text-muted-foreground">Não recebeu? </span>
+              <Button
+                variant="link"
+                className="p-0 h-auto text-sm"
+                onClick={handleResendEmail}
+                disabled={cooldown > 0 || resendVerification.isPending}
+              >
+                {resendVerification.isPending ? (
+                  <>
+                    <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                    Reenviando...
+                  </>
+                ) : cooldown > 0 ? (
+                  `Aguarde ${cooldown}s`
+                ) : (
+                  'Reenviar email'
+                )}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="text-center text-sm text-muted-foreground space-y-2">
-        <p>Problemas com o email? Verifique sua pasta de spam.</p>
-        <p>
-          Email incorreto? {' '}
-          <Link to="/signup" className="text-primary hover:underline">
-            Criar nova conta
-          </Link>
-        </p>
-      </div>
+      <p className="text-center text-sm text-muted-foreground">
+        Email incorreto?{' '}
+        <Link to="/signup" className="text-primary hover:underline">
+          Criar nova conta
+        </Link>
+      </p>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Req, RawBodyRequest, Headers } from '@nestjs/common';
-import { SupabaseAuthGuard } from '../../guards/supabase-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { BillingService } from './billing.service';
 import { StripeWebhookService } from './stripe-webhook.service';
 import {
@@ -17,32 +17,32 @@ export class BillingController {
   ) {}
 
   @Post('checkout')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async createCheckoutSession(
     @Body() dto: CreateCheckoutDto,
     @Req() req: any,
   ): Promise<{ checkoutUrl: string; sessionId: string }> {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     return this.billingService.createCheckoutSession(dto, userId);
   }
 
   @Post('portal')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async createPortalSession(
     @Body() dto: CreatePortalDto,
     @Req() req: any,
   ): Promise<{ portalUrl: string }> {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     return this.billingService.createPortalSession(dto, userId);
   }
 
   @Get('workspace/:workspaceId')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getWorkspaceBillingInfo(
     @Param('workspaceId') workspaceId: string,
     @Req() req: any,
   ): Promise<BillingInfoResponseDto> {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     return this.billingService.getWorkspaceBillingInfo(workspaceId, userId);
   }
 

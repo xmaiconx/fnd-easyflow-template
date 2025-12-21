@@ -2,17 +2,17 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { LoadingButton } from '@/components/forms'
-import { CheckCircle2, Mail, Clock } from 'lucide-react'
+import { CheckCircle2, Mail, RefreshCw } from 'lucide-react'
 import { APP_NAME } from '@/lib/constants'
-import { useResendConfirmation } from '@/hooks/use-auth'
+import { useResendVerification } from '@/hooks/use-auth'
 import { toast } from 'sonner'
 
 export function SignUpSuccessPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const [email, setEmail] = useState<string>('')
-  const resendConfirmationMutation = useResendConfirmation()
+  const [cooldown, setCooldown] = useState<number>(0)
+  const resendVerification = useResendVerification()
 
   useEffect(() => {
     // Get email from location state or redirect to signup
@@ -23,15 +23,23 @@ export function SignUpSuccessPage() {
     }
   }, [location.state, navigate])
 
-  const handleResendConfirmation = async () => {
-    if (!email) return
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [cooldown])
+
+  const handleResendEmail = async () => {
+    if (cooldown > 0 || !email) return
 
     try {
-      await resendConfirmationMutation.mutateAsync({ email })
-      toast.success('Email de confirmação reenviado com sucesso!')
+      await resendVerification.mutateAsync({ email })
+      toast.success('Email de verificação reenviado com sucesso!')
+      setCooldown(60) // 60 seconds cooldown
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Erro ao reenviar email'
-      toast.error(message)
+      toast.error(error.message || 'Erro ao reenviar email')
     }
   }
 
@@ -50,57 +58,54 @@ export function SignUpSuccessPage() {
 
       <Card>
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
-            <CheckCircle2 className="w-6 h-6 text-green-600" />
+          <div className="mx-auto mb-4">
+            <CheckCircle2 className="w-10 h-10 text-green-500" />
           </div>
-          <CardTitle className="text-green-900">Conta Criada!</CardTitle>
+          <CardTitle>Conta criada!</CardTitle>
           <CardDescription>
-            Sua conta foi criada com sucesso
+            Enviamos um link de verificação para seu email
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Mail className="w-4 h-4" />
-              <span>Email enviado para:</span>
-            </div>
-            <div className="font-medium text-center">{email}</div>
+        <CardContent className="space-y-5">
+          <div className="flex items-center justify-center gap-2 py-3 px-4 bg-muted rounded-lg">
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            <span className="font-medium">{email}</span>
           </div>
 
-          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-            <div className="flex items-center gap-2 text-blue-800">
-              <Clock className="w-4 h-4" />
-              <span className="font-medium text-sm">Próximo passo</span>
-            </div>
-            <p className="text-sm text-blue-700">
-              Verifique sua caixa de entrada e clique no link de confirmação.
-              O link é válido por <strong>24 horas</strong>.
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Verifique sua caixa de entrada (incluindo spam). O link é válido por 24 horas.
+          </p>
 
           <div className="space-y-3">
-            <LoadingButton
-              onClick={handleResendConfirmation}
-              variant="outline"
-              className="w-full"
-              loading={resendConfirmationMutation.isPending}
-              loadingText="Reenviando..."
-            >
-              Reenviar Email
-            </LoadingButton>
-
             <Link to="/login">
-              <Button variant="ghost" className="w-full">
+              <Button className="w-full">
                 Ir para Login
               </Button>
             </Link>
+
+            <div className="text-center">
+              <span className="text-sm text-muted-foreground">Não recebeu? </span>
+              <Button
+                variant="link"
+                className="p-0 h-auto text-sm"
+                onClick={handleResendEmail}
+                disabled={cooldown > 0 || resendVerification.isPending}
+              >
+                {resendVerification.isPending ? (
+                  <>
+                    <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                    Reenviando...
+                  </>
+                ) : cooldown > 0 ? (
+                  `Aguarde ${cooldown}s`
+                ) : (
+                  'Reenviar email'
+                )}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
-
-      <div className="text-center text-sm text-muted-foreground">
-        <p>Não recebeu o email? Verifique sua pasta de spam ou lixo eletrônico.</p>
-      </div>
     </div>
   )
 }

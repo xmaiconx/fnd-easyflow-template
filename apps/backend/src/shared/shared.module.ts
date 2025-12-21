@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
-import { ILoggerService, IConfigurationService, ISupabaseService, IQueueService, IEventPublisher } from '@fnd/backend';
+import { ILoggerService, IConfigurationService, IQueueService, IEventPublisher } from '@fnd/backend';
 import { IEmailService } from '@fnd/backend';
 import { IEmailQueueService } from '@fnd/backend';
 import {
@@ -21,6 +21,10 @@ import {
   PlanRepository,
   SubscriptionRepository,
   WebhookEventRepository,
+  SessionRepository,
+  LoginAttemptRepository,
+  AuthTokenRepository,
+  ImpersonateSessionRepository,
   createDatabase
 } from '@fnd/database';
 import { ResendEmailService } from './services/resend-email.service';
@@ -29,7 +33,6 @@ import { EmailQueueService } from './services/email-queue.service';
 import { EventBrokerService } from './services/event-broker.service';
 import { ConfigurationService } from './services/configuration.service';
 import { StartupLoggerService } from './services/startup-logger.service';
-import { SupabaseService } from './services/supabase.service';
 import { BullMQQueueAdapter, BullMQEventPublisher } from './adapters';
 import { RedisProvider } from './providers/redis.provider';
 
@@ -44,10 +47,13 @@ const AUDIT_LOG_REPOSITORY_TOKEN = 'IAuditLogRepository';
 const PLAN_REPOSITORY_TOKEN = 'IPlanRepository';
 const SUBSCRIPTION_REPOSITORY_TOKEN = 'ISubscriptionRepository';
 const WEBHOOK_EVENT_REPOSITORY_TOKEN = 'IWebhookEventRepository';
+const SESSION_REPOSITORY_TOKEN = 'ISessionRepository';
+const LOGIN_ATTEMPT_REPOSITORY_TOKEN = 'ILoginAttemptRepository';
+const AUTH_TOKEN_REPOSITORY_TOKEN = 'IAuthTokenRepository';
+const IMPERSONATE_SESSION_REPOSITORY_TOKEN = 'IImpersonateSessionRepository';
 const EMAIL_QUEUE_SERVICE_TOKEN = 'IEmailQueueService';
 const EVENT_BROKER_TOKEN = 'IEventBroker';
 const CONFIGURATION_SERVICE_TOKEN = 'IConfigurationService';
-const SUPABASE_SERVICE_TOKEN = 'ISupabaseService';
 const QUEUE_SERVICE_TOKEN = 'IQueueService';
 const EVENT_PUBLISHER_TOKEN = 'IEventPublisher';
 const REDIS_CONNECTION_TOKEN = 'REDIS_CONNECTION';
@@ -116,6 +122,26 @@ const REDIS_CONNECTION_TOKEN = 'REDIS_CONNECTION';
       inject: [DATABASE_TOKEN],
     },
     {
+      provide: SESSION_REPOSITORY_TOKEN,
+      useFactory: (db) => new SessionRepository(db),
+      inject: [DATABASE_TOKEN],
+    },
+    {
+      provide: LOGIN_ATTEMPT_REPOSITORY_TOKEN,
+      useFactory: (db) => new LoginAttemptRepository(db),
+      inject: [DATABASE_TOKEN],
+    },
+    {
+      provide: AUTH_TOKEN_REPOSITORY_TOKEN,
+      useFactory: (db) => new AuthTokenRepository(db),
+      inject: [DATABASE_TOKEN],
+    },
+    {
+      provide: IMPERSONATE_SESSION_REPOSITORY_TOKEN,
+      useFactory: (db) => new ImpersonateSessionRepository(db),
+      inject: [DATABASE_TOKEN],
+    },
+    {
       provide: EMAIL_QUEUE_SERVICE_TOKEN,
       useClass: EmailQueueService,
     },
@@ -126,10 +152,6 @@ const REDIS_CONNECTION_TOKEN = 'REDIS_CONNECTION';
     {
       provide: CONFIGURATION_SERVICE_TOKEN,
       useClass: ConfigurationService,
-    },
-    {
-      provide: SUPABASE_SERVICE_TOKEN,
-      useClass: SupabaseService,
     },
     RedisProvider,
     {
@@ -154,10 +176,13 @@ const REDIS_CONNECTION_TOKEN = 'REDIS_CONNECTION';
     PLAN_REPOSITORY_TOKEN,
     SUBSCRIPTION_REPOSITORY_TOKEN,
     WEBHOOK_EVENT_REPOSITORY_TOKEN,
+    SESSION_REPOSITORY_TOKEN,
+    LOGIN_ATTEMPT_REPOSITORY_TOKEN,
+    AUTH_TOKEN_REPOSITORY_TOKEN,
+    IMPERSONATE_SESSION_REPOSITORY_TOKEN,
     EMAIL_QUEUE_SERVICE_TOKEN,
     EVENT_BROKER_TOKEN,
     CONFIGURATION_SERVICE_TOKEN,
-    SUPABASE_SERVICE_TOKEN,
     QUEUE_SERVICE_TOKEN,
     EVENT_PUBLISHER_TOKEN,
     REDIS_CONNECTION_TOKEN,

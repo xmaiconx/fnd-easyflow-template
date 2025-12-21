@@ -57,33 +57,13 @@ export class ConfigurationService implements IConfigurationService {
     };
   }
 
-  // Supabase Auth configuration methods
-  getSupabaseUrl(): string {
-    const url = this.configService.get<string>('SUPABASE_URL');
-    if (!url) {
-      throw new Error('SUPABASE_URL is required for Supabase Auth');
+  // JWT configuration
+  getJwtSecret(): string {
+    const secret = this.configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET is required for authentication');
     }
-    return url;
-  }
-
-  getSupabasePublishableKey(): string {
-    const key = this.configService.get<string>('SUPABASE_PUBLISHABLE_KEY');
-    if (!key) {
-      throw new Error('SUPABASE_PUBLISHABLE_KEY is required for Supabase Auth');
-    }
-    return key;
-  }
-
-  getSupabaseSecretKey(): string {
-    const key = this.configService.get<string>('SUPABASE_SECRET_KEY');
-    if (!key) {
-      throw new Error('SUPABASE_SECRET_KEY is required for Supabase Auth');
-    }
-    return key;
-  }
-
-  getSupabaseWebhookSecret(): string {
-    return this.configService.get<string>('SUPABASE_WEBHOOK_SECRET') || '';
+    return secret;
   }
 
   // Stripe configuration methods
@@ -129,5 +109,11 @@ export class ConfigurationService implements IConfigurationService {
     }
 
     return mode as 'api' | 'workers' | 'hybrid';
+  }
+
+  // Environment detection
+  isTestEnvironment(): boolean {
+    const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
+    return nodeEnv === 'test';
   }
 }

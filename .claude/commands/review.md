@@ -64,9 +64,28 @@ ls CLAUDE.md
 
 **A especificação técnica é a fonte da verdade** para validar o código.
 
-### Step 4: Identify & Read Implemented Files
+### Step 4: Identify ALL Changed Files (Branch-Wide)
 
-From `implementation.md`, extract and **read ALL files** created/modified.
+**⚠️ CRÍTICO:** Use o script de detecção para listar TODOS os arquivos alterados na branch.
+
+```bash
+# Lista commits, staged, unstaged e untracked
+bash .claude/scripts/detect-project-state.sh --branch-changes
+```
+
+**Este script retorna:**
+- `COMMITTED_FILES` - Arquivos já commitados na branch
+- `STAGED_FILES` - Arquivos prontos para commit
+- `UNSTAGED_FILES` - Arquivos modificados mas não staged
+- `UNTRACKED_FILES` - Arquivos novos não rastreados
+- `FILES_TO_REVIEW` - Lista consolidada de todos os arquivos a revisar
+- `CHANGES_BY_AREA` - Estatísticas por diretório
+
+**IMPORTANTE:** A review deve cobrir TODOS os arquivos listados em `FILES_TO_REVIEW`, não apenas os mencionados em `implementation.md`.
+
+### Step 5: Read Implemented Files
+
+From the script output and `implementation.md`, **read ALL files** that exist and were created/modified.
 
 ---
 
@@ -318,6 +337,166 @@ cat docs/instructions/security.md
 
 ---
 
+## Phase 5.5: Contract & Runtime Validation
+
+**⚠️ NOVA FASE CRÍTICA:** Validar contratos entre frontend/backend e comportamentos de bibliotecas para prevenir erros em tempo de execução.
+
+### 5.5.1 Frontend/Backend Contract Validation
+
+**Objetivo:** Garantir que DTOs do frontend espelham corretamente os contratos do backend.
+
+**Verificar:**
+
+```bash
+# 1. Buscar DTOs do backend alterados na feature
+grep -rE "export (class|interface) \w+(Dto|Response)" apps/backend/src --include="*.ts"
+
+# 2. Comparar com types do frontend
+ls apps/frontend/src/types/
+```
+
+**Checklist de Contratos:**
+
+| Verificação | Ação se Falhar |
+|-------------|----------------|
+| Novo DTO no backend tem interface correspondente no frontend? | Criar interface em `apps/frontend/src/types/` |
+| Campos obrigatórios coincidem? | Alinhar campos entre backend e frontend |
+| Tipos são compatíveis? (Date→string, Enum→union types) | Ajustar tipos no frontend |
+| Enums têm mesmos valores? | Sincronizar valores |
+| Campos opcionais são tratados corretamente? (`?` no TS) | Adicionar `?` onde necessário |
+
+**Padrões de Contrato:**
+```typescript
+// Backend DTO
+export class UserResponseDto {
+  id: string;
+  email: string;
+  role: UserRole;
+  createdAt: Date;
+}
+
+// Frontend Interface (DEVE espelhar)
+export interface UserResponse {
+  id: string;
+  email: string;
+  role: 'owner' | 'admin' | 'member';  // Union ao invés de enum import
+  createdAt: string;  // Date serializa como string no JSON
+}
+```
+
+**Erros Comuns de Contrato:**
+- ❌ Frontend espera campo que backend não envia
+- ❌ Tipos incompatíveis (Date no backend, espera Date no frontend mas recebe string)
+- ❌ Enum importado do backend (deve usar union type ou espelhar)
+- ❌ Campo obrigatório no frontend mas opcional no backend
+
+### 5.5.2 Library Behavior Validation
+
+**Objetivo:** Identificar usos incorretos de bibliotecas que causarão erros em runtime.
+
+#### Kysely / PostgreSQL Patterns
+
+| Pattern Incorreto | Pattern Correto | Razão |
+|-------------------|-----------------|-------|
+| `JSON.parse(row.jsonbColumn)` | `row.jsonbColumn` (direto) | Kysely retorna JSONB já parseado |
+| `JSON.stringify(obj)` em insert de JSONB | `obj` (direto) | Kysely serializa automaticamente |
+| `eb.val(JSON.stringify(x))` | `eb.val(x)` | Evitar double-stringify |
+| `.where('id', '=', id)` sem cast | `.where('id', '=', sql\`${id}::uuid\`)` | UUID precisa de cast explícito |
+
+```typescript
+// ❌ ERRADO - Double parse
+const data = JSON.parse(result.metadata); // metadata já é objeto
+
+// ✅ CORRETO
+const data = result.metadata; // Kysely já fez o parse
+```
+
+#### Date/Timestamp Handling
+
+| Pattern Incorreto | Pattern Correto | Razão |
+|-------------------|-----------------|-------|
+| `new Date(row.created_at)` (redundante) | `row.created_at` | Postgres retorna Date object |
+| Comparar Date com string | Usar `Date` objects ou timestamps | Evitar comparação de tipos diferentes |
+
+```typescript
+// ❌ ERRADO
+const isRecent = row.created_at > '2024-01-01'; // String comparison
+
+// ✅ CORRETO
+const isRecent = row.created_at > new Date('2024-01-01');
+```
+
+#### Supabase Auth Patterns
+
+| Pattern Incorreto | Pattern Correto | Razão |
+|-------------------|-----------------|-------|
+| `supabase.auth.getUser()` sem await | `await supabase.auth.getUser()` | Retorna Promise |
+| Acessar `session.user` sem null check | `session?.user` | Pode ser null |
+| Confiar no user do body | Extrair do JWT token | Segurança |
+
+#### NestJS Patterns
+
+| Pattern Incorreto | Pattern Correto | Razão |
+|-------------------|-----------------|-------|
+| `@Injectable()` sem provider | Registrar no module | Erro de DI em runtime |
+| Circular dependency sem forwardRef | `@Inject(forwardRef(() => Service))` | Evitar erro de inicialização |
+| Serviço sem interface | Implementar interface | Facilitar testes e DI |
+
+#### BullMQ Patterns
+
+| Pattern Incorreto | Pattern Correto | Razão |
+|-------------------|-----------------|-------|
+| Job data com funções | Apenas dados serializáveis | Jobs são JSON serialized |
+| Assumir job.data tipado | Validar estrutura em runtime | Type safety não persiste |
+
+### 5.5.3 Runtime Error Detection Checklist
+
+**Para CADA arquivo TypeScript modificado, verificar:**
+
+```markdown
+### Type Coercion Issues
+- [ ] Sem `JSON.parse` em campos JSONB do Kysely
+- [ ] Sem `JSON.stringify` desnecessário em inserts JSONB
+- [ ] Sem `new Date()` redundante em campos timestamp
+- [ ] Sem comparação de Date com string
+
+### Null/Undefined Safety
+- [ ] Optional chaining em acessos que podem ser null
+- [ ] Nullish coalescing (`??`) ao invés de `||` para valores falsy válidos
+- [ ] Verificação de null antes de destructuring
+
+### Async/Await Issues
+- [ ] Todas as Promises têm await ou são handled
+- [ ] Sem Promise em condições (ex: `if (promise)` ao invés de `if (await promise)`)
+- [ ] Sem `.then()` misturado com async/await
+
+### Type Assertions
+- [ ] Sem `as any` (usar unknown + type guard)
+- [ ] Assertions (`as Type`) validadas em runtime quando dados externos
+- [ ] Sem non-null assertion (operador !) em dados não garantidos
+
+### Array/Object Operations
+- [ ] `.find()` result verificado antes de uso (pode ser undefined)
+- [ ] `.map()` em array garantidamente não-null
+- [ ] Object spread em objeto garantidamente não-null
+```
+
+### 5.5.4 Validação Automática
+
+**Se encontrar violações:**
+
+1. **Identificar** o padrão incorreto
+2. **Corrigir** automaticamente
+3. **Documentar** no relatório com antes/depois
+4. **Verificar** que build ainda passa
+
+**Severidades:**
+- 🔴 **Critical** - Causará erro em runtime (JSON.parse de JSONB, Promise sem await)
+- 🟡 **High** - Pode causar bugs sutis (contrato desalinhado, type coercion)
+- 🟠 **Medium** - Code smell que pode evoluir para bug (any, assertions)
+
+---
+
 ## Phase 6: Apply Fixes (AUTO-CORRECTION)
 
 **⚠️ OBRIGATÓRIO:** Para CADA violação encontrada, aplicar a correção imediatamente.
@@ -337,7 +516,8 @@ cat docs/instructions/security.md
 3. Architecture violations
 4. SOLID violations
 5. Security violations
-6. Code quality issues
+6. Contract & Runtime violations (frontend/backend, library misuse)
+7. Code quality issues
 ```
 
 ### Build Verification:
@@ -385,6 +565,7 @@ npm run build
 | Architecture & SOLID | X/10 | ✅/⚠️/❌ |
 | Security & Multi-Tenancy | X/10 | ✅/⚠️/❌ |
 | Code Quality (types, exports, dead code) | X/10 | ✅/⚠️/❌ |
+| **Contract & Runtime (NEW)** | X/10 | ✅/⚠️/❌ |
 | Database & Migrations | X/10 | ✅/⚠️/❌ |
 | **OVERALL** | **X/10** | **✅** |
 
@@ -484,10 +665,24 @@ Próximos Passos:
 - Não invente padrões - use apenas os definidos no projeto
 - Se spec não existir, recomendar `/architecture` e usar CLAUDE.md
 
+**⚠️ IDENTIFICAR TODOS OS ARQUIVOS:**
+- SEMPRE execute `bash .claude/scripts/detect-project-state.sh --branch-changes`
+- Revise TODOS os arquivos em `FILES_TO_REVIEW`, não apenas implementation.md
+- Subagentes devem usar o script para mapear escopo completo
+
+**⚠️ VALIDAÇÃO DE CONTRATOS E RUNTIME:**
+- SEMPRE validar contratos frontend/backend (DTOs espelhados)
+- SEMPRE verificar uso correto de bibliotecas (Kysely JSONB, Supabase Auth, etc.)
+- Erros de runtime são CRÍTICOS - causam falhas em produção
+- Date serializa como string no JSON - frontend deve esperar string
+- Kysely retorna JSONB já parseado - não usar JSON.parse
+
 **BE CRITICAL:**
 - Find ALL violations against project patterns (from technical-spec.md or CLAUDE.md)
 - Check EVERY pattern defined in the project
 - Validate EVERY query has proper filters (if multi-tenancy defined)
+- Check frontend/backend contract alignment for NEW DTOs
+- Detect library misuse that causes runtime errors
 
 **DO NOT:**
 - Generate report without fixing issues
@@ -496,10 +691,15 @@ Próximos Passos:
 - Leave code in non-compiling state
 - Invent patterns not defined in the specification
 - Assume patterns without checking the spec first
+- Use JSON.parse on Kysely JSONB columns
+- Import backend enums in frontend (use union types)
 
 **DO:**
+- Run detect-project-state.sh --branch-changes FIRST
 - Read technical-spec.md (or CLAUDE.md) completely first
 - Fix ALL issues automatically
 - Verify build passes after fixes
 - Document before/after for each fix
 - Reference CLAUDE.md in explanations
+- Check Date→string serialization in contracts
+- Validate library patterns match documentation
