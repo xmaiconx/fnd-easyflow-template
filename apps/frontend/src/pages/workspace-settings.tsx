@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
 import { PageHeader } from "@/components/layout/page-header"
@@ -15,6 +15,7 @@ import { useAuthStore } from "@/stores/auth-store"
 
 export function WorkspaceSettingsPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams<{ id: string }>()
   const workspaceList = useAuthStore((state) => state.workspaceList)
 
@@ -26,7 +27,7 @@ export function WorkspaceSettingsPage() {
   // Loading state while workspace list might still be loading
   if (workspaceList.length === 0) {
     return (
-      <AppShell>
+      <AppShell currentPath={location.pathname}>
         <div className="space-y-6">
           <PageHeader
             title="Configurações do Workspace"
@@ -43,7 +44,7 @@ export function WorkspaceSettingsPage() {
   // If workspace not found, show alert
   if (!workspace) {
     return (
-      <AppShell>
+      <AppShell currentPath={location.pathname}>
         <div className="space-y-6">
           <PageHeader
             title="Configurações do Workspace"
@@ -68,7 +69,7 @@ export function WorkspaceSettingsPage() {
   }
 
   return (
-    <AppShell>
+    <AppShell currentPath={location.pathname}>
       <div className="space-y-6">
         <PageHeader
           title="Configurações do Workspace"

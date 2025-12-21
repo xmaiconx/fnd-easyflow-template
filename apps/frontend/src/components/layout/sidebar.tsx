@@ -18,7 +18,7 @@ import type { Workspace } from "@/types"
 
 const navItems = [
   { icon: Home, label: "Dashboard", href: "/" },
-  { icon: Building2, label: "Workspaces", href: "/settings/workspaces" },
+  { icon: Building2, label: "Workspaces", href: "/settings/workspaces", matchPaths: ["/settings/workspace", "/settings/workspaces"] },
   { icon: Activity, label: "Sessions", href: "/sessions" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ]
@@ -30,6 +30,21 @@ interface SidebarProps {
   isCollapsed?: boolean
   currentPath?: string
   onToggleCollapse?: () => void
+}
+
+// Helper function to check if current path matches a route
+function isRouteActive(currentPath: string, href: string, matchPaths?: string[]): boolean {
+  // Exact match
+  if (currentPath === href) {
+    return true
+  }
+
+  // Check partial matches for nested routes
+  if (matchPaths) {
+    return matchPaths.some((path) => currentPath.startsWith(path))
+  }
+
+  return false
 }
 
 export function Sidebar({
@@ -121,7 +136,7 @@ export function Sidebar({
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = currentPath === item.href
+            const isActive = isRouteActive(currentPath, item.href, (item as any).matchPaths)
 
             return (
               <motion.a

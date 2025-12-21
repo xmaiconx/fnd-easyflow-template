@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Building2 } from "lucide-react"
@@ -60,6 +60,7 @@ const container = {
 
 export function WorkspacesPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const currentWorkspace = useAuthStore((state) => state.currentWorkspace)
   const switchWorkspace = useAuthStore((state) => state.switchWorkspace)
@@ -100,7 +101,7 @@ export function WorkspacesPage() {
 
   if (isLoading) {
     return (
-      <AppShell>
+      <AppShell currentPath={location.pathname}>
         <div className="space-y-6">
           <PageHeader
             title="Workspaces"
@@ -118,7 +119,7 @@ export function WorkspacesPage() {
   }
 
   return (
-    <AppShell>
+    <AppShell currentPath={location.pathname}>
       <div className="space-y-6">
         <PageHeader
           title="Workspaces"
