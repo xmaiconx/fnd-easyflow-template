@@ -11,7 +11,7 @@ Rebuild completo do frontend em `apps/frontend_v2/` utilizando design system mod
 ## Spec (Token-Efficient)
 
 ### Summary
-{"project":"apps/frontend_v2","stack":"React 18.2+Vite 4.4+Tailwind v3+shadcn/ui+Motion+Recharts+TanStack","port":"3005","designSystem":"Teal #1AB394 + Cyan #16A8E0","theme":"dark default","mobile-first":true,"build":"✓ 100% pass"}
+{"project":"apps/frontend_v2","stack":"React 18.2+Vite 4.4+Tailwind v3+shadcn/ui+Motion+Recharts+TanStack","port":"3000","designSystem":"Teal #1AB394 + Cyan #16A8E0","theme":"dark default","mobile-first":true,"build":"✓ 100% pass"}
 
 ### Implementation Phases
 [{"phase":"1 - Setup","status":"✓","files":14,"tasks":"Vite project, Tailwind config, shadcn setup, fonts, globals.css, path aliases"},{"phase":"2 - Layout System","status":"✓","files":8,"tasks":"AppShell, Sidebar, Header, MobileHeader, BottomNav, PageHeader, AuthLayout"},{"phase":"3 - UI Components","status":"✓","files":26,"tasks":"shadcn install (17 components), custom UI (LoadingButton, FormField, EmptyState, PageSkeleton, CardSkeleton), hooks (useMobile, useMediaQuery)"},{"phase":"4 - Stores & API","status":"✓","files":21,"tasks":"auth-store (Zustand), ui-store (Zustand), API client (Axios+interceptors), React Router, types, placeholder pages"},{"phase":"5 - Auth Pages","status":"✓","files":12,"tasks":"LoginForm, SignupForm, ForgotPasswordForm, ResetPasswordForm, VerifyEmailStatus, EmailNotVerifiedCard + 6 pages"},{"phase":"6 - Dashboard","status":"✓","files":10,"tasks":"StatsCard, ChartCard (Recharts), ActivityFeed, dashboard page"},{"phase":"7 - Workspace","status":"✓","files":8,"tasks":"WorkspaceCard, CreateWorkspaceDialog, WorkspaceGeneralForm, WorkspaceMembersList, WorkspaceDangerZone + 2 pages"},{"phase":"8 - Billing & Sessions","status":"✓","files":9,"tasks":"CurrentPlanCard, PlanCard, BillingHistory, SessionCard, SessionsTable + 2 pages"},{"phase":"9 - Polish","status":"✓","tasks":"Verified: animations, skeletons, empty/error states all implemented"}]
@@ -20,7 +20,7 @@ Rebuild completo do frontend em `apps/frontend_v2/` utilizando design system mod
 
 #### Setup & Config (14 files)
 - `apps/frontend_v2/package.json` - @fnd/frontend_v2 com dependencies
-- `apps/frontend_v2/vite.config.ts` - port 3005, path alias @/*
+- `apps/frontend_v2/vite.config.ts` - port 3000, path alias @/*
 - `apps/frontend_v2/tailwind.config.js` - design tokens Teal/Cyan
 - `apps/frontend_v2/postcss.config.js` - Tailwind + Autoprefixer
 - `apps/frontend_v2/components.json` - shadcn config
@@ -162,7 +162,7 @@ Rebuild completo do frontend em `apps/frontend_v2/` utilizando design system mod
 {"provided":["Dashboard stats (4 metrics)","Chart data (7 days)","Activities (7 items)","Workspaces (3 items)","Plans (Free, Pro, Enterprise)","Invoices (3 items)","Sessions (4 items)"]}
 
 ### Next Steps
-[{"task":"Conectar com API real","priority":"high","impact":"Replace mock data com TanStack Query calls"},{"task":"Executar migrations","command":"npm run migrate:latest","when":"Antes de testar auth flow"},{"task":"Iniciar serviços","command":"docker-compose -f infra/docker-compose.yml up -d && npm run dev","port":"Frontend :3005, API :3001"},{"task":"Testar auth flow","pages":"Signup → Verify Email → Login → Dashboard"},{"task":"Testar workspace CRUD","pages":"Create workspace → Switch → Settings → Members"},{"task":"Code review","command":"/review","when":"Após testes manuais"},{"task":"Migração final","steps":"Deletar apps/frontend → Renomear apps/frontend_v2 → apps/frontend → Atualizar package.json workspaces"}]
+[{"task":"Conectar com API real","priority":"high","impact":"Replace mock data com TanStack Query calls"},{"task":"Executar migrations","command":"npm run migrate:latest","when":"Antes de testar auth flow"},{"task":"Iniciar serviços","command":"docker-compose -f infra/docker-compose.yml up -d && npm run dev","port":"Frontend :3000, API :3001"},{"task":"Testar auth flow","pages":"Signup → Verify Email → Login → Dashboard"},{"task":"Testar workspace CRUD","pages":"Create workspace → Switch → Settings → Members"},{"task":"Code review","command":"/review","when":"Após testes manuais"},{"task":"Migração final","steps":"Deletar apps/frontend → Renomear apps/frontend_v2 → apps/frontend → Atualizar package.json workspaces"}]
 
 ### Integration Points
 {"backend":"F0001 internal auth (Passport.js + JWT)","api":"apps/backend (NestJS)","database":"PostgreSQL 15 via Kysely","auth":"JWT tokens (access + refresh)","payments":"Stripe (checkout + portal)"}
@@ -225,7 +225,7 @@ Todos componentes começam mobile (320px) e escalam: touch targets 44px, input f
 
 1. **npm run migrate:latest** - Rodar migrations backend
 2. **docker-compose -f infra/docker-compose.yml up -d** - Subir PostgreSQL + Redis
-3. **npm run dev** - Iniciar API (:3001) + Frontend V2 (:3005)
+3. **npm run dev** - Iniciar API (:3001) + Frontend V2 (:3000)
 4. Testar auth flow completo (signup → verify → login)
 5. Conectar TanStack Query nos componentes (substituir mock data)
 6. Code review com `/review`

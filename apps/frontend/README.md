@@ -29,7 +29,7 @@ Based on `docs/design-system/foundations.md`:
 ## Getting Started
 
 ```bash
-# Development server (port 3005)
+# Development server (port 3000)
 npm run dev -w @fnd/frontend_v2
 
 # Build for production

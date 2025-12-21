@@ -22,7 +22,7 @@ export async function bootstrapApi() {
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:3000',
     process.env.MANAGER_URL || 'http://localhost:3002',
-    'http://localhost:3005', // frontend_v2
+    'http://localhost:3000', // frontend_v2
   ].filter(Boolean);
 
   app.enableCors({
