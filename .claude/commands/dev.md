@@ -244,74 +244,7 @@ Fix ALL build errors. Do not stop until build passes 100%.
 
 ---
 
-## Phase 6: API Test Generation (If Backend)
-
-**Condição:** Execute esta fase APENAS se o escopo incluir Backend API.
-
-### 6.0 Ensure httpyac is installed
-
-```bash
-npm ls httpyac 2>/dev/null || npm install httpyac --save-dev
-```
-
-### 6.1 Dispatch Test Generation Subagent
-
-**Use Task tool with `subagent_type: "general-purpose"`**
-
-**Subagent Prompt Template:**
-
-```
-You are generating API tests for feature ${FEATURE_ID}.
-
-## Context
-- Feature: ${FEATURE_ID}
-- Implementation: Read docs/features/${FEATURE_ID}/implementation.md for files created
-- Skill: Read and follow .claude/skills/api-testing/SKILL.md
-- Patterns: Read .claude/skills/api-testing/httpyac-patterns.md
-
-## Your Tasks
-1. Read implementation.md to identify all endpoints created
-2. Read the controller files to understand request/response structure
-3. Read httpyac-patterns.md for test patterns
-4. Create test directory: docs/features/${FEATURE_ID}/tests/api/
-5. Generate http-client.env.json with environment variables
-6. Generate 00-setup.http for authentication
-7. Generate 01-[module]-crud.http for CRUD operations
-8. Generate test-plan.md documenting all test scenarios
-
-## Worker Testing (if applicable)
-If the feature includes workers:
-- Read .claude/skills/api-testing/worker-testing-guide.md
-- Add worker verification tests with {{$sleep}} delays
-
-## Deliverables
-- Report: List of test files created
-- All .http files following the patterns
-- test-plan.md with complete test documentation
-
-## Output Structure
-docs/features/${FEATURE_ID}/tests/
-├── api/
-│   ├── http-client.env.json    # Environment variables
-│   ├── 00-setup.http           # Authentication
-│   ├── 01-[module]-crud.http   # CRUD tests
-│   ├── 02-[module]-validation.http  # Validation tests (if applicable)
-│   └── test-plan.md            # Test documentation
-```
-
-### 6.2 Verify Test Files
-
-After subagent completes, verify:
-
-```bash
-ls -la "docs/features/${FEATURE_ID}/tests/api/"
-```
-
-**Expected:** At least `http-client.env.json`, `00-setup.http`, and one module test file.
-
----
-
-## Phase 7: Completion
+## Phase 6: Completion
 
 **Inform the user:**
 
@@ -330,14 +263,16 @@ Feature: ${FEATURE_ID}
 
 **Documentation:** `docs/features/${FEATURE_ID}/implementation.md`
 
-**API Tests:** `docs/features/${FEATURE_ID}/tests/api/` (if backend)
-
 **Next Steps:**
 1. Execute migration: `npm run migrate:latest`
 2. Start services: `docker-compose -f infra/docker-compose.yml up -d && npm run dev`
-3. Run API tests: `/test-api`
-4. Run code review: `/review`
-5. When approved, stage and commit changes
+3. Run code review: `/review`
+4. When approved, stage and commit changes
+
+**Testes de API (Opcional):**
+Se desejar criar testes de API para validar os endpoints desenvolvidos, execute:
+
+/api-testing crie os testes baseado nas alterações realizadas na branch da feature
 ```
 
 ---
