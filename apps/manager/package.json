@@ -1,7 +1,7 @@
 {
   "name": "@fnd/manager",
   "version": "1.0.0",
-  "description": "Manager Admin Panel para FND EasyFlow Template",
+  "description": "Manager Admin Panel para FND MetaTemplate",
   "type": "module",
   "scripts": {
     "build": "vite build",

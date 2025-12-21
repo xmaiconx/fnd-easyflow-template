@@ -22,8 +22,15 @@ export class WorkspaceController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createWorkspace(@Body() dto: { accountId: string; name: string; settings?: object }, @Request() req: any) {
-    return await this.workspaceService.createWorkspace(dto, req.user.id);
+  async createWorkspace(@Body() dto: { name: string; settings?: object }, @Request() req: any) {
+    return await this.workspaceService.createWorkspace(
+      {
+        accountId: req.user.accountId,
+        name: dto.name,
+        settings: dto.settings,
+      },
+      req.user.id,
+    );
   }
 
   @Get()

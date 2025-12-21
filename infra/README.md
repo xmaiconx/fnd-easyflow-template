@@ -1,4 +1,4 @@
-# FND EasyFlow - Docker Infrastructure
+# FND MetaTemplate - Docker Infrastructure
 
 This directory contains Docker infrastructure for local development and deployment.
 
@@ -7,7 +7,7 @@ This directory contains Docker infrastructure for local development and deployme
 ### PostgreSQL 15
 - **Port**: 5432
 - **Container**: fnd-postgres
-- **Database**: fnd_easyflow
+- **Database**: fnd_metatemplate
 - **User**: fnd_user
 - **Password**: fnd_pass
 
@@ -75,7 +75,7 @@ After starting the services, update your `.env` file:
 
 ```bash
 # Local Docker PostgreSQL
-DATABASE_URL=postgresql://fnd_user:fnd_pass@localhost:5432/fnd_easyflow
+DATABASE_URL=postgresql://fnd_user:fnd_pass@localhost:5432/fnd_metatemplate
 
 # Local Docker Redis
 REDIS_URL=redis://localhost:6379
@@ -90,7 +90,7 @@ REDIS_URL=redis://localhost:6379
 3. Add Server:
    - Host: postgres (use container name)
    - Port: 5432
-   - Database: fnd_easyflow
+   - Database: fnd_metatemplate
    - Username: fnd_user
    - Password: fnd_pass
 
@@ -100,7 +100,7 @@ REDIS_URL=redis://localhost:6379
 2. Add Redis Database:
    - Host: redis (use container name)
    - Port: 6379
-   - Database Alias: FND EasyFlow
+   - Database Alias: FND MetaTemplate
 
 ## Network
 

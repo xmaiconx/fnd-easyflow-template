@@ -835,3 +835,87 @@ Duas fontes de notificação + React StrictMode causando triplicação:
 **Rule:** Ao usar `location.state` para mensagens, SEMPRE limpar o state após processar para evitar duplicação em re-renders.
 
 ---
+
+## Fix 014 - Super-Admin Baseado em Email .env em Vez de Role no Banco
+
+**Data:** 2025-12-21
+**Fixed By:** Claude Code
+**Trigger:** Discussão sobre padrões de super-admin em SaaS templates
+
+### Bug
+
+**Expected:** Super-admin deve ser definido como role no banco de dados (UserRole.SUPER_ADMIN) durante signup, permitindo múltiplos admins e melhor auditoria.
+
+**Actual:** Super-admin era verificado apenas comparando email do JWT com SUPER_ADMIN_EMAIL do .env em runtime, sem persistir a role no banco.
+
+**Impact:**
+- Apenas um super-admin possível
+- Role não auditável no banco
+- Restart necessário para mudar super-admin
+- Inconsistente com UserRole enum que já tinha SUPER_ADMIN
+
+### Root Cause
+
+Implementação original comparava email em runtime no SuperAdminGuard em vez de usar a role persistida no banco:
+
+1. **SignUpCommand:** Criava todos os usuários com `UserRole.OWNER`, ignorando SUPER_ADMIN_EMAIL
+2. **SuperAdminGuard:** Comparava `user.email` com `configService.getSuperAdminEmail()` em runtime
+3. **UserRole enum:** Já tinha `SUPER_ADMIN = 'super-admin'` mas não era usado
+4. **JWT payload:** Não incluía role (mas JwtStrategy retorna User completo do banco, então role estava disponível)
+
+**Abordagem antiga:**
+```typescript
+// SuperAdminGuard - ANTES
+if (user.email !== configService.getSuperAdminEmail()) {
+  throw new ForbiddenException();
+}
+```
+
+### Fix Applied
+
+**Strategy:** Definir role SUPER_ADMIN no signup baseado em SUPER_ADMIN_EMAIL + verificar role no guard.
+
+| File | Change |
+|------|--------|
+| `apps/backend/src/api/modules/auth/commands/SignUpCommand.ts` | (1) Importar `IConfigurationService`. (2) Injetar `IConfigurationService` no constructor. (3) Antes de criar user, chamar `configService.isSuperAdminEmail(email)`. (4) Definir `userRole = isSuperAdmin ? UserRole.SUPER_ADMIN : UserRole.OWNER`. (5) Criar user com `role: userRole` |
+| `apps/backend/src/api/guards/super-admin.guard.ts` | (1) Remover import `IConfigurationService`. (2) Remover injeção de `IConfigurationService` do constructor. (3) Importar `UserRole` de `@fnd/domain`. (4) Substituir lógica de comparação de email por `if (user.role !== UserRole.SUPER_ADMIN) throw ForbiddenException()` |
+
+**Abordagem nova:**
+```typescript
+// SignUpCommand - DEPOIS
+const isSuperAdmin = this.configService.isSuperAdminEmail(command.email);
+const userRole = isSuperAdmin ? UserRole.SUPER_ADMIN : UserRole.OWNER;
+const user = await this.userRepository.create({ ..., role: userRole });
+
+// SuperAdminGuard - DEPOIS
+if (user.role !== UserRole.SUPER_ADMIN) {
+  throw new ForbiddenException();
+}
+```
+
+### Spec (Token-Efficient)
+
+{"problema":"super_admin_runtime_only","causa_raiz":"role não persistida no banco","solução":"definir role no signup + verificar no guard","arquivos_modificados":2,"benefits":["role auditável","permite múltiplos admins futuros","usa UserRole enum existente","sem restart necessário"]}
+
+### Status
+
+- [x] Bug resolved
+- [x] Build passes (backend build 100%)
+- [x] No regressions
+- [x] Role armazenada no banco
+- [x] Guard simplificado (sem dependência de IConfigurationService)
+
+### Benefits
+
+**Antes:** Email hardcoded no .env, verificado em runtime, um admin apenas
+**Depois:** Role persistida no banco, verificada via JwtStrategy, extensível para múltiplos admins
+
+**Extensibilidade futura:** Adicionar endpoint `PATCH /manager/users/:id/role` para promover outros usuários a super-admin sem redeploy.
+
+### Prevention
+
+**Rule:** Roles de segurança devem ser persistidas no banco, não apenas verificadas em runtime contra .env.
+
+**Pattern:** Use .env para configuração inicial (primeiro super-admin no signup), mas persista a role no banco para auditoria e extensibilidade.
+
+---

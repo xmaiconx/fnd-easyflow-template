@@ -28,7 +28,7 @@ async function bootstrap() {
     process.env.NODE_MODE = 'hybrid';
   }
 
-  console.log(`🚀 Starting FND EasyFlow in ${NODE_MODE.toUpperCase()} mode...`);
+  console.log(`🚀 Starting FND MetaTemplate in ${NODE_MODE.toUpperCase()} mode...`);
 
   try {
     switch (NODE_MODE) {
@@ -53,9 +53,9 @@ async function bootstrap() {
       }
     }
 
-    console.log(`✅ FND EasyFlow ${NODE_MODE.toUpperCase()} mode started successfully`);
+    console.log(`✅ FND MetaTemplate ${NODE_MODE.toUpperCase()} mode started successfully`);
   } catch (error) {
-    console.error(`❌ Failed to start FND EasyFlow in ${NODE_MODE} mode:`, error);
+    console.error(`❌ Failed to start FND MetaTemplate in ${NODE_MODE} mode:`, error);
     process.exit(1);
   }
 }

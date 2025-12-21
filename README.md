@@ -1,12 +1,12 @@
-# FND EasyFlow Template
+# FND MetaTemplate
 
 > **Template base para alunos da Fábrica de Negócios Digitais (FND)** construírem seus SaaS utilizando IA.
 
-## 🎯 Sobre o FND EasyFlow
+## 🎯 Sobre o FND MetaTemplate
 
-O **FND EasyFlow** é um template pronto para produção que permite aos alunos da FND iniciarem o desenvolvimento de seus SaaS com uma base sólida e bem arquitetada.
+O **FND MetaTemplate** é um template pronto para produção que permite aos alunos da FND iniciarem o desenvolvimento de seus SaaS com uma base sólida e bem arquitetada.
 
-**A grande promessa do FND**: Pare de tentar construir tijolo por tijolo. Entre na Fábrica, use nossas máquinas (EasyFlow + SalesFlow) e tenha não só o produto pronto, mas a máquina de vendas construída.
+**A grande promessa do FND**: Pare de tentar construir tijolo por tijolo. Entre na Fábrica, use nossas máquinas (MetaTemplate + SalesFlow) e tenha não só o produto pronto, mas a máquina de vendas construída.
 
 Este template inclui:
 - ✅ Arquitetura limpa (Clean Architecture + CQRS)

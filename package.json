@@ -1,5 +1,5 @@
 {
-  "name": "fnd-easyflow-template",
+  "name": "fnd-metatemplate",
   "version": "1.0.0",
   "description": "Template base para alunos FND construírem SaaS com IA",
   "private": true,

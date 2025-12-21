@@ -3,10 +3,9 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  Inject,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { IConfigurationService } from '@fnd/backend';
+import { UserRole } from '@fnd/domain';
 
 /**
  * Super Admin Guard
@@ -15,16 +14,14 @@ import { IConfigurationService } from '@fnd/backend';
  *
  * Flow:
  * 1. Delegates to JwtAuthGuard for JWT validation
- * 2. Checks if authenticated user email matches SUPER_ADMIN_EMAIL
+ * 2. Checks if authenticated user role is SUPER_ADMIN
  * 3. Throws ForbiddenException if not super admin
  *
  * Usage: @UseGuards(SuperAdminGuard)
  */
 @Injectable()
 export class SuperAdminGuard extends JwtAuthGuard implements CanActivate {
-  constructor(
-    @Inject('IConfigurationService') private readonly configService: IConfigurationService,
-  ) {
+  constructor() {
     super();
   }
 
@@ -36,21 +33,15 @@ export class SuperAdminGuard extends JwtAuthGuard implements CanActivate {
       return false;
     }
 
-    // Then, check super admin access
+    // Then, check super admin access based on user role
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (!user || !user.email) {
+    if (!user || !user.role) {
       throw new ForbiddenException('User context not found');
     }
 
-    const superAdminEmail = this.configService.getSuperAdminEmail();
-
-    if (!superAdminEmail) {
-      throw new ForbiddenException('Super admin feature is not configured');
-    }
-
-    if (user.email.toLowerCase().trim() !== superAdminEmail.toLowerCase().trim()) {
+    if (user.role !== UserRole.SUPER_ADMIN) {
       throw new ForbiddenException('Super admin access required');
     }
 

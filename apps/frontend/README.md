@@ -1,113 +1,165 @@
-# FND EasyFlow Frontend
+# FND MetaTemplate - Frontend V2
 
-Frontend React para o template FND EasyFlow.
+Complete rebuild of the frontend application for F0002-frontend-v2-rebuild feature.
 
-## 🚀 Stack Tecnológica
+## Overview
 
-- **Framework**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **UI Library**: Shadcn/ui + Tailwind CSS
-- **State Management**: Zustand (client) + TanStack Query (server)
-- **Forms**: React Hook Form + Zod
-- **Routing**: React Router
-- **HTTP Client**: Axios
+Production-grade, mobile-first frontend built with:
+- React 18.2 + TypeScript
+- Vite 7.x (fast builds, HMR)
+- Tailwind CSS v3 (utility-first, responsive)
+- shadcn/ui (Radix UI primitives)
+- Framer Motion (animations)
+- Recharts (data visualization)
+- TanStack Query v4 (server state)
+- TanStack Table v8 (advanced tables)
+- React Router v6 (routing)
+- Zustand v4 (client state)
+- React Hook Form v7 + Zod (forms)
 
-## 📦 Desenvolvimento
+## Design System
 
-### Pré-requisitos
+Based on `docs/design-system/foundations.md`:
+- **Colors**: Emerald primary (#10B981), Indigo accent (#6366F1)
+- **Fonts**: Plus Jakarta Sans (display), DM Sans (body), JetBrains Mono (mono)
+- **Breakpoints**: mobile (320px-767px), tablet (768px-1023px md:), desktop (1024px-1279px lg:), wide (1280px+ xl:)
+- **Dark Mode**: Primary experience (default)
+- **Border Radius**: 0.75rem (12px)
 
-- Node.js 16+
-- npm 9+
-
-### Instalação
-
-```bash
-# Do diretório raiz do monorepo
-npm install
-
-# Ou apenas para o frontend
-cd apps/frontend
-npm install
-```
-
-### Configuração
-
-1. Copie o arquivo de exemplo:
-```bash
-cp .env.example .env
-```
-
-2. Configure as variáveis de ambiente:
-```env
-VITE_API_URL=http://localhost:3001
-NODE_ENV=development
-```
-
-### Scripts Disponíveis
+## Getting Started
 
 ```bash
-# Desenvolvimento
-npm run dev
+# Development server (port 3005)
+npm run dev -w @fnd/frontend_v2
 
-# Build
-npm run build
+# Build for production
+npm run build -w @fnd/frontend_v2
 
-# Preview do build
-npm run preview
+# Preview production build
+npm run preview -w @fnd/frontend_v2
 
-# Typecheck
-npm run typecheck
-
-# Lint
-npm run lint
+# Type check
+npm run typecheck -w @fnd/frontend_v2
 ```
 
-## 🏗️ Estrutura de Arquivos
+## Project Structure
 
 ```
 src/
 ├── components/
-│   ├── ui/           # Componentes Shadcn/ui
-│   ├── forms/        # Componentes de formulário
-│   ├── layout/       # Componentes de layout
-│   └── auth/         # Componentes de autenticação
-├── pages/            # Páginas da aplicação
-├── hooks/            # Custom hooks
-├── stores/           # Stores Zustand
-├── lib/              # Utilitários e configurações
-├── types/            # Tipos TypeScript
-└── contexts/         # React Contexts
+│   ├── ui/              # shadcn primitives (button, card, input, etc.)
+│   ├── layout/          # Layout components (AppShell, Sidebar, Header, etc.)
+│   ├── features/        # Feature-specific components
+│   └── charts/          # Chart wrappers (Recharts)
+├── hooks/               # Custom React hooks
+├── lib/
+│   └── utils.ts         # Utility functions (cn, etc.)
+├── pages/               # Route pages
+├── stores/              # Zustand stores
+├── styles/
+│   └── globals.css      # Tailwind + design tokens
+├── types/               # TypeScript type definitions
+├── App.tsx              # Root component
+├── main.tsx             # Entry point
+└── vite-env.d.ts        # Vite types
 ```
 
-## 🔐 Autenticação
+## Installing shadcn/ui Components
 
-O sistema de autenticação inclui:
+This project is configured for shadcn/ui. To add components:
 
-- **Login/Signup**: Formulários com validação Zod
-- **Tokens JWT**: Armazenados no localStorage via Zustand persist
-- **Rotas protegidas**: Redirecionamento automático
-- **Auto-refresh**: Verificação automática do token via TanStack Query
+```bash
+# From the frontend_v2 directory
+cd apps/frontend_v2
 
-## 📱 Mobile-First
+# Add specific components
+npx shadcn@latest add button
+npx shadcn@latest add card
+npx shadcn@latest add dialog
+npx shadcn@latest add input
+npx shadcn@latest add label
+# etc.
+```
 
-- **Responsive design**: Tailwind CSS breakpoints
-- **Modals**: Fullscreen no mobile, popup no desktop
-- **Navigation**: Sidebar colapsível + drawer mobile
+Components will be added to `src/components/ui/`.
 
-## 🎨 Componentes UI
+## Path Aliases
 
-Baseados no Shadcn/ui com customizações:
+The project uses `@/*` for imports:
 
-- **Button**: Variantes e loading states
-- **Input**: Integração com React Hook Form
-- **Card**: Layout consistente
-- **FormField**: Wrapper com validação
+```tsx
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/stores/auth-store'
+```
 
-## 🔧 Integração API
+## Mobile-First Development
 
-Configurada via Axios com interceptors:
+All components MUST be mobile-first:
 
-- **Base URL**: Configurável por ambiente
-- **Auth headers**: Automático via token
-- **Error handling**: Interceptors globais
-- **Types**: Espelhados do backend em types/api/ (frontend 100% desacoplado)
+```tsx
+// CORRECT: Mobile-first
+<div className="p-4 md:p-6 lg:p-8">
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+
+// INCORRECT: Desktop-first
+<div className="p-8 sm:p-4">
+```
+
+## Design Tokens
+
+All colors use CSS variables for theme support:
+
+```tsx
+// Use semantic colors
+<div className="bg-background text-foreground">
+<div className="bg-card text-card-foreground">
+<div className="bg-primary text-primary-foreground">
+
+// Avoid hardcoded colors
+<div className="bg-emerald-500"> // Don't do this
+```
+
+## Animation Guidelines
+
+Use subtle, purposeful animations:
+
+```tsx
+import { motion } from 'framer-motion'
+
+// Fade in
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.3 }}
+>
+
+// Hover states
+<Button className="transition-colors hover:bg-accent">
+```
+
+## Accessibility Checklist
+
+- [ ] Contrast ratio 4.5:1 for text, 3:1 for UI
+- [ ] Touch targets 44x44px minimum (h-11)
+- [ ] Focus visible on all interactive elements
+- [ ] Labels on all form inputs
+- [ ] Alt text on all images
+- [ ] Keyboard navigation support
+- [ ] Screen reader announcements
+- [ ] Reduced motion support
+
+## Next Steps
+
+1. Install shadcn components as needed
+2. Implement layout components (AppShell, Sidebar, Header)
+3. Create auth pages (login, signup, etc.)
+4. Build dashboard with stats and charts
+5. Add workspace management
+6. Implement billing page
+
+## References
+
+- Design System: `docs/design-system/foundations.md`
+- Design Spec: `docs/features/F0002-frontend-v2-rebuild/design.md`
+- UX Skill: `.claude/skills/ux-design/SKILL.md`

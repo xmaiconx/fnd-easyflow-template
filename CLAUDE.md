@@ -1,4 +1,4 @@
-# FND EasyFlow - Development Guide
+# FND MetaTemplate - Development Guide
 
 ## About
 

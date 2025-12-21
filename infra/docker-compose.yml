@@ -3,7 +3,7 @@ services:
     image: postgres:15-alpine
     container_name: fnd-postgres
     environment:
-      POSTGRES_DB: fnd_easyflow
+      POSTGRES_DB: fnd_metatemplate
       POSTGRES_USER: fnd_user
       POSTGRES_PASSWORD: fnd_pass
     ports:
@@ -13,7 +13,7 @@ services:
     networks:
       - fnd
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U fnd_user -d fnd_easyflow']
+      test: ['CMD-SHELL', 'pg_isready -U fnd_user -d fnd_metatemplate']
       interval: 10s
       timeout: 5s
       retries: 5

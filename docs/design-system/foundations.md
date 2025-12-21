@@ -1,4 +1,4 @@
-# FND EasyFlow - Design System Foundations
+# FND MetaTemplate - Design System Foundations
 
 Design System para aplicações SaaS modernas. Mobile-first como princípio central: todo design começa em 320px e escala para cima. Inspirado nos templates premium do Envato (Metronic, Vuexy, Trezo) com foco em dark mode como experiência primária, microinteractions sutis e interfaces data-driven.
 
@@ -40,9 +40,20 @@ Design SEMPRE começa no mobile (320px). Classes sem prefixo = mobile. Prefixos 
 
 Paleta sofisticada com dark mode como padrão. Cores semânticas para consistência e acessibilidade.
 
+### REGRA CRÍTICA: Contraste de Foreground
+**SEMPRE use o foreground correto para cada background:**
+- `bg-primary` → `text-primary-foreground` (branco)
+- `bg-secondary` → `text-secondary-foreground` (preto)
+- `bg-accent` → `text-accent-foreground` (branco)
+- `bg-destructive` → `text-destructive-foreground` (branco)
+
+**NUNCA:**
+- ❌ `bg-primary text-primary` (azul + azul = invisível)
+- ❌ `bg-secondary text-secondary` (cinza + cinza = invisível)
+
 ### Brand Colors
 ```
-{"brand":{"primary":"hsl(15, 90%, 50%)","primaryHover":"hsl(15, 90%, 45%)","secondary":"hsl(230, 70%, 50%)","secondaryHover":"hsl(230, 70%, 45%)","accent":"hsl(340, 85%, 55%)","accentHover":"hsl(340, 85%, 50%)"}}
+{"brand":{"primary":"hsl(210, 100%, 56%)","primaryHover":"hsl(210, 100%, 51%)","secondary":"hsl(200, 90%, 48%)","secondaryHover":"hsl(200, 90%, 43%)","accent":"hsl(200, 90%, 48%)","accentHover":"hsl(200, 90%, 43%)"}}
 ```
 
 ### Semantic Colors
@@ -62,7 +73,7 @@ Paleta sofisticada com dark mode como padrão. Cores semânticas para consistên
   --popover-foreground: 224 71% 4%;
 
   /* Brand */
-  --primary: 15 90% 50%;            /* #F56B00 - Orange vibrant */
+  --primary: 210 100% 56%;          /* #3B9EFF - Blue vibrant */
   --primary-foreground: 0 0% 100%;
 
   /* Neutrals */
@@ -70,7 +81,7 @@ Paleta sofisticada com dark mode como padrão. Cores semânticas para consistên
   --secondary-foreground: 224 71% 4%;
   --muted: 220 14% 96%;
   --muted-foreground: 220 9% 46%;   /* #6B7280 - Medium gray */
-  --accent: 340 85% 55%;            /* #F0447A - Pink accent */
+  --accent: 200 90% 48%;            /* #1AA3E0 - Blue darker */
   --accent-foreground: 0 0% 100%;
 
   /* Feedback */
@@ -86,7 +97,7 @@ Paleta sofisticada com dark mode como padrão. Cores semânticas para consistên
   /* UI Elements */
   --border: 220 13% 91%;            /* #E5E7EB - Subtle border */
   --input: 220 13% 91%;
-  --ring: 15 90% 50%;
+  --ring: 210 100% 56%;
   --radius: 0.75rem;                /* 12px - Modern rounded */
 
   /* Shadows */
@@ -109,7 +120,7 @@ Paleta sofisticada com dark mode como padrão. Cores semânticas para consistên
   --popover-foreground: 210 20% 98%;
 
   /* Brand - Slightly adjusted for dark */
-  --primary: 15 90% 55%;            /* Lighter orange for contrast */
+  --primary: 210 100% 60%;          /* Lighter blue for contrast */
   --primary-foreground: 0 0% 100%;
 
   /* Neutrals */
@@ -117,7 +128,7 @@ Paleta sofisticada com dark mode como padrão. Cores semânticas para consistên
   --secondary-foreground: 210 20% 98%;
   --muted: 224 30% 15%;
   --muted-foreground: 215 20% 65%;  /* Readable secondary text */
-  --accent: 340 85% 60%;            /* Brighter pink in dark */
+  --accent: 200 90% 52%;            /* Brighter blue in dark */
   --accent-foreground: 0 0% 100%;
 
   /* Feedback - Same with adjusted luminance */
@@ -133,7 +144,7 @@ Paleta sofisticada com dark mode como padrão. Cores semânticas para consistên
   /* UI Elements */
   --border: 224 30% 18%;            /* Subtle in dark */
   --input: 224 30% 15%;
-  --ring: 15 90% 55%;
+  --ring: 210 100% 60%;
 
   /* Shadows - Darker, subtler */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
@@ -145,7 +156,7 @@ Paleta sofisticada com dark mode como padrão. Cores semânticas para consistên
 
 ### Status Colors (Charts/Tags)
 ```
-{"status":{"blue":"hsl(230, 70%, 50%)","pink":"hsl(340, 85%, 55%)","orange":"hsl(15, 90%, 50%)","green":"hsl(142, 76%, 36%)","purple":"hsl(280, 70%, 50%)","cyan":"hsl(185, 80%, 45%)","yellow":"hsl(45, 93%, 47%)","red":"hsl(0, 84%, 60%)"}}
+{"status":{"blue-light":"hsl(210, 100%, 56%)","blue":"hsl(210, 90%, 50%)","blue-dark":"hsl(200, 90%, 48%)","cyan":"hsl(190, 85%, 50%)","green":"hsl(142, 76%, 36%)","purple":"hsl(270, 70%, 55%)","orange":"hsl(30, 100%, 50%)","yellow":"hsl(45, 93%, 47%)","red":"hsl(0, 84%, 60%)"}}
 ```
 
 ### Gradients
@@ -779,3 +790,6 @@ Documentação das bibliotecas:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0.0 | 2025-12-21 | Initial design system - Envato-inspired, mobile-first, dark-mode primary |
+| 1.1.0 | 2025-12-21 | Updated brand colors: Emerald primary (#10B981), Indigo accent (#6366F1) |
+| 1.2.0 | 2025-12-21 | Harmonic palette redesign: Teal primary (#1AB394), Cyan accent (#16A8E0) - analogous color scheme |
+| 1.3.0 | 2025-12-21 | Monochromatic blue redesign: Blue primary (#3B9EFF), Blue accent (#1AA3E0) - single color family for visual harmony |

@@ -1,6 +1,6 @@
 # Configuracao do Supabase Auth
 
-Este guia detalha como configurar a autenticacao do Supabase para o projeto FND EasyFlow Template.
+Este guia detalha como configurar a autenticacao do Supabase para o projeto FND MetaTemplate.
 
 ## Indice
 
@@ -57,7 +57,7 @@ Este guia detalha como configurar a autenticacao do Supabase para o projeto FND 
 4. Clique em **Create Credentials > OAuth 2.0 Client IDs**
 5. Configure:
    - **Application type**: Web application
-   - **Name**: `FND EasyFlow - Supabase Auth`
+   - **Name**: `FND MetaTemplate - Supabase Auth`
    - **Authorized JavaScript origins**:
      - `http://localhost:3000` (dev)
      - `https://seu-dominio.com` (prod)

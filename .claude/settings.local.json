@@ -20,7 +20,9 @@
       "mcp__supabase__execute_sql",
       "mcp__supabase__search_docs",
       "Skill(done)",
-      "Skill(done:*)"
+      "Skill(done:*)",
+      "Skill(fix)",
+      "Skill(fix:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

@@ -31,6 +31,7 @@ async function bootstrap(): Promise<INestApplication> {
     const allowedOrigins = [
       process.env.FRONTEND_URL || 'http://localhost:3000',
       process.env.MANAGER_URL || 'http://localhost:3002',
+      'http://localhost:3005',
     ].filter(Boolean);
 
     app.enableCors({

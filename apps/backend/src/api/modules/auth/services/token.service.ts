@@ -35,8 +35,8 @@ export class TokenService {
 
     return jwt.sign(payload, this.configService.getJwtSecret(), {
       expiresIn: '15m',
-      issuer: 'fnd-easyflow',
-      audience: 'fnd-easyflow-api',
+      issuer: 'fnd-metatemplate',
+      audience: 'fnd-metatemplate-api',
     });
   }
 

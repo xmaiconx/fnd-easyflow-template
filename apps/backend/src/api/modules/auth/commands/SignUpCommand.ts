@@ -1,4 +1,4 @@
-import { ICommand, ICommandHandler } from '@fnd/backend';
+import { ICommand, ICommandHandler, IConfigurationService } from '@fnd/backend';
 import { CommandHandler } from '@nestjs/cqrs';
 import { EventBus } from '@nestjs/cqrs';
 import { Inject, ConflictException } from '@nestjs/common';
@@ -17,8 +17,8 @@ export class SignUpCommand {
   constructor(
     public readonly email: string,
     public readonly password: string,
-    public readonly name: string,
-    public readonly workspaceName: string,
+    public readonly fullName: string,
+    public readonly workspaceName: string | undefined,
     public readonly ipAddress: string,
     public readonly userAgent: string,
   ) {}
@@ -37,6 +37,8 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
     private readonly workspaceUserRepository: WorkspaceUserRepository,
     @Inject('IAuthTokenRepository')
     private readonly authTokenRepository: AuthTokenRepository,
+    @Inject('IConfigurationService')
+    private readonly configService: IConfigurationService,
     private readonly passwordService: PasswordService,
     private readonly eventBus: EventBus,
   ) {}
@@ -60,25 +62,29 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
 
     // Create account
     const account = await this.accountRepository.create({
-      name: `${command.name}'s Account`,
+      name: `${command.fullName}'s Account`,
       settings: {},
     });
+
+    // Determine user role based on super admin email
+    const isSuperAdmin = this.configService.isSuperAdminEmail(command.email);
+    const userRole = isSuperAdmin ? UserRole.SUPER_ADMIN : UserRole.OWNER;
 
     // Create user
     const user = await this.userRepository.create({
       accountId: account.id,
-      fullName: command.name,
+      fullName: command.fullName,
       email: command.email,
       passwordHash,
       emailVerified: false,
-      role: UserRole.OWNER,
+      role: userRole,
       status: EntityStatus.ACTIVE,
     });
 
-    // Create workspace
+    // Create workspace with default name if not provided
     const workspace = await this.workspaceRepository.create({
       accountId: account.id,
-      name: command.workspaceName,
+      name: command.workspaceName || 'Workspace 01',
       settings: {},
       status: EntityStatus.ACTIVE,
       onboardingStatus: OnboardingStatus.PENDING,

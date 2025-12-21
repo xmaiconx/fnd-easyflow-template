@@ -2,7 +2,7 @@
 set -e
 
 echo "======================================"
-echo "FND EasyFlow - Docker Entrypoint"
+echo "FND MetaTemplate - Docker Entrypoint"
 echo "======================================"
 
 # ========================================

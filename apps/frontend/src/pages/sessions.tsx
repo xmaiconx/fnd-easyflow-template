@@ -1,100 +1,127 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { SessionCard } from '@/components/SessionCard'
-import { useSessions, useRevokeSession } from '@/hooks/use-sessions'
-import { toast } from 'sonner'
-import { Loader2, AlertCircle } from 'lucide-react'
+"use client"
 
-export function SessionsPage() {
-  const { data: sessions, isLoading, error } = useSessions()
-  const revokeSession = useRevokeSession()
+import * as React from "react"
+import { toast } from "sonner"
+import { Activity } from "lucide-react"
+import { AppShell } from "@/components/layout/app-shell"
+import { PageHeader } from "@/components/layout/page-header"
+import { SessionCard } from "@/components/features/sessions/session-card"
+import { SessionsTable } from "@/components/features/sessions/sessions-table"
+import { EmptyState } from "@/components/ui/empty-state"
 
-  const handleRevoke = (sessionId: string) => {
-    revokeSession.mutate(sessionId, {
-      onSuccess: () => {
-        toast.success('Sessão revogada com sucesso!')
-      },
-      onError: (error: any) => {
-        const message = error.message || 'Erro ao revogar sessão'
-        toast.error(message)
-      },
-    })
-  }
+interface Session {
+  id: string
+  device: string
+  browser: string
+  location: string
+  lastActive: string
+  isCurrent: boolean
+}
 
-  if (isLoading) {
-    return (
-      <div className="container max-w-4xl mx-auto py-8">
-        <Card>
-          <CardContent className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+// Mock Data
+const mockSessions: Session[] = [
+  {
+    id: "1",
+    device: "Windows PC",
+    browser: "Chrome 131",
+    location: "São Paulo, Brazil",
+    lastActive: "2025-12-21T10:00:00Z",
+    isCurrent: true,
+  },
+  {
+    id: "2",
+    device: "iPhone 15",
+    browser: "Safari",
+    location: "São Paulo, Brazil",
+    lastActive: "2025-12-20T08:30:00Z",
+    isCurrent: false,
+  },
+  {
+    id: "3",
+    device: "MacBook Pro",
+    browser: "Firefox 120",
+    location: "Rio de Janeiro, Brazil",
+    lastActive: "2025-12-19T15:45:00Z",
+    isCurrent: false,
+  },
+  {
+    id: "4",
+    device: "Android Phone",
+    browser: "Chrome Mobile",
+    location: "Belo Horizonte, Brazil",
+    lastActive: "2025-12-18T12:20:00Z",
+    isCurrent: false,
+  },
+]
 
-  if (error) {
-    return (
-      <div className="container max-w-4xl mx-auto py-8">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
-            <AlertCircle className="h-12 w-12 text-red-500" />
-            <p className="text-lg font-medium">Erro ao carregar sessões</p>
-            <p className="text-muted-foreground">
-              {(error as any)?.message || 'Ocorreu um erro ao carregar as sessões ativas'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+export default function SessionsPage() {
+  const [sessions, setSessions] = React.useState<Session[]>(mockSessions)
+  const [loading, setLoading] = React.useState(false)
+
+  const handleRevokeSession = async (session: Session) => {
+    if (session.isCurrent) {
+      toast.error("Não é possível revogar a sessão atual")
+      return
+    }
+
+    try {
+      // Simulate API call
+      setLoading(true)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Remove session from list
+      setSessions((prev) => prev.filter((s) => s.id !== session.id))
+
+      toast.success("Sessão revogada com sucesso", {
+        description: `A sessão em ${session.device} foi encerrada.`,
+      })
+    } catch (error) {
+      toast.error("Erro ao revogar sessão", {
+        description: "Tente novamente em alguns instantes.",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Sessões Ativas</h1>
-        <p className="text-muted-foreground">
-          Gerencie todas as sessões ativas da sua conta
-        </p>
+    <AppShell currentPath="/sessions" breadcrumb={["Sessões Ativas"]}>
+      <div className="space-y-6">
+        <PageHeader
+          title="Sessões Ativas"
+          description="Gerencie os dispositivos conectados à sua conta"
+        />
+
+        {sessions.length === 0 ? (
+          <EmptyState
+            icon={Activity}
+            title="Nenhuma sessão ativa"
+            description="Você não tem sessões ativas no momento"
+          />
+        ) : (
+          <>
+            {/* Desktop: Table */}
+            <div className="hidden md:block">
+              <SessionsTable
+                sessions={sessions}
+                onRevoke={handleRevokeSession}
+                loading={loading}
+              />
+            </div>
+
+            {/* Mobile: Cards */}
+            <div className="md:hidden space-y-4">
+              {sessions.map((session) => (
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  onRevoke={handleRevokeSession}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
-
-      {!sessions || sessions.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Nenhuma sessão ativa</CardTitle>
-            <CardDescription>
-              Você não possui nenhuma sessão ativa no momento
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {sessions.map((session) => (
-            <SessionCard
-              key={session.id}
-              session={session}
-              onRevoke={() => handleRevoke(session.id)}
-              isRevoking={revokeSession.isPending}
-            />
-          ))}
-        </div>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Sobre as Sessões</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>
-            Uma sessão é criada toda vez que você faz login em um dispositivo ou navegador.
-          </p>
-          <p>
-            Você pode revogar sessões de dispositivos que não reconhece ou que não usa mais.
-          </p>
-          <p>
-            Ao revogar uma sessão, você será desconectado daquele dispositivo imediatamente.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+    </AppShell>
   )
 }
