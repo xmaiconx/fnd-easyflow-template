@@ -14,8 +14,14 @@ You are the **Autopilot Coordinator** - a master orchestrator that coordinates s
 - `docs/features/${FEATURE_ID}/about.md` - Feature specification exists
 - `docs/features/${FEATURE_ID}/discovery.md` - Discovery process documented
 
+**RECOMMENDED (for Frontend Features):**
+- `docs/features/${FEATURE_ID}/design.md` - UX design specification (created by `/design`)
+
 If discovery is not complete, inform the user:
 > "⚠️ Discovery não encontrado. Use `/feature` primeiro para realizar o discovery."
+
+If feature has frontend components and design.md is missing, warn:
+> "⚠️ **RECOMENDAÇÃO:** Execute `/design` para criar especificação de UX antes do desenvolvimento."
 
 ---
 
@@ -25,12 +31,15 @@ If discovery is not complete, inform the user:
 ┌─────────────────────────────────────────────────────────────────┐
 │                    AUTOPILOT COORDINATOR                        │
 ├─────────────────────────────────────────────────────────────────┤
+│  Prerequisites: /feature (about.md + discovery.md)              │
+│  Recommended:   /design (design.md - UX specs for frontend)     │
+├─────────────────────────────────────────────────────────────────┤
 │  Phase 1: Context Loading (automatic)                           │
-│     ↓                                                           │
-│  Phase 2: Planning Subagent → follows .claude/commands/plan.md │
-│     ↓                                                           │
+│     ↓    (loads about.md, discovery.md, design.md if exists)    │
+│  Phase 2: Planning Subagent → follows .claude/commands/plan.md  │
+│     ↓    (uses design.md as UX source of truth)                 │
 │  Phase 3: Development Subagents → follows .claude/commands/dev.md │
-│     ↓                                                           │
+│     ↓    (frontend uses design.md for layouts/components)       │
 │  Phase 4: Review Subagent → follows .claude/commands/review.md  │
 │     ↓                                                           │
 │  Phase 5: Documentation Subagent → implementation.md            │
@@ -66,6 +75,33 @@ ls -la "docs/features/${FEATURE_ID}/"
 
 **If missing:** STOP and inform user to run `/feature` first.
 
+### Step 2.1: Check Design Specification
+
+```bash
+# Check if design.md exists
+ls "docs/features/${FEATURE_ID}/design.md" 2>/dev/null
+```
+
+**Check if feature has frontend scope:**
+```bash
+# Analyze about.md for frontend mentions
+grep -iE "(frontend|ui|tela|página|componente|interface)" "docs/features/${FEATURE_ID}/about.md"
+```
+
+**Decision logic:**
+| Has Frontend Scope | design.md Exists | Action |
+|--------------------|------------------|--------|
+| Yes | Yes | ✅ Proceed with design specs |
+| Yes | No | ⚠️ Warn user, recommend `/design` first, continue |
+| No | - | ✅ Skip design check (backend-only feature) |
+
+**If frontend feature without design.md:**
+```
+⚠️ Feature possui escopo frontend mas design.md não encontrado.
+   → RECOMENDAÇÃO: Execute `/design` para criar especificação UX.
+   → Continuando sem design specs (usando skill ux-design como fallback)...
+```
+
 ### Step 3: Load Project Architecture Reference
 
 **Verificar se existe technical-spec.md:**
@@ -88,7 +124,8 @@ ls docs/architecture/technical-spec.md 2>/dev/null
 Read ALL feature context files in parallel:
 1. `docs/features/${FEATURE_ID}/about.md`
 2. `docs/features/${FEATURE_ID}/discovery.md`
-3. `docs/features/${FEATURE_ID}/plan.md` (se existir)
+3. `docs/features/${FEATURE_ID}/design.md` (se existir - UX specs)
+4. `docs/features/${FEATURE_ID}/plan.md` (se existir)
 
 **Output to user:**
 ```
@@ -97,6 +134,7 @@ Read ALL feature context files in parallel:
 📂 Context carregado:
 - about.md: ✅
 - discovery.md: ✅
+- design.md: ✅ OU ⚠️ (não encontrado - usando skill ux-design como fallback)
 - Architecture ref: ✅ (technical-spec.md) OU ⚠️ (CLAUDE.md - recomendado executar /architecture)
 
 Iniciando execução autônoma...
@@ -125,6 +163,26 @@ prompt: |
   3. Apply hybrid structure (human-readable + token-efficient) to plan.md
   4. TodoWrite: Mark item as completed AFTER writing plan.md
 
+  ## DESIGN SPECIFICATION (CRITICAL FOR FRONTEND)
+  Check if design.md exists:
+  ```bash
+  ls "docs/features/${FEATURE_ID}/design.md" 2>/dev/null
+  ```
+
+  **If design.md EXISTS:**
+  1. Read: docs/features/${FEATURE_ID}/design.md
+  2. Use design specs as SOURCE OF TRUTH for:
+     - Page/screen structure
+     - Component specifications (new vs existing)
+     - Mobile-first layout requirements
+     - States (loading, empty, error)
+  3. Reference design.md in plan.md for dev agents
+
+  **If design.md DOES NOT EXIST (frontend features):**
+  1. Load UX skill: .claude/skills/ux-design/SKILL.md
+  2. Use skill patterns as fallback
+  3. Note in plan: "Design specs: Using ux-design skill (no design.md)"
+
   ## AUTOPILOT OVERRIDES (CRITICAL)
   These rules OVERRIDE any conflicting instructions in plan.md:
 
@@ -149,6 +207,7 @@ prompt: |
   ## Context
   - Feature ID: ${FEATURE_ID}
   - Feature docs: docs/features/${FEATURE_ID}/
+  - Design specs: docs/features/${FEATURE_ID}/design.md (if exists)
   - Architecture: CLAUDE.md
 
   ## Output
@@ -160,6 +219,7 @@ prompt: |
   - Key technical decisions made autonomously
   - Components identified for development
   - Development phases defined
+  - Design reference used (design.md or ux-design skill)
 ```
 
 ### Wait and Verify
@@ -234,20 +294,40 @@ prompt: |
      - Run the appropriate build command for your area
      - Fix ALL errors before reporting back
 
-  ## UX Design Skill (FRONTEND ONLY - MANDATORY)
+  ## UX Design Specification (FRONTEND ONLY - MANDATORY)
   If your area is Frontend:
+
+  **STEP 1: Check for design.md (PRIMARY SOURCE)**
+  ```bash
+  ls "docs/features/${FEATURE_ID}/design.md" 2>/dev/null
+  ```
+
+  **If design.md EXISTS (PREFERRED):**
+  1. Read: docs/features/${FEATURE_ID}/design.md
+  2. Use design specs as SOURCE OF TRUTH for:
+     - Page/screen layouts
+     - Component structure (new vs existing)
+     - Mobile-first breakpoints
+     - States (loading, empty, error)
+     - Component locations and naming
+  3. Load skill for implementation details: .claude/skills/ux-design/SKILL.md
+
+  **If design.md DOES NOT EXIST (FALLBACK):**
   1. FIRST, load the UX design skill: Read .claude/skills/ux-design/SKILL.md
   2. Follow ALL patterns from the skill (mobile-first, shadcn, Tailwind v3, Motion, etc.)
-  3. For shadcn components: Grep pattern="[component]" path=".claude/skills/ux-design/shadcn-docs.md"
-  4. For Tailwind utilities: Grep pattern="[utility]" path=".claude/skills/ux-design/tailwind-v3-docs.md"
-  5. For animations: Grep pattern="[pattern]" path=".claude/skills/ux-design/motion-dev-docs.md"
-  6. For charts: Grep pattern="[chart]" path=".claude/skills/ux-design/recharts-docs.md"
-  7. For tables: Grep pattern="[pattern]" path=".claude/skills/ux-design/tanstack-table-docs.md"
-  8. Read: docs/design-system/foundations.md (if exists)
+  3. Read: docs/design-system/foundations.md (if exists)
+
+  **STEP 2: Consult skill documentation as needed:**
+  - For shadcn components: Grep pattern="[component]" path=".claude/skills/ux-design/shadcn-docs.md"
+  - For Tailwind utilities: Grep pattern="[utility]" path=".claude/skills/ux-design/tailwind-v3-docs.md"
+  - For animations: Grep pattern="[pattern]" path=".claude/skills/ux-design/motion-dev-docs.md"
+  - For charts: Grep pattern="[chart]" path=".claude/skills/ux-design/recharts-docs.md"
+  - For tables: Grep pattern="[pattern]" path=".claude/skills/ux-design/tanstack-table-docs.md"
 
   ## Context
   - Feature ID: ${FEATURE_ID}
   - Plan: docs/features/${FEATURE_ID}/plan.md (SOURCE OF TRUTH)
+  - Design: docs/features/${FEATURE_ID}/design.md (if exists - UX specs)
   - Architecture: CLAUDE.md
   - Your area: ${AREA}
 
@@ -261,6 +341,7 @@ prompt: |
   - Files created/modified
   - Implementation summary
   - Build status (MUST be passing)
+  - Design reference used (design.md or ux-design skill)
 ```
 
 ### Wait for All Development Subagents
@@ -536,6 +617,7 @@ ls -la "docs/features/${FEATURE_ID}/"
 **Expected files:**
 - `about.md` - Feature specification
 - `discovery.md` - Discovery record
+- `design.md` - UX design specification (optional, recommended for frontend)
 - `plan.md` - Technical plan
 - `implementation.md` - Implementation record
 - `review.md` - Review record
@@ -570,6 +652,7 @@ ls -la "docs/features/${FEATURE_ID}/"
 📄 Documentation:
 - docs/features/${FEATURE_ID}/about.md
 - docs/features/${FEATURE_ID}/discovery.md
+- docs/features/${FEATURE_ID}/design.md (if frontend)
 - docs/features/${FEATURE_ID}/plan.md
 - docs/features/${FEATURE_ID}/implementation.md
 - docs/features/${FEATURE_ID}/review.md
@@ -658,3 +741,5 @@ If feature is very simple (based on about.md analysis):
 - No new database entities
 
 **Then:** Skip Phase 2, go directly to Development using about.md as source.
+
+**Note:** Even for simple features, if design.md exists, use it as UX reference.
