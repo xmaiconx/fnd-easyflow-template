@@ -119,11 +119,15 @@ ${TASK_LIST}
 ## Patterns to Follow
 ${PATTERNS}
 
-## Design System (Frontend only)
-- Read: docs/design-system/foundations.md
-- Mobile-first: Design for 320px, scale UP with min-width
-- Touch targets: 44x44px minimum
-- Input font-size: 16px+ (prevents iOS zoom)
+## UX Design Skill (FRONTEND ONLY - MANDATORY)
+If implementing Frontend:
+1. FIRST, load the UX design skill: Read .claude/skills/ux-design/SKILL.md
+2. Follow ALL patterns from the skill (mobile-first, shadcn, Tailwind v3, Motion, etc.)
+3. Consult skill documentation for: components, animations, charts, tables
+4. Read: docs/design-system/foundations.md (if exists)
+5. Mobile-first: Design for 320px, scale UP with min-width
+6. Touch targets: 44x44px minimum
+7. Input font-size: 16px+ (prevents iOS zoom)
 
 ## Deliverables
 - Report: List of files created/modified
@@ -143,13 +147,29 @@ ${PATTERNS}
 **Backend Tasks:** Module structure, DTOs, Commands, Events, Controller, Service, register in app.module.ts
 **Worker Tasks:** Worker, Processor, queue config, error handling, register in worker.module.ts
 **Frontend Tasks:** Pages, Components, Zustand store, Hooks, mirror DTOs, API integration, forms
+- **MANDATORY:** Load skill `.claude/skills/ux-design/SKILL.md` before implementing ANY frontend code
 - **If design.md exists:** Follow mobile-first layouts, use design tokens, implement specified states
+- **Consult skill docs:** shadcn-docs.md, tailwind-v3-docs.md, motion-dev-docs.md, recharts-docs.md, tanstack-*.md
 
 ### 3.4 Subagent Dispatch
 
 **Use Task tool with `subagent_type: "general-purpose"`**
 
 **CRITICAL:** When dispatching multiple independent subagents, send ALL Task tool calls in a SINGLE message.
+
+**FRONTEND SUBAGENT (MANDATORY INSTRUCTION):**
+When dispatching a frontend subagent, ALWAYS include this instruction in the prompt:
+```
+## UX Design Skill (MANDATORY)
+BEFORE writing ANY frontend code:
+1. Read and internalize: .claude/skills/ux-design/SKILL.md
+2. For shadcn components: Grep pattern="[component]" path=".claude/skills/ux-design/shadcn-docs.md"
+3. For Tailwind utilities: Grep pattern="[utility]" path=".claude/skills/ux-design/tailwind-v3-docs.md"
+4. For animations: Grep pattern="[pattern]" path=".claude/skills/ux-design/motion-dev-docs.md"
+5. For charts: Grep pattern="[chart]" path=".claude/skills/ux-design/recharts-docs.md"
+6. For tables: Grep pattern="[pattern]" path=".claude/skills/ux-design/tanstack-table-docs.md"
+7. For data fetching: Grep pattern="[hook]" path=".claude/skills/ux-design/tanstack-query-docs.md"
+```
 
 ### 3.5 Coordination Flow
 

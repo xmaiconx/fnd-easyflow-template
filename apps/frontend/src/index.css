@@ -54,6 +54,12 @@
     --ring: 15 90% 50%;
     --radius: 0.5rem;
 
+    /* Layout Variables */
+    --sidebar-width: 256px;
+    --sidebar-collapsed: 64px;
+    --header-height: 64px;
+    --banner-height: 40px;
+
     /* Status Colors */
     --status-post: 230 70% 50%;             /* Azul */
     --status-carrossel: 340 85% 55%;        /* Rosa */

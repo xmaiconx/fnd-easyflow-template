@@ -27,7 +27,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const userInitial = user?.name?.[0]?.toUpperCase() || 'U'
 
   return (
-    <header className="bg-background border-b px-4 md:px-6 h-16 flex items-center gap-4">
+    <header className="sticky top-0 z-40 bg-background border-b px-4 md:px-6 h-16 flex items-center gap-4">
       {/* Mobile menu button */}
       <Button
         variant="ghost"

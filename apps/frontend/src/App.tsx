@@ -6,7 +6,6 @@ import { AuthProvider } from '@/contexts/auth-context'
 import { ThemeProvider } from '@/contexts/theme-context'
 import { AppLayout, AuthLayout } from '@/components/layout'
 import { ProtectedRoute, RedirectIfAuthenticated } from '@/components/auth'
-import { ImpersonateBanner } from '@/components/ImpersonateBanner'
 import { ImpersonateHandler } from '@/components/ImpersonateHandler'
 import { LoginPage, SignUpPage, SignUpSuccessPage, ConfirmEmailPage, EmailNotVerifiedPage, VerifyEmailPage, ForgotPasswordPage, ResetPasswordPage, SessionsPage, DashboardPage, WorkspacesPage, WorkspaceSettingsPage, BillingPage } from '@/pages'
 
@@ -17,7 +16,6 @@ function App() {
         <AuthProvider>
           <ThemeProvider>
             <ImpersonateHandler />
-            <ImpersonateBanner />
             <Routes>
             {/* Public routes */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

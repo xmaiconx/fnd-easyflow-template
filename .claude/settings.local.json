@@ -18,7 +18,9 @@
       "Skill(writing-skills)",
       "mcp__supabase__get_project_url",
       "mcp__supabase__execute_sql",
-      "mcp__supabase__search_docs"
+      "mcp__supabase__search_docs",
+      "Skill(done)",
+      "Skill(done:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

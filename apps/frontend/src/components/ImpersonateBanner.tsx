@@ -40,24 +40,26 @@ export function ImpersonateBanner() {
   }
 
   return (
-    <div className="bg-yellow-500 text-black px-4 py-2 flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <AlertTriangle className="h-5 w-5" />
-        <span className="font-medium">
-          Você está impersonando um usuário
-        </span>
-        <span className="text-sm opacity-90">
-          (Expira em: {formatExpiresAt((impersonateData as any).expiresAt)})
-        </span>
+    <div className="sticky top-0 z-50 bg-yellow-500 text-black px-4 py-2 mb-4 rounded-md">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2 text-center sm:text-left">
+          <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+          <span className="font-medium">
+            Você está impersonando um usuário
+          </span>
+          <span className="text-sm opacity-90">
+            (Expira em: {formatExpiresAt((impersonateData as any).expiresAt)})
+          </span>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleEndImpersonation}
+          className="bg-black text-white hover:bg-gray-800 w-full sm:w-auto"
+        >
+          Finalizar Impersonação
+        </Button>
       </div>
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={handleEndImpersonation}
-        className="bg-black text-white hover:bg-gray-800"
-      >
-        Finalizar Impersonação
-      </Button>
     </div>
   )
 }

@@ -113,6 +113,15 @@ Files to investigate (from implementation.md):
 - Add defensive checks if needed
 - Ensure fix aligns with acceptance criteria
 
+**FRONTEND FIXES (MANDATORY):**
+If the bug is in frontend code:
+1. FIRST, load the UX design skill: Read `.claude/skills/ux-design/SKILL.md`
+2. Follow ALL patterns from the skill (mobile-first, shadcn, Tailwind v3, Motion, etc.)
+3. For component fixes: Grep pattern="[component]" path=".claude/skills/ux-design/shadcn-docs.md"
+4. For styling fixes: Grep pattern="[utility]" path=".claude/skills/ux-design/tailwind-v3-docs.md"
+5. For animation fixes: Grep pattern="[pattern]" path=".claude/skills/ux-design/motion-dev-docs.md"
+6. Read: docs/design-system/foundations.md (if exists)
+
 ### 3.2 Verify Build
 ```bash
 npm run build

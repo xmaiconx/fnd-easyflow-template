@@ -6,6 +6,8 @@
 
 > **ADAPTIVE RULE:** NEVER assume fixed patterns. ALWAYS analyze the existing project first and adapt to its conventions.
 
+> **DOCUMENTATION RULE:** Feature design docs go in `docs/features/${FEATURE_ID}/design.md`. The file `docs/design-system/foundations.md` is ONLY created/modified when user EXPLICITLY requests design system changes.
+
 You are a **Design UX Specialist** focused on mobile-first design systems and layout planning. Your role is to create detailed, text-based design specifications that AI agents (plan, dev, autopilot) can implement.
 
 This command runs AFTER `/feature` and BEFORE `/plan` or `/dev`.
@@ -14,7 +16,40 @@ This command runs AFTER `/feature` and BEFORE `/plan` or `/dev`.
 
 ## Phase 0: Load All Context (SINGLE SCRIPT)
 
-### Step 1: Run Context Mapper
+### Step 0.1: Load UX Design Skill (MANDATORY)
+
+**BEFORE any design work, load the UX design skill:**
+
+```bash
+cat .claude/skills/ux-design/SKILL.md
+```
+
+This skill provides:
+- Design philosophy and anti-patterns
+- Stack documentation (Tailwind v3, shadcn, Motion, Recharts, TanStack)
+- Quick patterns for layouts, cards, tables, charts
+- Typography and color guidelines
+- Mobile-first checklist
+
+**Consult skill documentation as needed:**
+```bash
+# For shadcn components
+Grep pattern="[component]" path=".claude/skills/ux-design/shadcn-docs.md"
+
+# For Tailwind utilities
+Grep pattern="[utility]" path=".claude/skills/ux-design/tailwind-v3-docs.md"
+
+# For animations
+Grep pattern="[pattern]" path=".claude/skills/ux-design/motion-dev-docs.md"
+
+# For charts
+Grep pattern="[chart]" path=".claude/skills/ux-design/recharts-docs.md"
+
+# For tables
+Grep pattern="[pattern]" path=".claude/skills/ux-design/tanstack-table-docs.md"
+```
+
+### Step 0.2: Run Context Mapper
 
 ```bash
 bash .claude/scripts/identify-current-feature.sh
@@ -27,18 +62,18 @@ This script provides ALL context needed:
 - **FRONTEND**: Path, component counts, folder structure
 - **PROJECT_CONTEXT**: Architecture reference
 
-### Step 2: Parse Key Variables
+### Step 0.3: Parse Key Variables
 
 From the script output, extract:
 - `FEATURE_ID` - Current feature
-- `FEATURE_DIR` - Path to feature docs
+- `FEATURE_DIR` - Path to feature docs (where design.md will be written)
 - `CURRENT_PHASE` - Where the feature is in the workflow
 - `HAS_FOUNDATIONS` - If design system exists
 - `FRONTEND.EXISTS` - If frontend exists
 - `FRONTEND.UI_COMPONENTS` - Count of existing UI components
 - `FRONTEND.COMPONENT_FOLDERS` - Existing component organization
 
-### Step 3: Load Feature Documentation
+### Step 0.4: Load Feature Documentation
 
 ```bash
 cat "docs/features/${FEATURE_ID}/about.md"
@@ -218,44 +253,88 @@ src/
 
 ## Phase 2: Design System Check
 
-### 2.1 Check Script Output
+### 2.1 O que é o foundations.md?
+
+O arquivo `docs/design-system/foundations.md` é o **Design System do Projeto** - um documento **GLOBAL** que define:
+- Tokens de design (cores, tipografia, espaçamento)
+- Breakpoints e estratégia responsiva
+- Inventário de componentes UI existentes
+- Convenções de nomenclatura e padrões
+
+**Características:**
+- É **único por projeto** (NÃO por feature)
+- Contém **apenas tokens e convenções** (SEM instruções de implementação)
+- Serve como **referência centralizada** para todas as features
+
+### 2.2 Quando Criar o foundations.md?
+
+| Cenário | Ação |
+|---------|------|
+| Usuário pede para **criar/configurar design system** | Criar foundations.md |
+| Usuário pede para **ajustar tokens do projeto** | Modificar foundations.md |
+| Usuário pede para **documentar padrões visuais** | Criar/atualizar foundations.md |
+| Executando `/design` para uma feature | **NÃO criar** - usar skill diretamente |
+
+**REGRA:** Só criar/modificar quando o usuário **EXPLICITAMENTE** solicitar ajustes no design system do projeto.
+
+### 2.3 Check Script Output
 
 From `DESIGN_SYSTEM` section of context script:
 - `HAS_FOUNDATIONS=true/false`
 - `FOUNDATIONS_PATH` (if exists)
 
-**Decision based on script data:**
+**Decision:**
 
 | HAS_FOUNDATIONS | Action |
 |-----------------|--------|
-| true | Load and use: `cat ${FOUNDATIONS_PATH}` |
-| false | Check CSS/Tailwind, then generate |
+| true | Carregar: `cat ${FOUNDATIONS_PATH}` e usar tokens |
+| false | Usar patterns da skill `.claude/skills/ux-design/SKILL.md` |
 
-### 2.2 If No Foundations, Extract Tokens
+### 2.4 Se Foundations Existe
 
 ```bash
-# Check CSS for existing tokens
-cat apps/frontend/src/index.css 2>/dev/null | grep -E "^[[:space:]]*--" | head -20
-cat apps/frontend/tailwind.config.* 2>/dev/null | head -50
+cat docs/design-system/foundations.md
 ```
 
-**For truly new projects:**
+Use os tokens e padrões do foundations.md no design da feature.
+
+### 2.5 Se Foundations NÃO Existe
+
+**NÃO criar automaticamente.** Usar a skill ux-design diretamente.
+
+### 2.6 Como Criar o foundations.md (Quando Solicitado)
+
+**Gatilhos válidos do usuário:**
+- "Crie o design system do projeto"
+- "Configure os tokens de design"
+- "Documente o design system"
+- "Ajuste o foundations.md"
+
+**Processo de criação:**
+
+1. **Analisar o frontend existente:**
 ```bash
-bash .claude/scripts/init-design-system.sh
+# Detectar tokens CSS
+cat apps/frontend/src/index.css 2>/dev/null | grep -E "^[[:space:]]*--" | head -30
+
+# Detectar config Tailwind
+cat apps/frontend/tailwind.config.* 2>/dev/null
+
+# Inventariar componentes
+ls apps/frontend/src/components/ui/ 2>/dev/null
 ```
 
-### 2.3 Generate Foundations from Analysis
+2. **Criar o arquivo:**
+```bash
+mkdir -p docs/design-system
+```
 
-**Only if no design system exists.** Create `docs/design-system/foundations.md` based on what was FOUND in Phase 1.
-
-**IMPORTANT:** Extract REAL values from the project, don't use defaults blindly.
-
-Create `docs/design-system/foundations.md` following hybrid structure:
+3. **Usar o template abaixo para** `docs/design-system/foundations.md`:
 
 ```markdown
 # Design System Foundations
 
-Design system extraído do projeto. Mobile-first: design para 320px, escala para cima. Gerado automaticamente pela análise do frontend em [date].
+Design system do projeto. Mobile-first: design para 320px, escala para cima.
 
 **Stack:** [framework] + [ui library] + [bundler]
 
@@ -270,26 +349,35 @@ Design system extraído do projeto. Mobile-first: design para 320px, escala para
 {"mobile":"320px-767px (DEFAULT)","tablet":"768px-1023px (md:)","desktop":"1024px+ (lg:)"}
 
 ### Spacing
-[Extract from tailwind.config or use detected values]
 {"scale":{"1":"0.25rem","2":"0.5rem","4":"1rem","6":"1.5rem","8":"2rem"}}
 
 ### Typography
-[Extract from CSS/config]
 {"fonts":{"sans":"[detected]","mono":"[detected]"},"scale":{"sm":"0.875rem","base":"1rem","lg":"1.125rem","xl":"1.25rem"}}
 
 ### Colors
-[Extract CSS variables]
 {"tokens":["--primary","--secondary","--destructive","--muted","--background","--foreground"]}
 
 ### Components Inventory
-{"ui":[{"name":"Button","path":"components/ui/button.tsx"},{"name":"Card","path":"components/ui/card.tsx"}],"feature":[{"folder":"auth","components":["ProtectedRoute","FeatureGate"]}]}
+{"ui":[...],"feature":[...]}
 
 ### Conventions
-{"naming":"[kebab-case/PascalCase]","exports":"[barrel/direct]","propsStyle":"[interface/type]","patterns":["forwardRef","displayName"]}
+{"naming":"[detected]","exports":"[detected]","propsStyle":"[detected]"}
 
 ### Mobile Checklist
 ["Touch targets 44px","Input font 16px+","Focus visible","Contrast WCAG AA","Reduced motion support"]
 ```
+
+**IMPORTANTE - O que o foundations.md DEVE conter:**
+- Tokens extraídos do projeto (cores, fontes, espaçamento)
+- Breakpoints e estratégia responsiva
+- Inventário de componentes existentes
+- Convenções de nomenclatura detectadas
+
+**IMPORTANTE - O que o foundations.md NÃO DEVE conter:**
+- Instruções de implementação
+- Tarefas ou atividades para executar
+- Especificações de features específicas
+- Código ou exemplos de uso (isso fica na skill ux-design)
 
 ---
 
@@ -415,7 +503,11 @@ For EACH page/screen, create specs that REFERENCE existing components:
 4. TodoWrite: Mark item as completed after writing
 ```
 
-Create `docs/features/${FEATURE_ID}/design.md` following hybrid structure:
+### 6.1 Create Feature Design Document
+
+**Location:** `docs/features/${FEATURE_ID}/design.md`
+
+**IMPORTANT:** This document is written in the FEATURE directory, NOT in docs/design-system/.
 
 ```markdown
 # Design Specification: [Feature Name]
@@ -426,12 +518,14 @@ Especificação de design mobile-first para [feature]. Baseado na análise do fr
 
 **Princípios aplicados:** Mobile-first (320px base), touch-friendly (44px targets), progressive enhancement.
 
+**Skill Reference:** .claude/skills/ux-design/SKILL.md
+
 ---
 
 ## Spec (Token-Efficient)
 
 ### Context
-{"stack":"[detected]","patterns":"[detected]","analysisDate":"[date]"}
+{"stack":"[detected]","patterns":"[detected]","analysisDate":"[date]","skillRef":".claude/skills/ux-design/SKILL.md"}
 
 ### Pages
 [For each page, use JSON format:]
@@ -445,10 +539,14 @@ Especificação de design mobile-first para [feature]. Baseado na análise do fr
 [{"name":"Button","location":"components/ui/button.tsx"},{"name":"Card","location":"components/ui/card.tsx"}]
 
 ### Dev Agent Instructions
-{"conventions":{"naming":"[detected]","location":"[detected]","exports":"[detected]"},"mobileFirst":["touch targets 44px","input 16px+ font","bottom nav for primary actions"],"priority":["[component1]","[component2]"]}
+{"conventions":{"naming":"[detected]","location":"[detected]","exports":"[detected]"},"mobileFirst":["touch targets 44px","input 16px+ font","bottom nav for primary actions"],"priority":["[component1]","[component2]"],"skillRequired":".claude/skills/ux-design/SKILL.md"}
 ```
 
-**Also update/create** `docs/design-system/foundations.md` if it didn't exist.
+### 6.2 DO NOT Auto-Create foundations.md
+
+**CRITICAL:** Do NOT create or modify `docs/design-system/foundations.md` unless the user EXPLICITLY requests design system changes.
+
+The design.md for each feature references the skill directly (`.claude/skills/ux-design/SKILL.md`) for patterns and guidelines.
 
 ---
 
@@ -464,19 +562,32 @@ Especificação de design mobile-first para [feature]. Baseado na análise do fr
 - Componentes existentes: [X]
 - Novos componentes: [Y]
 
-**Documentos:**
+**Documento Criado:**
 - `docs/features/${FEATURE_ID}/design.md`
-- `docs/design-system/foundations.md` [criado/atualizado/já existia]
+
+**Skill de Referência:**
+- `.claude/skills/ux-design/SKILL.md` (dev agents MUST load this)
 
 **Próximos Passos:**
 1. `/plan` - Planejamento técnico
-2. `/dev` - Implementação
-3. `/autopilot` - Implementação autônoma
+2. `/dev` - Implementação (will load ux-design skill)
+3. `/autopilot` - Implementação autônoma (will load ux-design skill)
 ```
 
 ---
 
 ## Critical Rules
+
+**DOCUMENTATION LOCATION:**
+- Feature design specs go in: `docs/features/${FEATURE_ID}/design.md`
+- NEVER create design.md in docs/design-system/
+- `docs/design-system/foundations.md` is ONLY for project-wide design tokens
+- foundations.md is ONLY created/modified when user EXPLICITLY requests design system changes
+
+**SKILL INTEGRATION:**
+- ALWAYS load `.claude/skills/ux-design/SKILL.md` before designing
+- Reference the skill in design.md for dev agents
+- Use skill patterns (not generic patterns)
 
 **ADAPTIVE BEHAVIOR:**
 - ALWAYS analyze before deciding
@@ -489,9 +600,11 @@ Especificação de design mobile-first para [feature]. Baseado na análise do fr
 - Change existing project structure
 - Ignore existing patterns
 - Skip the analysis phase
+- Auto-create foundations.md (only when user explicitly requests)
 
 **DO:**
 - Map what exists FIRST
 - Reuse existing components
 - Follow project conventions
 - Keep specs actionable for AI agents
+- Reference ux-design skill for dev agents

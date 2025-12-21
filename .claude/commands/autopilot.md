@@ -234,6 +234,17 @@ prompt: |
      - Run the appropriate build command for your area
      - Fix ALL errors before reporting back
 
+  ## UX Design Skill (FRONTEND ONLY - MANDATORY)
+  If your area is Frontend:
+  1. FIRST, load the UX design skill: Read .claude/skills/ux-design/SKILL.md
+  2. Follow ALL patterns from the skill (mobile-first, shadcn, Tailwind v3, Motion, etc.)
+  3. For shadcn components: Grep pattern="[component]" path=".claude/skills/ux-design/shadcn-docs.md"
+  4. For Tailwind utilities: Grep pattern="[utility]" path=".claude/skills/ux-design/tailwind-v3-docs.md"
+  5. For animations: Grep pattern="[pattern]" path=".claude/skills/ux-design/motion-dev-docs.md"
+  6. For charts: Grep pattern="[chart]" path=".claude/skills/ux-design/recharts-docs.md"
+  7. For tables: Grep pattern="[pattern]" path=".claude/skills/ux-design/tanstack-table-docs.md"
+  8. Read: docs/design-system/foundations.md (if exists)
+
   ## Context
   - Feature ID: ${FEATURE_ID}
   - Plan: docs/features/${FEATURE_ID}/plan.md (SOURCE OF TRUTH)
