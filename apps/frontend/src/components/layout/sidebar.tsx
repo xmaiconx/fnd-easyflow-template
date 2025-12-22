@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
-import { Home, Building2, Activity, Settings, ChevronDown, PanelLeftClose, PanelLeft, Check, Loader2 } from "lucide-react"
+import { Home, Building2, Activity, Settings, ChevronDown, PanelLeftClose, PanelLeft, Check, Loader2, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +19,7 @@ import type { Workspace } from "@/types"
 const navItems = [
   { icon: Home, label: "Dashboard", href: "/" },
   { icon: Building2, label: "Workspaces", href: "/settings/workspaces", matchPaths: ["/settings/workspace", "/settings/workspaces"] },
+  { icon: Users, label: "Usuários", href: "/settings/users" },
   { icon: Activity, label: "Sessions", href: "/sessions" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ]

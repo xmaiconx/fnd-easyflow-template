@@ -1,306 +1,154 @@
 ---
 name: code-review
 description: |
-  Expertise especializada em code review baseada em OWASP, Clean Architecture, SOLID e padrões do projeto. Valida implementações contra especificação técnica e identifica violações de segurança, arquitetura e qualidade.
+  Code review: IoC, RESTful, Contracts, Security (OWASP), Clean Architecture, SOLID.
 ---
 
-# Code Review Skill
+# Code Review
 
-Skill de expertise especializada para validação de código implementado, com foco em:
-- ✅ **Segurança** (OWASP Top 10)
-- ✅ **Arquitetura** (Clean Architecture, SOLID)
-- ✅ **Padrões do Projeto** (technical-spec.md ou CLAUDE.md)
-- ✅ **Qualidade de Código** (TypeScript, exports, dead code)
+Skill para validação de código implementado contra padrões do projeto.
 
----
+**Use para:** Validar código, identificar violações, auto-corrigir (autopilot)
+**Não use para:** Implementar código, planejamento, discovery
 
-## Quando Usar
-
-### ✅ USE esta skill quando:
-- Validar código implementado de uma feature
-- Identificar violações de segurança
-- Verificar conformidade com padrões do projeto
-- Auto-corrigir issues encontrados (modo autopilot)
-
-### ❌ NÃO use para:
-- Implementar código (use subagentes de desenvolvimento)
-- Planejamento técnico (use /plan)
-- Discovery de features (use /feature)
+**Referência:** Sempre consultar `CLAUDE.md` para padrões gerais do projeto.
 
 ---
 
-## Input Esperado
+## Skills de Referência
 
-```typescript
-{
-  featureId: string,           // F0001-user-authentication
-  mode: 'autopilot' | 'manual', // autopilot = auto-fix, manual = apenas report
-  context: {
-    aboutMd: string,            // Conteúdo de about.md
-    planMd?: string,            // Conteúdo de plan.md (se existir)
-    implementationMd: string,   // Conteúdo de implementation.md
-    technicalSpec?: string      // technical-spec.md ou CLAUDE.md
-  }
-}
-```
+**Carregar ANTES de revisar:**
+- Backend: `.claude/skills/backend-development/SKILL.md`
+- Database: `.claude/skills/database-development/SKILL.md`
+- Frontend (Code): `.claude/skills/frontend-development/SKILL.md`
+- Frontend (UI): `.claude/skills/ux-design/SKILL.md`
+- Security: `.claude/skills/security-audit/SKILL.md`
 
 ---
 
-## Output Esperado
+## Categorias de Validação
 
-```typescript
-{
-  reviewReport: string,        // Markdown do review.md
-  score: number,               // 0-10
-  issuesFound: number,
-  issuesFixed: number,         // Apenas em modo autopilot
-  buildPassing: boolean,
-  findings: [
-    {
-      id: string,              // "SEC-001"
-      severity: 'critical' | 'high' | 'medium' | 'low',
-      category: 'Security' | 'Architecture' | 'Quality',
-      file: string,
-      line: number,
-      description: string,
-      fixed: boolean           // true se auto-corrigido
-    }
-  ]
-}
-```
+### 1. IoC Configuration (CRÍTICO)
+
+{"check":["services in providers","handlers in providers","module in AppModule","repos exported","barrel exports in libs/"]}
+
+{"errors":[{"err":"Can't resolve dependencies","fix":"add to providers"},{"err":"cross-module","fix":"add to exports"},{"err":"404","fix":"import in AppModule"}]}
 
 ---
 
-## Checklist de Validação
+### 2. RESTful Compliance (CRÍTICO)
 
-### 1. Project-Specific Patterns (CRÍTICO)
-
-**Fonte:** `technical-spec.md` ou `CLAUDE.md`
-
-- [ ] Configuração: Variáveis de ambiente via padrão do projeto
-- [ ] DI: Dependency Injection seguindo tokens definidos
-- [ ] Repository: Usa domain entities (não DTOs)
-- [ ] CQRS: Commands para escrita, queries para leitura
-- [ ] Multi-tenancy: Filtro `account_id` em TODAS queries
-- [ ] Logs: Usa logger injetado (nunca `console.log`)
-
-### 2. Security (OWASP Top 10)
-
-**Fonte:** `docs/instructions/security.md`
-
-- [ ] Injection: Queries parametrizadas, inputs validados
-- [ ] Authentication: Guards aplicados, tokens não expostos
-- [ ] Data Exposure: Credenciais criptografadas, logs sem secrets
-- [ ] Access Control: `account_id` do JWT (nunca do body)
-- [ ] Misconfiguration: CORS restrito, secrets via env vars
-- [ ] XSS: Outputs sanitizados, URLs validadas
-- [ ] Dependencies: `npm audit` sem critical/high
-- [ ] Mass Assignment: DTOs explícitos
-
-### 3. Architecture & SOLID
-
-- [ ] Clean Architecture: Domain nunca depende de outer layers
-- [ ] SRP: Classes fazem apenas uma coisa
-- [ ] OCP: Extensível sem modificar código existente
-- [ ] DIP: Depende de abstrações (interfaces), não concretions
-
-### 4. Code Quality
-
-- [ ] TypeScript: Sem `any`, tipos explícitos
-- [ ] Migrations: Nova tabela → migration criada
-- [ ] Frontend Types: DTOs espelhados em `apps/frontend/src/types/`
-- [ ] Barrel Exports: Novos arquivos exportados em `index.ts`
-- [ ] Dead Code: Sem `console.log`, `debugger`, imports não usados
-- [ ] Hardcoded: Sem magic numbers, strings repetidas em constantes
-- [ ] Error Handling: Exceptions do NestJS, mensagens descritivas
-
-### 5. Environment Variables (OBRIGATÓRIO)
-
-- [ ] Novas variáveis documentadas em `.env.example`
-- [ ] Valores de exemplo (não valores reais)
-- [ ] Comentários explicativos para vars complexas
+{"check":[{"rule":"HTTP method","correct":"GET read, POST create, DELETE remove","wrong":"POST for read"},{"rule":"URL","correct":"/users (noun)","wrong":"/getUsers (verb)"},{"rule":"Status","correct":"201 POST, 204 DELETE","wrong":"200 for all"}]}
 
 ---
 
-## Processo de Review
+### 3. Contract Validation (CRÍTICO)
+
+{"frontendBackend":[{"backend":"Date","frontend":"string"},{"backend":"Enum","frontend":"union type"},{"rule":"sync required/optional fields"}]}
+
+{"jsonb":["NO double parse","NO double stringify","Kysely handles automatically"]}
+
+---
+
+### 4. Security (OWASP)
+
+{"checks":[{"cat":"Injection","check":"parametrized queries"},{"cat":"Auth","check":"guards applied"},{"cat":"DataExposure","check":"no secrets in logs"},{"cat":"AccessControl","check":"filter by account_id"},{"cat":"XSS","check":"outputs sanitized"}]}
+
+{"multiTenant":["EVERY query filters account_id","account_id from JWT not body"]}
+
+---
+
+### 5. Architecture & SOLID
+
+{"checks":["domain never imports outer layers","SRP: one class one thing","DIP: depend on interfaces"]}
+
+---
+
+### 6. Code Quality
+
+{"checks":["no any type","DTOs follow naming","no console.log (use logger)","no commented code","no unused imports","exception handling"]}
+
+---
+
+### 7. Database
+
+{"checks":["migration created","has up and down","Kysely types updated","entity exported","repository exported"]}
+
+---
+
+### 8. Environment
+
+{"checks":["new vars in .env.example","example values not real","use IConfigurationService not process.env"]}
+
+---
+
+## Score
+
+{"weights":{"ioc":15,"restful":15,"contracts":15,"security":20,"architecture":15,"quality":10,"database":10}}
+
+{"status":{"8-10":"APPROVED","6-7":"NEEDS ATTENTION","4-5":"NEEDS FIXES","0-3":"CRITICAL"}}
+
+---
+
+## Process
 
 ### Phase 1: Load Context
-1. Ler `technical-spec.md` (ou `CLAUDE.md` como fallback)
-2. Ler `docs/instructions/security.md`
-3. Ler arquivos da feature (about.md, plan.md, implementation.md)
-4. Identificar arquivos implementados (do implementation.md)
+1. `bash .claude/scripts/detect-project-state.sh --branch-changes`
+2. Read reference skills
+3. Read CLAUDE.md
+4. Identify ALL changed files
 
-### Phase 2: Validate Against Patterns
-1. Verificar CADA arquivo contra technical-spec.md
-2. Identificar violações de padrões do projeto
-3. Classificar por severidade (critical, high, medium, low)
+### Phase 2: Validate
+For EACH file: IoC → RESTful → Contracts → Security → Quality
 
-### Phase 3: Security Analysis
-1. Verificar CADA categoria OWASP
-2. Validar multi-tenancy (se aplicável)
-3. Verificar env vars no `.env.example`
+### Phase 3: Fix (autopilot)
+1. Fix each violation
+2. Verify build
+3. Document before/after
 
-### Phase 4: Architecture & Quality
-1. Validar Clean Architecture
-2. Verificar SOLID principles
-3. TypeScript quality checks
-4. Database migrations
-
-### Phase 5: Apply Fixes (se mode = autopilot)
-1. Para CADA violação encontrada:
-   - Aplicar correção
-   - Verificar build
-   - Documentar no report
-2. Só finalizar quando build passar 100%
-
-### Phase 6: Generate Report
-1. Criar `docs/features/${featureId}/review.md`
-2. Score baseado em issues ponderados
-3. Lista de findings com before/after
-4. Build status
+### Phase 4: Report
+Create `docs/features/${featureId}/review.md`
 
 ---
 
-## Scoring System
-
-```typescript
-// Severidade → Peso
-critical: 3 pontos
-high: 2 pontos
-medium: 1 ponto
-low: 0.5 pontos
-
-// Score final
-score = max(0, 10 - (soma_ponderada / 5))
-
-// Status
-8-10: ✅ APPROVED
-6-7: ⚠️ NEEDS ATTENTION
-4-5: ❌ NEEDS FIXES
-0-3: 🔴 CRITICAL ISSUES
-```
-
----
-
-## Template de Output (review.md)
+## Output Template
 
 ```markdown
-# Code Review: [Feature Name]
+# Code Review: [Feature]
 
-**Date:** [current date]
-**Reviewer:** Code Review Skill
-**Feature:** ${featureId}
-**Mode:** ${mode}
-**Status:** ✅ APPROVED / ⚠️ NEEDS ATTENTION / ❌ NEEDS FIXES
+**Date:** [date] | **Status:** ✅ APPROVED
 
----
-
-## Executive Summary
-
-[2-3 sentences: what was found, what was fixed, final state]
-
----
-
-## 📊 Review Score
+## Score
 
 | Category | Score | Status |
 |----------|-------|--------|
-| Project Patterns | X/10 | ✅/⚠️/❌ |
-| Security | X/10 | ✅/⚠️/❌ |
-| Architecture & SOLID | X/10 | ✅/⚠️/❌ |
-| Code Quality | X/10 | ✅/⚠️/❌ |
+| IoC | X/10 | ✅ |
+| RESTful | X/10 | ✅ |
+| Contracts | X/10 | ✅ |
+| Security | X/10 | ✅ |
+| Architecture | X/10 | ✅ |
+| Quality | X/10 | ✅ |
+| Database | X/10 | ✅ |
 | **OVERALL** | **X/10** | **✅** |
 
----
-
-## 🔧 Issues Found & Fixed
+## Issues Found & Fixed
 
 ### Issue #1: [Title]
+**Category:** [cat] | **File:** `path:line` | **Severity:** 🔴 Critical
 
-**Category:** [Project Patterns | Security | Architecture | Quality]
-**File:** `path/to/file.ts:line`
-**Severity:** 🔴 Critical | 🟡 High | 🟠 Medium | 🟢 Low
-
-**Problem:**
-```typescript
-// Code before fix
-```
-
-**Why it's a problem:**
-[Explanation - reference pattern violated]
-
-**Fix Applied:**
-```typescript
-// Code after fix
-```
-
-**Status:** ✅ FIXED / ⏳ PENDING
-
----
-
-## ✅ Strengths
-
-- [Positive aspects of implementation]
-
----
+**Problem:** [code before]
+**Fix:** [code after]
+**Status:** ✅ FIXED
 
 ## Build Status
-
-- [x] Backend compiles successfully
-- [x] Frontend compiles successfully
-- [x] All corrections applied
-
-**Final Status:** ✅ READY FOR MERGE
+- [x] Backend compiles
+- [x] Frontend compiles
 ```
 
 ---
 
-## Usage Example
+## Rules
 
-```typescript
-// Invoke from Review Subagent
-const reviewResult = await invokeSkill('code-review', {
-  featureId: 'F0001-user-authentication',
-  mode: 'autopilot',
-  context: {
-    aboutMd: await readFile('docs/features/F0001-user-authentication/about.md'),
-    planMd: await readFile('docs/features/F0001-user-authentication/plan.md'),
-    implementationMd: await readFile('docs/features/F0001-user-authentication/implementation.md'),
-    technicalSpec: await readFile('docs/architecture/technical-spec.md')
-  }
-});
+{"do":["load skills BEFORE review","run detect-project-state.sh FIRST","auto-fix in autopilot","verify build","document before/after"]}
 
-// Result
-console.log(reviewResult.score); // 8.5
-console.log(reviewResult.issuesFound); // 5
-console.log(reviewResult.issuesFixed); // 5
-console.log(reviewResult.buildPassing); // true
-```
-
----
-
-## Critical Rules
-
-**DO:**
-- ✅ Ler technical-spec.md ANTES de validar
-- ✅ SEMPRE aplicar correções em modo autopilot
-- ✅ Verificar build após CADA correção
-- ✅ Documentar before/after de cada fix
-- ✅ Validar TODAS as categorias do checklist
-
-**DO NOT:**
-- ❌ Gerar report sem corrigir (modo autopilot)
-- ❌ Ignorar padrões do technical-spec.md
-- ❌ Aceitar "funciona" como justificativa
-- ❌ Deixar código não compilando
-- ❌ Inventar padrões não definidos no projeto
-
----
-
-## References
-
-- OWASP Top 10: https://owasp.org/Top10/
-- Clean Architecture: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
-- SOLID Principles: https://en.wikipedia.org/wiki/SOLID
-- Project Patterns: `docs/architecture/technical-spec.md` or `CLAUDE.md`
-- Security Checklist: `docs/instructions/security.md`
+{"dont":["report without fixing (autopilot)","ignore skill patterns","accept 'works' as justification","leave non-compiling code","skip IoC/RESTful checks"]}

@@ -181,3 +181,72 @@ export interface ApiError {
   errorCode?: string
   statusCode?: number
 }
+
+// Account Admin types
+export type UserRole = 'owner' | 'admin' | 'member'
+export type UserStatus = 'active' | 'inactive'
+export type InviteStatus = 'pending' | 'accepted' | 'canceled' | 'expired'
+
+export interface AccountUser {
+  id: string
+  fullName: string
+  email: string
+  role: UserRole
+  status: UserStatus
+  lastLoginAt: string | null
+  createdAt: string
+  workspaces: {
+    id: string
+    name: string
+    role: UserRole
+  }[]
+}
+
+export interface AccountUserDetails extends AccountUser {
+  sessions: Session[]
+  recentActivities: AuditLog[]
+}
+
+export interface AccountInvite {
+  id: string
+  email: string
+  role: UserRole
+  status: InviteStatus
+  expiresAt: string
+  createdAt: string
+  workspaces: {
+    id: string
+    name: string
+  }[]
+}
+
+export interface CreateInviteDto {
+  email: string
+  role: UserRole
+  workspaceIds: string[]
+}
+
+export interface CreateInviteResponse {
+  id: string
+  email: string
+  expiresAt: string
+  inviteUrl: string
+}
+
+export interface UpdateUserRoleDto {
+  role: UserRole
+}
+
+export interface UpdateUserStatusDto {
+  status: UserStatus
+}
+
+export interface ListUsersFilters {
+  role?: UserRole
+  status?: UserStatus
+  search?: string
+}
+
+export interface ListInvitesFilters {
+  status?: InviteStatus
+}

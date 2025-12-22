@@ -1,8 +1,8 @@
 import { ICommand, ICommandHandler, IConfigurationService } from '@fnd/backend';
 import { CommandHandler } from '@nestjs/cqrs';
 import { EventBus } from '@nestjs/cqrs';
-import { Inject, ConflictException } from '@nestjs/common';
-import { EntityStatus, UserRole, OnboardingStatus } from '@fnd/domain';
+import { Inject, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { EntityStatus, UserRole, OnboardingStatus, InviteStatus } from '@fnd/domain';
 import {
   UserRepository,
   AccountRepository,
@@ -12,6 +12,7 @@ import {
 } from '@fnd/database';
 import { PasswordService } from '../services/password.service';
 import { AccountCreatedEvent } from '../events/AccountCreatedEvent';
+import * as crypto from 'crypto';
 
 export class SignUpCommand {
   constructor(
@@ -21,6 +22,7 @@ export class SignUpCommand {
     public readonly workspaceName: string | undefined,
     public readonly ipAddress: string,
     public readonly userAgent: string,
+    public readonly inviteToken?: string,
   ) {}
 }
 
@@ -37,6 +39,8 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
     private readonly workspaceUserRepository: WorkspaceUserRepository,
     @Inject('IAuthTokenRepository')
     private readonly authTokenRepository: AuthTokenRepository,
+    @Inject('IInviteRepository')
+    private readonly inviteRepository: any,
     @Inject('IConfigurationService')
     private readonly configService: IConfigurationService,
     private readonly passwordService: PasswordService,
@@ -60,15 +64,62 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
     // Hash password
     const passwordHash = await this.passwordService.hashPassword(command.password);
 
-    // Create account
-    const account = await this.accountRepository.create({
-      name: `${command.fullName}'s Account`,
-      settings: {},
-    });
+    let account;
+    let userRole: UserRole;
+    let workspaceIds: string[] = [];
 
-    // Determine user role based on super admin email
-    const isSuperAdmin = this.configService.isSuperAdminEmail(command.email);
-    const userRole = isSuperAdmin ? UserRole.SUPER_ADMIN : UserRole.OWNER;
+    // If invite token provided, validate and accept invite
+    if (command.inviteToken) {
+      const tokenHash = crypto.createHash('sha256').update(command.inviteToken).digest('hex');
+      const invite = await this.inviteRepository.findByToken(tokenHash);
+
+      if (!invite) {
+        throw new NotFoundException('Invalid invite token');
+      }
+
+      if (invite.status !== InviteStatus.PENDING) {
+        throw new BadRequestException('Invite has already been used or canceled');
+      }
+
+      if (invite.expiresAt < new Date()) {
+        throw new BadRequestException('Invite has expired');
+      }
+
+      if (invite.email.toLowerCase() !== command.email.toLowerCase()) {
+        throw new BadRequestException('Email does not match invite');
+      }
+
+      // Use account and role from invite
+      account = await this.accountRepository.findById(invite.accountId);
+      if (!account) {
+        throw new NotFoundException('Account not found');
+      }
+      userRole = invite.role;
+      workspaceIds = invite.workspaceIds;
+
+      // Mark invite as accepted
+      await this.inviteRepository.updateStatus(invite.id, InviteStatus.ACCEPTED);
+    } else {
+      // Create new account (standard signup flow)
+      account = await this.accountRepository.create({
+        name: `${command.fullName}'s Account`,
+        settings: {},
+      });
+
+      // Determine user role based on super admin email
+      const isSuperAdmin = this.configService.isSuperAdminEmail(command.email);
+      userRole = isSuperAdmin ? UserRole.SUPER_ADMIN : UserRole.OWNER;
+
+      // Create default workspace
+      const workspace = await this.workspaceRepository.create({
+        accountId: account.id,
+        name: command.workspaceName || 'Workspace 01',
+        settings: {},
+        status: EntityStatus.ACTIVE,
+        onboardingStatus: OnboardingStatus.PENDING,
+      });
+      workspaceIds = [workspace.id];
+    }
 
     // Create user
     const user = await this.userRepository.create({
@@ -81,14 +132,14 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
       status: EntityStatus.ACTIVE,
     });
 
-    // Create workspace with default name if not provided
-    const workspace = await this.workspaceRepository.create({
-      accountId: account.id,
-      name: command.workspaceName || 'Workspace 01',
-      settings: {},
-      status: EntityStatus.ACTIVE,
-      onboardingStatus: OnboardingStatus.PENDING,
-    });
+    // Add user to workspaces
+    for (const workspaceId of workspaceIds) {
+      await this.workspaceUserRepository.addUserToWorkspace({
+        workspaceId,
+        userId: user.id,
+        role: userRole,
+      });
+    }
 
     // Generate verification token
     const verificationToken = this.passwordService.generateRandomToken();

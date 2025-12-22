@@ -1,129 +1,88 @@
 ---
 name: health-check
 description: |
-  Skills de análise técnica para o comando /tech-health-check. Inclui subagentes especializados em descoberta de contexto, documentação, infraestrutura, segurança, arquitetura e dados.
+  Tech health check: documentation, security, architecture, data analysis.
 ---
 
-# Health Check Skills
+# Health Check
 
-Suite de skills para análise técnica completa do projeto, projetada para empreendedores que usam vibe coding.
+Suite de skills para análise técnica completa do projeto.
+
+**Referência:** Sempre consultar `CLAUDE.md` para padrões gerais do projeto.
 
 ---
 
-## Arquitetura
+## Architecture
 
 ```
-/tech-health-check (comando coordenador)
-    │
-    ├── FASE 1 - DESCOBERTA (paralelo)
-    │   ├── context-discovery.md      🔍 Arquitetura, multi-tenancy, módulos
-    │   ├── documentation-analyzer.md 📋 CLAUDE.md, technical-spec, padrões
-    │   └── infrastructure-check.md   🔌 MCP Supabase, env vars, deps
-    │
-    ├── FASE 2 - ANÁLISE (paralelo, depende da Fase 1)
-    │   ├── security-analyzer.md      🔴 RLS, secrets, frontend/backend boundary
-    │   ├── architecture-analyzer.md  🟠 Clean arch, imports, CQRS
-    │   └── data-analyzer.md          🟡 Migrations, índices, N+1
-    │
-    └── FASE 3 - CONSOLIDAÇÃO
-        └── HEALTH-REPORT.md           📊 Scorecard + roadmap
+/tech-health-check
+├── PHASE 1 - DISCOVERY (parallel)
+│   ├── context-discovery     → architecture, multi-tenancy, modules
+│   ├── documentation-analyzer → CLAUDE.md, patterns
+│   └── infrastructure-check   → MCP, env vars, deps
+│
+├── PHASE 2 - ANALYSIS (parallel, depends on Phase 1)
+│   ├── security-analyzer      → RLS, secrets, boundaries
+│   ├── architecture-analyzer  → clean arch, imports, CQRS
+│   └── data-analyzer          → migrations, indexes, N+1
+│
+└── PHASE 3 - CONSOLIDATION
+    └── HEALTH-REPORT.md        → scorecard + roadmap
 ```
 
 ---
 
-## Criticidade dos Pilares
+## Criticality
 
-| Pilar | Criticidade | Justificativa |
-|-------|-------------|---------------|
-| Documentation | 🔴 Crítico | Impacta qualidade do desenvolvimento com IA |
-| Security | 🔴 Crítico | Vazamento de dados, violação de privacidade |
-| Architecture | 🟠 Alto | Dívida técnica acumulativa |
-| Data | 🟡 Médio | Performance e consistência |
-| Infrastructure | 🔵 Info | Pré-requisito para análise completa |
+{"pillars":[{"name":"Documentation","level":"🔴 Critical","reason":"impacts AI dev quality"},{"name":"Security","level":"🔴 Critical","reason":"data leaks, privacy"},{"name":"Architecture","level":"🟠 High","reason":"accumulating tech debt"},{"name":"Data","level":"🟡 Medium","reason":"performance, consistency"},{"name":"Infrastructure","level":"🔵 Info","reason":"prerequisite for analysis"}]}
 
 ---
 
-## Skills Disponíveis
+## Skills
 
-### context-discovery.md
-**Fase:** 1 - Descoberta
-**Objetivo:** Entender arquitetura e fornecer contexto para demais análises
-**Output:** context-discovery.md
+{"phase1":[{"skill":"context-discovery","output":"context-discovery.md"},{"skill":"documentation-analyzer","output":"documentation-report.md"},{"skill":"infrastructure-check","output":"infrastructure-report.md"}]}
 
-### documentation-analyzer.md
-**Fase:** 1 - Descoberta
-**Objetivo:** Verificar documentação do projeto
-**Output:** documentation-report.md
-
-### infrastructure-check.md
-**Fase:** 1 - Descoberta
-**Objetivo:** Verificar ferramentas e infraestrutura
-**Output:** infrastructure-report.md
-
-### security-analyzer.md
-**Fase:** 2 - Análise
-**Dependência:** context-discovery.md, infrastructure-report.md
-**Objetivo:** Analisar segurança por funcionalidade
-**Output:** security-report.md
-
-### architecture-analyzer.md
-**Fase:** 2 - Análise
-**Dependência:** context-discovery.md
-**Objetivo:** Verificar conformidade arquitetural
-**Output:** architecture-report.md
-
-### data-analyzer.md
-**Fase:** 2 - Análise
-**Dependência:** context-discovery.md, infrastructure-report.md
-**Objetivo:** Analisar banco de dados e queries
-**Output:** data-report.md
+{"phase2":[{"skill":"security-analyzer","deps":"context,infrastructure","output":"security-report.md"},{"skill":"architecture-analyzer","deps":"context","output":"architecture-report.md"},{"skill":"data-analyzer","deps":"context,infrastructure","output":"data-report.md"}]}
 
 ---
 
-## Output Final
+## Output
 
-**Pasta:** `docs/health-checks/YYYY-MM-DD/`
+{"folder":"docs/health-checks/YYYY-MM-DD/"}
 
-**Arquivos gerados:**
-- context-discovery.md
-- documentation-report.md
-- infrastructure-report.md
-- security-report.md
-- architecture-report.md
-- data-report.md
-- HEALTH-REPORT.md (consolidado)
+{"files":["context-discovery.md","documentation-report.md","infrastructure-report.md","security-report.md","architecture-report.md","data-report.md","HEALTH-REPORT.md"]}
 
 ---
 
-## Uso
+## Usage
 
 ```bash
 /tech-health-check
 ```
 
-O comando coordenador:
-1. Cria pasta com data atual
-2. Dispara subagentes Fase 1 em paralelo
-3. Aguarda conclusão
-4. Dispara subagentes Fase 2 em paralelo (com contexto da Fase 1)
-5. Aguarda conclusão
-6. Consolida no HEALTH-REPORT.md
+### Process
+1. Create folder with current date
+2. Run Phase 1 agents in parallel
+3. Wait completion
+4. Run Phase 2 agents in parallel (with Phase 1 context)
+5. Wait completion
+6. Consolidate in HEALTH-REPORT.md
 
 ---
 
-## Público-Alvo
+## Audience
 
-Empreendedores que:
-- Usam vibe coding para desenvolver
-- Não entendem detalhes técnicos
-- Precisam de um roadmap claro de ajustes
-- Querem priorização de crítico para desejável
+Entrepreneurs who:
+- Use vibe coding
+- Don't understand technical details
+- Need clear adjustment roadmap
+- Want prioritization: critical → desirable
 
 ---
 
-## Linguagem
+## Language
 
-- Reports em **Português (PT-BR)**
-- Termos técnicos em **Inglês**
-- Linguagem acessível para não-técnicos
-- Glossário incluso no HEALTH-REPORT.md
+{"reports":"PT-BR"}
+{"techTerms":"EN"}
+{"style":"accessible for non-technical"}
+{"glossary":"included in HEALTH-REPORT.md"}

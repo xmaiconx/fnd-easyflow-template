@@ -107,6 +107,12 @@ Database → Backend API → [parallel: Workers, Frontend]
 ```
 You are implementing the ${AREA} for feature ${FEATURE_ID}.
 
+## MANDATORY: Load Development Skills FIRST
+Based on your area, read the corresponding skills BEFORE writing any code:
+- Backend API: .claude/skills/backend-development/SKILL.md
+- Database: .claude/skills/database-development/SKILL.md
+- Frontend: .claude/skills/frontend-development/SKILL.md + .claude/skills/ux-design/SKILL.md
+
 ## Context
 - Feature: ${FEATURE_ID}
 - Plan: [paste relevant sections from plan.md]
@@ -116,18 +122,11 @@ You are implementing the ${AREA} for feature ${FEATURE_ID}.
 ## Your Tasks
 ${TASK_LIST}
 
-## Patterns to Follow
-${PATTERNS}
-
-## UX Design Skill (FRONTEND ONLY - MANDATORY)
-If implementing Frontend:
-1. FIRST, load the UX design skill: Read .claude/skills/ux-design/SKILL.md
-2. Follow ALL patterns from the skill (mobile-first, shadcn, Tailwind v3, Motion, etc.)
-3. Consult skill documentation for: components, animations, charts, tables
-4. Read: docs/design-system/foundations.md (if exists)
-5. Mobile-first: Design for 320px, scale UP with min-width
-6. Touch targets: 44x44px minimum
-7. Input font-size: 16px+ (prevents iOS zoom)
+## Skill Patterns
+Follow ALL patterns from your loaded skill. Key areas:
+- Backend: RESTful API, IoC/DI, DTOs, CQRS, Multi-tenancy
+- Database: Entities, Kysely types, Migrations, Repositories, Barrel exports
+- Frontend: Mobile-first, shadcn components, Tailwind v3, Motion animations
 
 ## Deliverables
 - Report: List of files created/modified
@@ -150,6 +149,23 @@ If implementing Frontend:
 - **MANDATORY:** Load skill `.claude/skills/ux-design/SKILL.md` before implementing ANY frontend code
 - **If design.md exists:** Follow mobile-first layouts, use design tokens, implement specified states
 - **Consult skill docs:** shadcn-docs.md, tailwind-v3-docs.md, motion-dev-docs.md, recharts-docs.md, tanstack-*.md
+
+### 3.3.1 Skills Reference (MANDATORY)
+
+**BEFORE implementing, load the relevant skill:**
+
+| Area | Skill | Content |
+|------|-------|---------|
+| **Backend API** | `.claude/skills/backend-development/SKILL.md` | RESTful, IoC, DTOs, CQRS, Multi-tenancy |
+| **Database** | `.claude/skills/database-development/SKILL.md` | Entities, Migrations, Kysely, Repositories |
+| **Frontend** | `.claude/skills/ux-design/SKILL.md` | Mobile-first, shadcn, Tailwind v3, Motion |
+
+**Subagent Prompt MUST include:**
+```
+## MANDATORY: Load Development Skill
+BEFORE writing code, read: .claude/skills/[area]-development/SKILL.md
+Follow ALL patterns from the skill.
+```
 
 ### 3.4 Subagent Dispatch
 
@@ -299,12 +315,20 @@ Se desejar criar testes de API para validar os endpoints desenvolvidos, execute:
 - Skip implementation sections
 - Leave code non-compiling
 - Add features not in specification
+- Ignore skill patterns
 
 **DO:**
-- Follow existing patterns rigorously
+- Load relevant skill BEFORE implementing
+- Follow skill patterns rigorously
 - Implement contracts exactly
 - Ensure 100% compilation
 - Keep code simple (KISS, YAGNI)
+
+**Skills Reference:**
+- Backend: `.claude/skills/backend-development/SKILL.md`
+- Database: `.claude/skills/database-development/SKILL.md`
+- Frontend (Code): `.claude/skills/frontend-development/SKILL.md`
+- Frontend (UI/UX): `.claude/skills/ux-design/SKILL.md`
 
 ---
 

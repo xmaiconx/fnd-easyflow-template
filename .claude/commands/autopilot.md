@@ -324,6 +324,18 @@ prompt: |
   - For charts: Grep pattern="[chart]" path=".claude/skills/ux-design/recharts-docs.md"
   - For tables: Grep pattern="[pattern]" path=".claude/skills/ux-design/tanstack-table-docs.md"
 
+  ## MANDATORY: Load Development Skills
+  Based on your area, read the corresponding skills BEFORE writing any code:
+
+  | Area | Skill | Key Patterns |
+  |------|-------|--------------|
+  | Backend API | `.claude/skills/backend-development/SKILL.md` | RESTful, IoC/DI, DTOs, CQRS |
+  | Database | `.claude/skills/database-development/SKILL.md` | Entities, Migrations, Kysely |
+  | Frontend | `.claude/skills/frontend-development/SKILL.md` | Hooks, State, Types, Forms |
+  | Frontend UI | `.claude/skills/ux-design/SKILL.md` | Mobile-first, shadcn, Tailwind v3 |
+
+  **Skills contain ALL standards** - do not implement without reading them first.
+
   ## Context
   - Feature ID: ${FEATURE_ID}
   - Plan: docs/features/${FEATURE_ID}/plan.md (SOURCE OF TRUTH)
@@ -341,7 +353,7 @@ prompt: |
   - Files created/modified
   - Implementation summary
   - Build status (MUST be passing)
-  - Design reference used (design.md or ux-design skill)
+  - Skills used and patterns followed
 ```
 
 ### Wait for All Development Subagents
@@ -427,20 +439,19 @@ prompt: |
   3. Apply hybrid structure (human-readable + token-efficient) to review.md
   4. TodoWrite: Mark item as completed AFTER writing review.md
 
-  ## STEP 3: Follow review.md Instructions
+  ## STEP 3: Load Code Review Skill and Execute
 
-  Execute ALL phases from: .claude/commands/review.md
+  **MANDATORY:** Load skill BEFORE reviewing:
+  ```bash
+  cat .claude/skills/code-review/SKILL.md
+  ```
 
-  **CRITICAL PHASES:**
-  - Phase 2: Project-Specific Patterns Validation
-  - Phase 3: Architecture & SOLID Analysis
-  - Phase 4: Security Validation
-  - Phase 5: Code Quality Checks
-  - **Phase 5.5: Contract & Runtime Validation** (NEW - MANDATORY)
-    - Validate frontend/backend DTO contracts match
-    - Check for library misuse (Kysely JSONB, Supabase Auth, etc.)
-    - Detect runtime errors (JSON.parse on already-parsed JSONB, etc.)
-  - Phase 6: Apply Fixes (AUTO-CORRECTION)
+  Then execute ALL phases from: .claude/commands/review.md
+
+  The code-review skill references:
+  - `.claude/skills/backend-development/SKILL.md` - RESTful, IoC, CQRS patterns
+  - `.claude/skills/database-development/SKILL.md` - Kysely, Migrations patterns
+  - `.claude/skills/security-audit/SKILL.md` - OWASP, Multi-tenancy patterns
 
   ## AUTOPILOT OVERRIDES (CRITICAL)
 
@@ -468,9 +479,9 @@ prompt: |
 
   ## Report Back
   - Total files reviewed (from script output)
-  - Issues found (count by category)
-  - Issues fixed (count)
-  - Final score (including Contract & Runtime category)
+  - Issues found and fixed (count by category)
+  - Skills validated (backend, database, frontend)
+  - Final score
   - Build status (MUST be passing)
 ```
 
@@ -492,6 +503,7 @@ npm run build
 - Arquivos revisados: [N]
 - Issues encontrados: [X]
 - Issues corrigidos: [X]
+- IoC Configuration issues: [W]
 - Contract & Runtime issues: [Z]
 - Score final: [Y/10]
 

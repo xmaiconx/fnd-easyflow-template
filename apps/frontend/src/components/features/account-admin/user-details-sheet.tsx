@@ -1,0 +1,196 @@
+"use client"
+
+import * as React from "react"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Separator } from "@/components/ui/separator"
+import { UserSessionCard } from "./user-session-card"
+import { ActivityCard } from "./activity-card"
+import {
+  useAccountUserDetails,
+  useUpdateUserRole,
+  useUpdateUserStatus,
+  useRevokeSession,
+  useRevokeAllUserSessions,
+} from "@/hooks/use-account-admin"
+import type { UserRole, UserStatus } from "@/types"
+
+interface UserDetailsSheetProps {
+  userId: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+const roleLabels: Record<string, string> = {
+  owner: 'Owner',
+  admin: 'Admin',
+  member: 'Member',
+}
+
+export function UserDetailsSheet({ userId, open, onOpenChange }: UserDetailsSheetProps) {
+  const { data: user, isLoading } = useAccountUserDetails(userId, open)
+  const updateRole = useUpdateUserRole()
+  const updateStatus = useUpdateUserStatus()
+  const revokeSession = useRevokeSession()
+  const revokeAllSessions = useRevokeAllUserSessions()
+
+  const handleRoleChange = (role: UserRole) => {
+    updateRole.mutate({ userId, role })
+  }
+
+  const handleStatusToggle = (status: UserStatus) => {
+    updateStatus.mutate({ userId, status })
+  }
+
+  const handleRevokeSession = (sessionId: string) => {
+    revokeSession.mutate(sessionId)
+  }
+
+  const handleRevokeAllSessions = () => {
+    revokeAllSessions.mutate(userId)
+  }
+
+  if (!open) return null
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-[480px]">
+        <SheetHeader>
+          <SheetTitle>User Details</SheetTitle>
+        </SheetHeader>
+
+        <ScrollArea className="h-[calc(100vh-80px)] pr-4 mt-6">
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          ) : user ? (
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback>{user.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                  <h3 className="font-semibold">{user.fullName}</h3>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <div className="flex gap-2">
+                    <Badge>{roleLabels[user.role]}</Badge>
+                    <Badge variant={user.status === 'active' ? 'default' : 'outline'}>
+                      {user.status === 'active' ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm">Quick Actions</h4>
+                <Select value={user.role} onValueChange={handleRoleChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="owner">Owner</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button
+                    variant={user.status === 'active' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusToggle('active')}
+                    className="flex-1"
+                  >
+                    Active
+                  </Button>
+                  <Button
+                    variant={user.status === 'inactive' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusToggle('inactive')}
+                    className="flex-1"
+                  >
+                    Inactive
+                  </Button>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-sm">Active Sessions</h4>
+                  {user.sessions && user.sessions.length > 0 && (
+                    <Button variant="destructive" size="sm" onClick={handleRevokeAllSessions}>
+                      Revoke All
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {user.sessions && user.sessions.length > 0 ? (
+                    user.sessions.map((session) => (
+                      <UserSessionCard
+                        key={session.id}
+                        session={session}
+                        onRevoke={() => handleRevokeSession(session.id)}
+                        isCurrentSession={session.isCurrent}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No sessions</p>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm">Recent Activity</h4>
+                <div className="space-y-3">
+                  {user.recentActivities && user.recentActivities.length > 0 ? (
+                    user.recentActivities.slice(0, 5).map((activity) => (
+                      <ActivityCard key={activity.id} activity={activity} />
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No activity</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+UserDetailsSheet.displayName = "UserDetailsSheet"

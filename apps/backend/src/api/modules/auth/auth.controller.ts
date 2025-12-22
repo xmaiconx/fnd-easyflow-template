@@ -55,7 +55,7 @@ export class AuthController {
     const userAgent = req.headers['user-agent'] || 'unknown';
 
     return this.commandBus.execute(
-      new SignUpCommand(dto.email, dto.password, dto.fullName, dto.workspaceName, ipAddress, userAgent)
+      new SignUpCommand(dto.email, dto.password, dto.fullName, dto.workspaceName, ipAddress, userAgent, dto.inviteToken)
     );
   }
 

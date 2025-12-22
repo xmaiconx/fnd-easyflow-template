@@ -16,6 +16,7 @@ const SessionsPage = lazy(() => import('@/pages/sessions'))
 const WorkspacesPage = lazy(() => import('@/pages/workspaces'))
 const WorkspaceSettingsPage = lazy(() => import('@/pages/workspace-settings'))
 const BillingPage = lazy(() => import('@/pages/billing'))
+const UsersManagementPage = lazy(() => import('@/pages/users-management'))
 
 // Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -129,6 +130,14 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <BillingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/users"
+          element={
+            <ProtectedRoute>
+              <UsersManagementPage />
             </ProtectedRoute>
           }
         />

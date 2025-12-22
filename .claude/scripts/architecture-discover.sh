@@ -46,14 +46,17 @@ mkdir -p "$TEMP_DIR"
   echo "## 2. Package Configuration"
   echo ""
 
-  # Root package.json
-  if [ -f "package.json" ]; then
-    echo "### package.json (root)"
+  # All package.json files in the project
+  echo "### All package.json files"
+  echo ""
+
+  for pkg_file in $(find . -name "package.json" -not -path "*/node_modules/*" -not -path "*/dist/*" 2>/dev/null | sort); do
+    echo "#### 📦 $pkg_file"
     echo '```json'
-    cat package.json | jq '{name, version, private, workspaces, type}' 2>/dev/null || head -20 package.json
+    cat "$pkg_file"
     echo '```'
     echo ""
-  fi
+  done
 
   # Turbo.json
   if [ -f "turbo.json" ]; then
