@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Bell, Sun, Moon, LogOut, User, Settings, CreditCard } from "lucide-react"
+import { Sun, Moon, LogOut, User, CreditCard } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/stores/auth-store"
 import { useUIStore } from "@/stores/ui-store"
@@ -87,38 +86,6 @@ export function Header({ breadcrumb = ["Dashboard"], className }: HeaderProps) {
           )}
         </Button>
 
-        {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative h-10 w-10">
-              <Bell className="h-5 w-5" />
-              <Badge
-                variant="destructive"
-                className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
-              >
-                3
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <div className="px-3 py-2">
-              <p className="text-sm font-semibold">Notifications</p>
-            </div>
-            <Separator />
-            <div className="max-h-[400px] overflow-y-auto">
-              {[1, 2, 3].map((i) => (
-                <DropdownMenuItem key={i} className="flex flex-col items-start gap-1 p-3">
-                  <p className="text-sm font-medium">Notification {i}</p>
-                  <p className="text-xs text-muted-foreground">
-                    This is a sample notification message
-                  </p>
-                  <p className="text-xs text-muted-foreground">2 hours ago</p>
-                </DropdownMenuItem>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
         {/* User Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -136,10 +103,6 @@ export function Header({ breadcrumb = ["Dashboard"], className }: HeaderProps) {
             <DropdownMenuItem onClick={() => navigate('/settings?tab=profile')}>
               <User className="mr-2 h-4 w-4" />
               <span>Meu Perfil</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/settings')}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Configurações</span>
             </DropdownMenuItem>
             <Separator className="my-1" />
             <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
