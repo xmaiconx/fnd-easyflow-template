@@ -23,6 +23,14 @@ import {
   UserDetailsDto,
   ImpersonateResponseDto,
   MetricsDto,
+  DateRangeQueryDto,
+  OverviewMetricsDto,
+  MrrArrMetricsDto,
+  RevenueMetricsDto,
+  ChurnMetricsDto,
+  GrowthMetricsDto,
+  RetentionMetricsDto,
+  AtRiskMetricsDto,
 } from './dtos';
 import {
   ImpersonateCommand,
@@ -111,5 +119,68 @@ export class ManagerController {
   @Get('metrics')
   async getMetrics(): Promise<MetricsDto> {
     return this.managerService.getMetrics();
+  }
+
+  /**
+   * GET /api/v1/manager/metrics/overview
+   * Get overview metrics with KPIs and charts
+   */
+  @Get('metrics/overview')
+  async getOverviewMetrics(@Query() query: DateRangeQueryDto): Promise<OverviewMetricsDto> {
+    return this.managerService.getOverviewMetrics(query.startDate, query.endDate);
+  }
+
+  /**
+   * GET /api/v1/manager/metrics/financial/mrr-arr
+   * Get MRR/ARR metrics
+   */
+  @Get('metrics/financial/mrr-arr')
+  async getMrrArrMetrics(@Query() query: DateRangeQueryDto): Promise<MrrArrMetricsDto> {
+    return this.managerService.getMrrArrMetrics(query.startDate, query.endDate);
+  }
+
+  /**
+   * GET /api/v1/manager/metrics/financial/revenue
+   * Get revenue metrics
+   */
+  @Get('metrics/financial/revenue')
+  async getRevenueMetrics(@Query() query: DateRangeQueryDto): Promise<RevenueMetricsDto> {
+    return this.managerService.getRevenueMetrics(query.startDate, query.endDate);
+  }
+
+  /**
+   * GET /api/v1/manager/metrics/financial/churn
+   * Get churn metrics
+   */
+  @Get('metrics/financial/churn')
+  async getChurnMetrics(@Query() query: DateRangeQueryDto): Promise<ChurnMetricsDto> {
+    return this.managerService.getChurnMetrics(query.startDate, query.endDate);
+  }
+
+  /**
+   * GET /api/v1/manager/metrics/customers/growth
+   * Get customer growth metrics
+   */
+  @Get('metrics/customers/growth')
+  async getGrowthMetrics(@Query() query: DateRangeQueryDto): Promise<GrowthMetricsDto> {
+    return this.managerService.getGrowthMetrics(query.startDate, query.endDate);
+  }
+
+  /**
+   * GET /api/v1/manager/metrics/customers/retention
+   * Get customer retention metrics
+   */
+  @Get('metrics/customers/retention')
+  async getRetentionMetrics(@Query() query: DateRangeQueryDto): Promise<RetentionMetricsDto> {
+    return this.managerService.getRetentionMetrics(query.startDate, query.endDate);
+  }
+
+  /**
+   * GET /api/v1/manager/metrics/customers/at-risk
+   * Get at-risk accounts
+   */
+  @Get('metrics/customers/at-risk')
+  async getAtRiskAccounts(@Query() query: DateRangeQueryDto): Promise<AtRiskMetricsDto> {
+    return this.managerService.getAtRiskAccounts(query.startDate, query.endDate);
   }
 }

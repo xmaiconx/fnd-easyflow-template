@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom'
-import { Users, BarChart3, ChevronLeft, ChevronRight, Shield } from 'lucide-react'
+import { Users, LayoutDashboard, DollarSign, UserCheck, ChevronLeft, ChevronRight, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/stores/ui-store'
 import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const navItems = [
@@ -12,9 +13,23 @@ const navItems = [
     icon: Users,
   },
   {
-    label: 'Métricas',
-    href: '/metrics',
-    icon: BarChart3,
+    type: 'separator',
+    label: 'Analytics',
+  },
+  {
+    label: 'Overview',
+    href: '/metrics/overview',
+    icon: LayoutDashboard,
+  },
+  {
+    label: 'Financeiro',
+    href: '/metrics/financial',
+    icon: DollarSign,
+  },
+  {
+    label: 'Clientes',
+    href: '/metrics/customers',
+    icon: UserCheck,
   },
 ]
 
@@ -41,12 +56,28 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4">
         <TooltipProvider delayDuration={0}>
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
+            // Separator
+            if (item.type === 'separator') {
+              return (
+                <div key={`separator-${index}`} className="py-2">
+                  {!sidebarCollapsed ? (
+                    <div className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {item.label}
+                    </div>
+                  ) : (
+                    <Separator />
+                  )}
+                </div>
+              )
+            }
+
+            // Nav Item
             const Icon = item.icon
             const link = (
               <NavLink
                 key={item.href}
-                to={item.href}
+                to={item.href!}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
@@ -58,7 +89,7 @@ export function Sidebar() {
                   )
                 }
               >
-                <Icon className="h-5 w-5 shrink-0" />
+                {Icon && <Icon className="h-5 w-5 shrink-0" />}
                 {!sidebarCollapsed && <span>{item.label}</span>}
               </NavLink>
             )
