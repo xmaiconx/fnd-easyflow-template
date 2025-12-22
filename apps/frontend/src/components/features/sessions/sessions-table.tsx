@@ -36,6 +36,8 @@ interface Session {
   location: string
   lastActive: string
   isCurrent: boolean
+  userName?: string
+  userEmail?: string
 }
 
 interface SessionsTableProps {
@@ -91,6 +93,7 @@ export function SessionsTable({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Usuário</TableHead>
             <TableHead>Dispositivo</TableHead>
             <TableHead>Navegador</TableHead>
             <TableHead>Localização</TableHead>
@@ -101,6 +104,12 @@ export function SessionsTable({
         <TableBody>
           {sessions.map((session) => (
             <TableRow key={session.id}>
+              <TableCell>
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium">{session.userName || 'Desconhecido'}</span>
+                  <span className="text-sm text-muted-foreground">{session.userEmail || '-'}</span>
+                </div>
+              </TableCell>
               <TableCell>
                 <div className="flex items-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-2 shrink-0">

@@ -1,8 +1,6 @@
-"use client"
-
 import * as React from "react"
 import { motion } from "framer-motion"
-import { Home, Building2, Activity, Settings, ChevronDown, PanelLeftClose, PanelLeft, Check, Loader2 } from "lucide-react"
+import { Home, Building2, Settings, ChevronDown, PanelLeftClose, PanelLeft, Check, Loader2, Users, Mail, Shield, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,12 +14,14 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useAuthStore } from "@/stores/auth-store"
 import type { Workspace } from "@/types"
 
-const navItems = [
-  { icon: Home, label: "Dashboard", href: "/" },
-  { icon: Building2, label: "Workspaces", href: "/settings/workspaces", matchPaths: ["/settings/workspace", "/settings/workspaces"] },
-  { icon: Activity, label: "Sessions", href: "/sessions" },
-  { icon: Settings, label: "Settings", href: "/settings" },
-]
+// Section Label Component
+function SidebarSectionLabel({ label }: { label: string }) {
+  return (
+    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-4 first:mt-0">
+      {label}
+    </div>
+  )
+}
 
 interface SidebarProps {
   isOpen?: boolean
@@ -58,6 +58,38 @@ export function Sidebar({
   const workspaceList = useAuthStore((state) => state.workspaceList)
   const currentWorkspace = useAuthStore((state) => state.currentWorkspace)
   const switchWorkspace = useAuthStore((state) => state.switchWorkspace)
+  const user = useAuthStore((state) => state.user)
+
+  // Compute admin access: super-admin OR owner/admin at user level
+  const isAdmin =
+    user?.role === 'super-admin' ||
+    user?.role === 'owner' ||
+    user?.role === 'admin'
+
+  // Navigation sections
+  const sections = [
+    {
+      id: 'main',
+      label: 'MENU PRINCIPAL',
+      visible: true,
+      items: [
+        { icon: Home, label: 'Dashboard', href: '/' },
+        { icon: Settings, label: 'Configurações', href: '/settings' },
+      ]
+    },
+    {
+      id: 'admin',
+      label: 'ADMINISTRAÇÃO',
+      visible: isAdmin,
+      items: [
+        { icon: Building2, label: 'Workspaces', href: '/admin/workspaces', matchPaths: ['/admin/workspace'] },
+        { icon: Users, label: 'Usuários', href: '/admin/users' },
+        { icon: Mail, label: 'Convites', href: '/admin/invites' },
+        { icon: Shield, label: 'Sessões', href: '/admin/sessions' },
+        { icon: FileText, label: 'Auditoria', href: '/admin/audit' },
+      ]
+    }
+  ]
 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-card border-r">
@@ -134,39 +166,44 @@ export function Sidebar({
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = isRouteActive(currentPath, item.href, (item as any).matchPaths)
+          {sections.filter(section => section.visible).map((section) => (
+            <div key={section.id}>
+              {!isCollapsed && <SidebarSectionLabel label={section.label} />}
+              {section.items.map((item) => {
+                const Icon = item.icon
+                const isActive = isRouteActive(currentPath, item.href, (item as any).matchPaths)
 
-            return (
-              <motion.a
-                key={item.href}
-                href={item.href}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  "group relative flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground",
-                  {
-                    "bg-accent text-accent-foreground border-l-2 border-primary": isActive,
-                    "text-muted-foreground": !isActive,
-                    "justify-center": isCollapsed,
-                  }
-                )}
-              >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                {!isCollapsed && (
-                  <motion.span
-                    initial={false}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                return (
+                  <motion.a
+                    key={item.href}
+                    href={item.href}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={cn(
+                      "group relative flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground",
+                      {
+                        "bg-accent text-accent-foreground border-l-2 border-primary": isActive,
+                        "text-muted-foreground": !isActive,
+                        "justify-center": isCollapsed,
+                      }
+                    )}
                   >
-                    {item.label}
-                  </motion.span>
-                )}
-              </motion.a>
-            )
-          })}
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    {!isCollapsed && (
+                      <motion.span
+                        initial={false}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </motion.a>
+                )
+              })}
+            </div>
+          ))}
         </nav>
       </ScrollArea>
     </div>

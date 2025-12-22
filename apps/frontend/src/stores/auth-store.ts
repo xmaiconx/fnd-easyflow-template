@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { api } from '@/lib/api'
-import type { User, LoginDto, SignupDto, AuthResponse, Workspace } from '@/types'
+import type { User, LoginDto, SignupDto, AuthResponse, SignupResponse, Workspace } from '@/types'
 import { toast } from 'sonner'
 
 interface AuthState {
@@ -14,7 +14,7 @@ interface AuthState {
   setAuth: (user: User, accessToken: string, refreshToken: string) => void
   clearAuth: () => void
   login: (data: LoginDto) => Promise<void>
-  signup: (data: SignupDto) => Promise<void>
+  signup: (data: SignupDto) => Promise<SignupResponse | undefined>
   logout: () => void
   setUser: (user: User) => void
   setToken: (accessToken: string, refreshToken: string) => void
@@ -81,14 +81,31 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signup: async (data: SignupDto) => {
+      signup: async (data: SignupDto): Promise<SignupResponse | undefined> => {
         try {
-          // Backend retorna apenas { message, user } sem tokens
-          // Usuário deve verificar email antes de fazer login
-          await api.post('/auth/signup', data)
+          const response = await api.post<SignupResponse>('/auth/signup', data)
+          const result = response.data
 
-          // NÃO autenticar automaticamente - usuário precisa verificar email primeiro
-          // SignupForm vai mostrar toast e redirecionar para /email-not-verified
+          // If signup via invite, backend returns tokens for auto-login
+          if (result.accessToken && result.refreshToken) {
+            // Convert signup response user to full User type
+            const user: User = {
+              id: result.user.id,
+              email: result.user.email,
+              fullName: result.user.fullName,
+              accountId: '', // Will be fetched from /auth/me
+              emailVerified: true, // Invite signup = email verified
+            }
+
+            set({
+              user,
+              accessToken: result.accessToken,
+              refreshToken: result.refreshToken,
+              isAuthenticated: true,
+            })
+          }
+
+          return result
         } catch (error: any) {
           console.error('Signup error:', error)
           const message = error.response?.data?.message || error.message || 'Erro ao criar conta'

@@ -12,6 +12,7 @@ function App() {
   const setWorkspaceList = useAuthStore((state) => state.setWorkspaceList)
   const currentWorkspace = useAuthStore((state) => state.currentWorkspace)
   const setCurrentWorkspace = useAuthStore((state) => state.setCurrentWorkspace)
+  const setUser = useAuthStore((state) => state.setUser)
 
   useEffect(() => {
     const root = document.documentElement
@@ -27,14 +28,19 @@ function App() {
     }
   }, [theme])
 
-  // Load workspaces when user is authenticated
+  // Load user data and workspaces when authenticated
   useEffect(() => {
     if (!isAuthenticated) return
 
-    const loadWorkspaces = async () => {
+    const loadUserData = async () => {
       try {
-        const response = await api.get<Workspace[]>('/workspaces')
-        const workspaces = response.data
+        // Fetch updated user data including role
+        const userResponse = await api.get<{ user: any }>('/auth/me')
+        setUser(userResponse.data.user)
+
+        // Fetch workspaces
+        const workspacesResponse = await api.get<Workspace[]>('/workspaces')
+        const workspaces = workspacesResponse.data
 
         if (workspaces.length > 0) {
           setWorkspaceList(workspaces)
@@ -45,12 +51,12 @@ function App() {
           }
         }
       } catch (error) {
-        console.error('Failed to load workspaces:', error)
+        console.error('Failed to load user data:', error)
       }
     }
 
-    loadWorkspaces()
-  }, [isAuthenticated, setWorkspaceList, currentWorkspace, setCurrentWorkspace])
+    loadUserData()
+  }, [isAuthenticated, setWorkspaceList, currentWorkspace, setCurrentWorkspace, setUser])
 
   return (
     <>

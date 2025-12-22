@@ -4,6 +4,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { WorkspaceModule } from './modules/workspace/workspace.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { ManagerModule } from './modules/manager/manager.module';
+import { AccountAdminModule } from './modules/account-admin/account-admin.module';
 import { SharedModule } from '../shared/shared.module';
 import { WorkersModule } from '../workers/workers.module';
 import { AppController } from './app.controller';
@@ -39,6 +40,7 @@ const imports = [
   WorkspaceModule,
   BillingModule,
   ManagerModule,
+  AccountAdminModule,
 ];
 
 // Add WorkersModule only in workers or hybrid mode

@@ -203,6 +203,16 @@ Read these files:
 Create the backend planning section covering: API, Commands, Events, Workers (if needed).
 Search the codebase for similar modules to use as references.
 
+## MANDATORY: Load Backend Development Skill
+BEFORE designing endpoints, read: `.claude/skills/backend-development/SKILL.md`
+
+This skill contains ALL standards for:
+- RESTful API (HTTP methods, status codes, URL patterns)
+- IoC/DI configuration
+- DTO naming conventions
+- CQRS patterns
+- Multi-tenancy rules
+
 ## Output Format
 Write to: docs/features/${FEATURE_ID}/.plan-backend.md
 
@@ -211,9 +221,9 @@ Use this EXACT format:
 ## Backend
 
 ### Endpoints
-| Method | Path | Request DTO | Response DTO | Purpose |
-|--------|------|-------------|--------------|---------|
-| [METHOD] | /api/v1/[path] | [DtoName] | [DtoName] | [~10 words] |
+| Method | Path | Request DTO | Response DTO | Status | Purpose |
+|--------|------|-------------|--------------|--------|---------|
+| [METHOD] | /api/v1/[path] | [DtoName] | [DtoName] | [2xx] | [~10 words] |
 
 ### DTOs
 | DTO | Fields | Validations |
@@ -252,6 +262,8 @@ Reference: `apps/backend/src/api/modules/[similar module]/`
 - MUST find similar module for reference
 - Combine API + Workers in same section
 - Keep it under 60 lines
+- MUST follow `.claude/skills/backend-development/SKILL.md` patterns
+- Include Status column in Endpoints table
 ```
 
 ---
@@ -435,6 +447,7 @@ git push
 - Only create subagents the feature needs
 - Execute subagents sequentially
 - Delete temporary .plan-*.md files after consolidation
+- Load skill files before planning each area
 
 **DO NOT:**
 - Write implementation code
@@ -442,6 +455,12 @@ git push
 - Include testing strategy (follow project patterns)
 - Add unnecessary sections
 - Create subagents for components not in scope
+
+**Skills to Reference:**
+- Backend: `.claude/skills/backend-development/SKILL.md`
+- Database: `.claude/skills/database-development/SKILL.md`
+- Frontend (Code): `.claude/skills/frontend-development/SKILL.md`
+- Frontend (UI): `.claude/skills/ux-design/SKILL.md`
 
 ---
 
@@ -456,6 +475,7 @@ Before completing, verify:
 - [ ] Flow is numbered list (not ASCII/Mermaid)
 - [ ] Implementation order is clear
 - [ ] Temporary files deleted
+- [ ] Skills loaded and patterns followed
 
 ---
 
@@ -472,9 +492,9 @@ Add health check endpoint for monitoring. Returns API status and version.
 ## Backend
 
 ### Endpoints
-| Method | Path | Request DTO | Response DTO | Purpose |
-|--------|------|-------------|--------------|---------|
-| GET | /api/v1/health | - | HealthResponseDto | Return API status |
+| Method | Path | Request DTO | Response DTO | Status | Purpose |
+|--------|------|-------------|--------------|--------|---------|
+| GET | /api/v1/health | - | HealthResponseDto | 200 | Return API status |
 
 ### DTOs
 | DTO | Fields | Validations |

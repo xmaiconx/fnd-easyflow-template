@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
@@ -86,12 +84,12 @@ export function WorkspacesPage() {
 
   const handleSettings = (workspace: Workspace) => {
     // Navigate to workspace settings with ID in route
-    navigate(`/settings/workspace/${workspace.id}`)
+    navigate(`/admin/workspace/${workspace.id}`)
   }
 
   const handleLeave = (workspace: Workspace) => {
     // Navigate to settings danger zone with ID in route
-    navigate(`/settings/workspace/${workspace.id}`)
+    navigate(`/admin/workspace/${workspace.id}`)
   }
 
   const handleCreateSuccess = () => {
@@ -101,7 +99,7 @@ export function WorkspacesPage() {
 
   if (isLoading) {
     return (
-      <AppShell currentPath={location.pathname}>
+      <AppShell currentPath={location.pathname} breadcrumb={["Administração", "Workspaces"]}>
         <div className="space-y-6">
           <PageHeader
             title="Workspaces"
@@ -119,7 +117,7 @@ export function WorkspacesPage() {
   }
 
   return (
-    <AppShell currentPath={location.pathname}>
+    <AppShell currentPath={location.pathname} breadcrumb={["Administração", "Workspaces"]}>
       <div className="space-y-6">
         <PageHeader
           title="Workspaces"

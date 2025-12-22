@@ -29,6 +29,7 @@ export class ResendEmailService implements IEmailService {
       'email-confirmation': this.getEmailConfirmationTemplate(variables),
       'email-verification': this.getEmailVerificationTemplate(variables),
       'password-reset': this.getPasswordResetTemplate(variables),
+      'user-invite': this.getUserInviteTemplate(variables),
     };
 
     const template = templates[templateId as keyof typeof templates];
@@ -90,6 +91,32 @@ export class ResendEmailService implements IEmailService {
         <a href="${variables.verificationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px;">Verificar Email</a>
         <p>Este link expira em 24 horas.</p>
         <p>Se você não criou uma conta, ignore este email.</p>
+        <p>Equipe Rugido Digital</p>
+      `,
+    };
+  }
+
+  private getUserInviteTemplate(variables: Record<string, any>) {
+    const expiresDate = new Date(variables.expiresAt);
+    const expiresFormatted = expiresDate.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const roleLabel = variables.role === 'admin' ? 'Administrador' : variables.role === 'member' ? 'Membro' : 'Owner';
+
+    return {
+      subject: 'Você foi convidado para participar de uma conta - Rugido Digital',
+      html: `
+        <h1>Você foi convidado!</h1>
+        <p>Você foi convidado para participar de uma conta no Rugido Digital com a permissão de <strong>${roleLabel}</strong>.</p>
+        <p>Clique no botão abaixo para aceitar o convite e criar sua conta:</p>
+        <a href="${variables.inviteUrl}" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px; margin: 16px 0;">Aceitar Convite</a>
+        <p style="color: #6B7280; font-size: 14px;">Este convite expira em ${expiresFormatted}.</p>
+        <p>Se você não esperava este convite, pode ignorar este email.</p>
         <p>Equipe Rugido Digital</p>
       `,
     };

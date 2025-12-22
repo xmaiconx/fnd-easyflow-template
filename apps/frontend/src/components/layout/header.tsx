@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { Bell, Sun, Moon, LogOut, User, Settings, CreditCard } from "lucide-react"
 import { useNavigate } from "react-router-dom"
@@ -135,17 +133,13 @@ export function Header({ breadcrumb = ["Dashboard"], className }: HeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => navigate('/profile')}>
+            <DropdownMenuItem onClick={() => navigate('/settings?tab=profile')}>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>Meu Perfil</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/settings')}>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Account Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/settings/billing')}>
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Billing</span>
+              <span>Configurações</span>
             </DropdownMenuItem>
             <Separator className="my-1" />
             <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>

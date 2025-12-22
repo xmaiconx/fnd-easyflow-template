@@ -20,6 +20,7 @@ import { ForgotPasswordCommandHandler } from './commands/ForgotPasswordCommand';
 import { ResetPasswordCommandHandler } from './commands/ResetPasswordCommand';
 import { VerifyEmailCommandHandler } from './commands/VerifyEmailCommand';
 import { ResendVerificationCommandHandler } from './commands/ResendVerificationCommand';
+import { UpdateProfileCommandHandler } from './commands/UpdateProfileCommand';
 import { AccountCreatedEventHandler } from './events/handlers/AccountCreatedEventHandler';
 import { LoginSuccessEventHandler } from './events/handlers/LoginSuccessEventHandler';
 import { LoginFailureEventHandler } from './events/handlers/LoginFailureEventHandler';
@@ -63,6 +64,7 @@ import { PasswordChangedEventHandler } from './events/handlers/PasswordChangedEv
     ResetPasswordCommandHandler,
     VerifyEmailCommandHandler,
     ResendVerificationCommandHandler,
+    UpdateProfileCommandHandler,
 
     // Event Handlers
     AccountCreatedEventHandler,

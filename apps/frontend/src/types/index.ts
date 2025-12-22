@@ -5,6 +5,7 @@ export interface User {
   fullName: string
   accountId: string
   emailVerified: boolean
+  role?: 'super-admin' | 'owner' | 'admin' | 'member'
 }
 
 export interface LoginDto {
@@ -16,12 +17,26 @@ export interface SignupDto {
   fullName: string
   email: string
   password: string
+  inviteToken?: string
 }
 
 export interface AuthResponse {
   user: User
   accessToken: string
   refreshToken: string
+}
+
+// SignupResponse pode ou não ter tokens (depende se foi via convite)
+export interface SignupResponse {
+  message: string
+  user: {
+    id: string
+    email: string
+    fullName: string
+  }
+  // Tokens são retornados quando signup é via convite (login automático)
+  accessToken?: string
+  refreshToken?: string
 }
 
 export interface ForgotPasswordDto {
@@ -180,4 +195,83 @@ export interface ApiError {
   message: string
   errorCode?: string
   statusCode?: number
+}
+
+// Account Admin types
+export type UserRole = 'owner' | 'admin' | 'member'
+export type UserStatus = 'active' | 'inactive'
+export type InviteStatus = 'pending' | 'accepted' | 'canceled' | 'expired'
+
+export interface AccountUser {
+  id: string
+  fullName: string
+  email: string
+  role: UserRole
+  status: UserStatus
+  lastLoginAt: string | null
+  createdAt: string
+  workspaces: {
+    id: string
+    name: string
+    role: UserRole
+  }[]
+}
+
+// Activity types (simplified audit log for recent activities)
+export interface Activity {
+  id: string
+  action: string
+  timestamp: string
+  details: Record<string, any>
+  userName?: string
+  userEmail?: string
+}
+
+export interface AccountUserDetails extends AccountUser {
+  sessions: Session[]
+  recentActivities: Activity[]
+}
+
+export interface AccountInvite {
+  id: string
+  email: string
+  role: UserRole
+  status: InviteStatus
+  expiresAt: string
+  createdAt: string
+  workspaces: {
+    id: string
+    name: string
+  }[]
+}
+
+export interface CreateInviteDto {
+  email: string
+  role: UserRole
+  workspaceIds: string[]
+}
+
+export interface CreateInviteResponse {
+  id: string
+  email: string
+  expiresAt: string
+  inviteUrl: string
+}
+
+export interface UpdateUserRoleDto {
+  role: UserRole
+}
+
+export interface UpdateUserStatusDto {
+  status: UserStatus
+}
+
+export interface ListUsersFilters {
+  role?: UserRole
+  status?: UserStatus
+  search?: string
+}
+
+export interface ListInvitesFilters {
+  status?: InviteStatus
 }

@@ -11,6 +11,7 @@ import { SessionsTable } from './SessionsTable';
 import { LoginAttemptsTable } from './LoginAttemptsTable';
 import { AuthTokensTable } from './AuthTokensTable';
 import { ImpersonateSessionsTable } from './ImpersonateSessionsTable';
+import { InvitesTable } from './InvitesTable';
 
 export interface Database {
   accounts: AccountTable;
@@ -26,4 +27,5 @@ export interface Database {
   login_attempts: LoginAttemptsTable;
   auth_tokens: AuthTokensTable;
   impersonate_sessions: ImpersonateSessionsTable;
+  invites: InvitesTable;
 }

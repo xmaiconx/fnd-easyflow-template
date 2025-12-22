@@ -88,6 +88,18 @@ export class UserRepository implements IUserRepository {
       .execute();
   }
 
+  async countActiveOwnersByAccountId(accountId: string): Promise<number> {
+    const result = await this.db
+      .selectFrom('users')
+      .select(({ fn }) => [fn.count('id').as('count')])
+      .where('account_id', '=', accountId)
+      .where('role', '=', 'owner')
+      .where('status', '=', 'active')
+      .executeTakeFirst();
+
+    return Number(result?.count || 0);
+  }
+
   private mapToUser(row: any): User {
     return {
       id: row.id,

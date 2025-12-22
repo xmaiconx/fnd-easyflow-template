@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Delete,
+  Patch,
   Body,
   Param,
   HttpStatus,
@@ -25,6 +26,7 @@ import {
   ResetPasswordDto,
   VerifyEmailDto,
   ResendVerificationDto,
+  UpdateProfileDto,
 } from './dtos';
 import {
   SignUpCommand,
@@ -34,9 +36,12 @@ import {
   ResetPasswordCommand,
   VerifyEmailCommand,
   ResendVerificationCommand,
+  UpdateProfileCommand,
 } from './commands';
-import { SessionRepository } from '@fnd/database';
-import { Inject } from '@nestjs/common';
+import { SessionRepository, InviteRepository, UserRepository } from '@fnd/database';
+import { Inject, BadRequestException } from '@nestjs/common';
+import { InviteStatus } from '@fnd/domain';
+import * as crypto from 'crypto';
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +49,10 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     @Inject('ISessionRepository')
     private readonly sessionRepository: SessionRepository,
+    @Inject('IInviteRepository')
+    private readonly inviteRepository: InviteRepository,
+    @Inject('IUserRepository')
+    private readonly userRepository: UserRepository,
   ) {}
 
   @Post('signup')
@@ -55,8 +64,33 @@ export class AuthController {
     const userAgent = req.headers['user-agent'] || 'unknown';
 
     return this.commandBus.execute(
-      new SignUpCommand(dto.email, dto.password, dto.fullName, dto.workspaceName, ipAddress, userAgent)
+      new SignUpCommand(dto.email, dto.password, dto.fullName, dto.workspaceName, ipAddress, userAgent, dto.inviteToken)
     );
+  }
+
+  // GET /auth/invite/:token - Validate invite and return email for signup form
+  @Get('invite/:token')
+  async validateInvite(@Param('token') token: string) {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const invite = await this.inviteRepository.findByToken(tokenHash);
+
+    if (!invite) {
+      throw new NotFoundException('Invalid invite token');
+    }
+
+    if (invite.status !== InviteStatus.PENDING) {
+      throw new BadRequestException('Invite has already been used or canceled');
+    }
+
+    if (invite.expiresAt < new Date()) {
+      throw new BadRequestException('Invite has expired');
+    }
+
+    return {
+      email: invite.email,
+      role: invite.role,
+      expiresAt: invite.expiresAt.toISOString(),
+    };
   }
 
   @Post('signin')
@@ -130,6 +164,33 @@ export class AuthController {
         accountId: req.user.accountId,
         role: req.user.role,
         createdAt: req.user.createdAt,
+      },
+    };
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(@Req() req: any, @Body() dto: UpdateProfileDto) {
+    await this.commandBus.execute(
+      new UpdateProfileCommand(req.user.id, dto.fullName)
+    );
+
+    // Fetch updated user data from database
+    const updatedUser = await this.userRepository.findById(req.user.id);
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        fullName: updatedUser.fullName,
+        emailVerified: updatedUser.emailVerified,
+        accountId: updatedUser.accountId,
+        role: req.user.role, // Role comes from JWT
+        createdAt: updatedUser.createdAt,
       },
     };
   }

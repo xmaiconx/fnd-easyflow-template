@@ -17,4 +17,8 @@ export class SignUpDto {
   @IsString()
   @IsOptional()
   workspaceName?: string;
+
+  @IsString()
+  @IsOptional()
+  inviteToken?: string;
 }

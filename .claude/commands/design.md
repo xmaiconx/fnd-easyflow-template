@@ -191,6 +191,17 @@ ls apps/frontend/src/stores/ 2>/dev/null
 - How exports are organized (barrel files?)
 - Naming conventions (kebab-case files? PascalCase components?)
 
+**CHECKPOINT - Before proceeding to Phase 2:**
+Verify you have COMPLETE information:
+- ✅ File naming pattern detected
+- ✅ Props typing pattern detected (interface vs type)
+- ✅ Export pattern detected (barrel vs direct)
+- ✅ Existing components cataloged with paths
+- ✅ State management pattern identified
+- ✅ Routing pattern identified
+
+**IF MISSING:** Run additional analysis NOW. Incomplete info = broken development later.
+
 ### 1.3 Phase 1B: Propose Patterns (New Projects Only)
 
 **Only execute if frontend has minimal/no structure.**
@@ -383,6 +394,16 @@ Design system do projeto. Mobile-first: design para 320px, escala para cima.
 
 ## Phase 3: Quick Validation with User
 
+**CRITICAL INFORMATION CHECK:** Antes de apresentar, verifique se você capturou:
+- ✅ Estrutura de pastas e convenções de naming
+- ✅ Componentes reutilizáveis (evita retrabalho)
+- ✅ Padrões de estado (loading, empty, error)
+- ✅ Navegação/routing (afeta imports e organização)
+- ✅ Props typing pattern (interface vs type)
+- ✅ Export pattern (barrel files vs direct)
+
+**SE FALTAR ALGO ACIMA:** Investigue ANTES de validar com usuário.
+
 Present findings and inferences for quick validation:
 
 ```markdown
@@ -467,6 +488,8 @@ For EACH page/screen, create specs that REFERENCE existing components:
 
 **Only for components that DON'T exist yet:**
 
+**CRITICAL:** Include ALL props with complete types. Missing props = implementation failures.
+
 ```markdown
 ## New Components Needed
 
@@ -476,17 +499,45 @@ For EACH page/screen, create specs that REFERENCE existing components:
 
 **Purpose:** [one line]
 
-**Props:**
-{"props":[{"name":"x","type":"string","required":true}]}
+**Props:** (COMPLETE - include ALL props needed)
+{"props":[{"name":"title","type":"string","required":true},{"name":"items","type":"Item[]","required":true},{"name":"onItemClick","type":"(item: Item) => void","required":false},{"name":"loading","type":"boolean","required":false,"default":"false"}]}
 
 **Composition:**
-- Uses: [list existing components it will compose]
+- Uses: [list existing components it will compose, e.g., "Card", "Button", "Skeleton"]
 - Pattern: [follow existing component patterns in project]
 
-**Mobile Behavior:** [specific mobile notes]
+**Mobile Behavior:**
+- Touch targets: 44px minimum
+- Font size: 16px+ for inputs (prevents zoom)
+- [any other specific mobile consideration]
 
 **Implementation Notes:**
-[Textual description for dev agent - be specific but concise]
+[Concise textual description for dev agent - focus on WHAT the component does, not HOW to code it. Example: "Displays a list of items in cards. Each card shows title and description. On click, triggers onItemClick callback. Shows skeleton loading state when loading=true."]
+```
+
+**EXAMPLE - Good Component Spec:**
+```markdown
+### WorkspaceCard
+
+**Location:** `components/workspace/workspace-card.tsx`
+
+**Purpose:** Display workspace info with actions (edit, delete)
+
+**Props:**
+{"props":[{"name":"workspace","type":"Workspace","required":true},{"name":"onEdit","type":"(id: string) => void","required":true},{"name":"onDelete","type":"(id: string) => void","required":true},{"name":"isOwner","type":"boolean","required":false,"default":"false"}]}
+
+**Composition:**
+- Uses: Card (ui/card), Button (ui/button), DropdownMenu (ui/dropdown-menu)
+- Pattern: Follow project's component structure (forwardRef if applicable)
+
+**Mobile Behavior:**
+- Touch targets: 44px for action buttons
+- Actions in dropdown menu (saves space)
+- Full-width on mobile
+
+**Implementation Notes:**
+Card showing workspace name, member count, and created date. Dropdown menu with Edit/Delete actions (only visible if isOwner=true). Delete action shows confirmation. Uses existing Card component as wrapper, Button for actions.
+```
 ```
 
 ---
@@ -502,6 +553,25 @@ For EACH page/screen, create specs that REFERENCE existing components:
    - Part 2 (rest): Token-efficient JSON for specs
 4. TodoWrite: Mark item as completed after writing
 ```
+
+**CRITICAL BALANCE - Token Efficiency vs Information Completeness:**
+
+**MUST INCLUDE (Afeta desenvolvimento - NÃO omitir):**
+- ✅ Estrutura de pastas e convenções (naming, exports, props typing)
+- ✅ Componentes existentes reutilizáveis (path completo + propósito)
+- ✅ Novos componentes necessários (props, composição, localização)
+- ✅ Padrões de estado detectados (loading, empty, error)
+- ✅ Navegação/routing (afeta imports)
+- ✅ Layout mobile-first (estrutura base 320px)
+- ✅ Touch targets e considerações mobile (44px, font 16px+)
+
+**CAN OMIT (Preferência estética - pode inferir):**
+- ⚠️ Cores exatas (use CSS vars do projeto)
+- ⚠️ Espaçamentos exatos (use scale Tailwind do projeto)
+- ⚠️ Animações decorativas (focar em UX essencial)
+- ⚠️ Ícones específicos (pode decidir na implementação)
+
+**FORMAT RULE:** Use JSON compacto para specs repetitivas. Use texto APENAS para contexto único/crítico.
 
 ### 6.1 Create Feature Design Document
 
@@ -525,21 +595,35 @@ Especificação de design mobile-first para [feature]. Baseado na análise do fr
 ## Spec (Token-Efficient)
 
 ### Context
-{"stack":"[detected]","patterns":"[detected]","analysisDate":"[date]","skillRef":".claude/skills/ux-design/SKILL.md"}
+{"stack":"[detected]","conventions":{"naming":"[detected]","propsType":"interface|type","exports":"barrel|direct","fileCase":"[detected]"},"analysisDate":"[date]","skillRef":".claude/skills/ux-design/SKILL.md"}
+
+### Existing Components (Reusable)
+[{"name":"Button","location":"components/ui/button.tsx","purpose":"[one line]"},{"name":"Card","location":"components/ui/card.tsx","purpose":"[one line]"}]
+
+**CRITICAL:** Dev agents MUST check this list before creating new components.
 
 ### Pages
 [For each page, use JSON format:]
-{"page":"[PageName]","purpose":"[one line]","mobile":{"structure":"header→content→bottomBar","components":[{"name":"X","status":"exists|new","location":"path"}]},"states":{"empty":"[pattern]","loading":"[pattern]","error":"[pattern]"}}
+{"page":"[PageName]","route":"[/path]","purpose":"[one line]","mobile":{"structure":"header→content→bottomBar","components":[{"name":"X","status":"exists|new","location":"path"}]},"states":{"empty":"[component or pattern]","loading":"[skeleton component or pattern]","error":"[error component or pattern]"},"responsive":{"md":"[ONLY differences from mobile]","lg":"[ONLY differences from mobile]"}}
 
 ### New Components
-[For each NEW component:]
-{"component":"[Name]","location":"[path]","purpose":"[one line]","props":[{"name":"x","type":"string","required":true}],"uses":["Button","Card"],"mobileNotes":"[specific notes]"}
+[For each NEW component - ONLY if not exists:]
+{"component":"[Name]","location":"[path following project convention]","purpose":"[one line]","props":[{"name":"x","type":"string","required":true,"default":"value if applicable"}],"composition":["[ExistingComponent1]","[ExistingComponent2]"],"mobileFirst":{"touchTarget":"44px minimum","fontSize":"16px+ for inputs","specific":"[any other mobile consideration]"},"implementation":"[Concise textual description for dev agent - focus on WHAT not HOW]"}
 
-### Existing Components
-[{"name":"Button","location":"components/ui/button.tsx"},{"name":"Card","location":"components/ui/card.tsx"}]
+**CRITICAL:** Include ALL props with types. Missing props = broken implementation.
+
+### State Patterns Detected
+{"loading":"[component/pattern]","empty":"[component/pattern]","error":"[component/pattern]","skeleton":"[if exists, location]"}
+
+**CRITICAL:** Dev agents MUST use these patterns for consistency.
+
+### Navigation/Routing
+{"pattern":"[react-router-dom v6/etc]","imports":"[detected import pattern]","guards":"[auth guards location if applicable]"}
+
+**CRITICAL:** Affects imports and route organization.
 
 ### Dev Agent Instructions
-{"conventions":{"naming":"[detected]","location":"[detected]","exports":"[detected]"},"mobileFirst":["touch targets 44px","input 16px+ font","bottom nav for primary actions"],"priority":["[component1]","[component2]"],"skillRequired":".claude/skills/ux-design/SKILL.md"}
+{"mobileFirst":["touch targets 44px minimum","input font 16px+ (prevents zoom)","bottom nav for primary actions","test on 320px viewport"],"implementationOrder":["[component1 - foundational]","[component2 - depends on component1]","[component3]"],"skillRequired":".claude/skills/ux-design/SKILL.md","conventions":{"follow":"Use project patterns exactly","reuse":"Check existing components FIRST","mobile":"Design mobile, enhance up"}}
 ```
 
 ### 6.2 DO NOT Auto-Create foundations.md
@@ -578,6 +662,12 @@ The design.md for each feature references the skill directly (`.claude/skills/ux
 
 ## Critical Rules
 
+**DOCUMENTATION STRATEGY (Token Efficiency + Completeness):**
+- ✅ **MUST DOCUMENT:** Conventions, existing components (with paths), new components (with ALL props), state patterns, routing, mobile requirements
+- ⚠️ **CAN OMIT:** Exact colors, spacing values, decorative animations, specific icons
+- 📝 **FORMAT:** JSON for repetitive specs, text ONLY for unique/critical context
+- 🎯 **GOAL:** Dev agent can implement WITHOUT making assumptions or missing dependencies
+
 **DOCUMENTATION LOCATION:**
 - Feature design specs go in: `docs/features/${FEATURE_ID}/design.md`
 - NEVER create design.md in docs/design-system/
@@ -595,12 +685,23 @@ The design.md for each feature references the skill directly (`.claude/skills/ux
 - RESPECT existing conventions 100%
 - Only propose patterns for truly new projects
 
+**CRITICAL INFORMATION CHECKPOINT:**
+Before finalizing documentation, verify you captured:
+- ✅ Naming conventions (files, components, props)
+- ✅ Export patterns (barrel vs direct)
+- ✅ Props typing pattern (interface vs type)
+- ✅ Existing components with full paths
+- ✅ State patterns (loading, empty, error)
+- ✅ Routing/navigation pattern
+- ✅ Mobile-first requirements (touch targets, font sizes)
+
 **DO NOT:**
 - Create visual mockups
 - Change existing project structure
 - Ignore existing patterns
 - Skip the analysis phase
 - Auto-create foundations.md (only when user explicitly requests)
+- Omit critical information to save tokens (will cause dev failures)
 
 **DO:**
 - Map what exists FIRST
@@ -608,3 +709,4 @@ The design.md for each feature references the skill directly (`.claude/skills/ux
 - Follow project conventions
 - Keep specs actionable for AI agents
 - Reference ux-design skill for dev agents
+- Balance token efficiency with completeness

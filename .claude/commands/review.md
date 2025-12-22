@@ -11,6 +11,24 @@ You are a **Feature Code Review Specialist**. Your role is to:
 
 ---
 
+## MANDATORY: Load Review Skills First
+
+**BEFORE reviewing, load the code-review skill and its references:**
+
+```bash
+cat .claude/skills/code-review/SKILL.md
+```
+
+The code-review skill defines validation categories and references:
+- `.claude/skills/backend-development/SKILL.md` - RESTful, IoC/DI, DTOs, CQRS
+- `.claude/skills/database-development/SKILL.md` - Entities, Migrations, Kysely, Repositories
+- `.claude/skills/frontend-development/SKILL.md` - Hooks, State, Types, Forms
+- `.claude/skills/security-audit/SKILL.md` - OWASP, Multi-tenancy, Authentication
+
+**All validation patterns are defined in the skills** - do not skip loading them.
+
+---
+
 ## Phase 1: Identify Feature & Load Context
 
 ### Step 1: Detect Current Feature
@@ -91,96 +109,50 @@ From the script output and `implementation.md`, **read ALL files** that exist an
 
 ## Phase 2: Project-Specific Patterns Validation
 
-**⚠️ OBRIGATÓRIO:** Validar o código contra TODOS os padrões definidos na especificação técnica (`technical-spec.md` ou `CLAUDE.md`).
+**⚠️ OBRIGATÓRIO:** Execute validação usando as skills carregadas.
 
-### 2.1 Configuration & Environment Patterns
+### Skill-Based Validation
 
-**Verificar na especificação técnica:**
-- Como o projeto espera que variáveis de ambiente sejam acessadas?
-- Existe padrão de config factory? Environment files?
-- Configs devem ser injetadas via DI?
+| Category | Skill Reference | Key Validations |
+|----------|-----------------|-----------------|
+| **IoC Configuration** | `backend-development/SKILL.md` | Providers, exports, imports, barrel exports |
+| **RESTful API** | `backend-development/SKILL.md` | HTTP methods, status codes, URL patterns |
+| **DTOs & CQRS** | `backend-development/SKILL.md` | Naming, validation, handlers |
+| **Database** | `database-development/SKILL.md` | Entities, migrations, Kysely types, repositories |
+| **Security** | `security-audit/SKILL.md` | OWASP, multi-tenancy, authentication |
 
-**Se houver padrão definido → código DEVE seguir**
-
-❌ Violação típica: Acessar `process.env` diretamente quando o projeto tem padrão diferente
-
-### 2.2 Dependency Injection Patterns
-
-**Verificar na especificação técnica:**
-- Como serviços devem ser injetados?
-- Quais tokens de DI existem?
-- Existe shared module?
-
-**Se houver padrão definido → código DEVE seguir**
-
-❌ Violação típica: Criar instância direta ao invés de injetar via DI
-
-### 2.3 Repository Pattern Compliance
-
-**Verificar na especificação técnica:**
-- Repositórios usam domain entities ou DTOs?
-- Quais métodos são esperados?
-- Como multi-tenancy é implementado?
-
-**Se houver padrão definido → código DEVE seguir**
-
-### 2.4 CQRS Pattern Compliance (se aplicável)
-
-**Verificar na especificação técnica:**
-- Commands apenas para escrita?
-- Queries diretas ou via handlers?
-- Como eventos são emitidos?
-
-**Se houver padrão definido → código DEVE seguir**
-
-### 2.5 Other Project Patterns
-
-**Verificar na especificação técnica qualquer outro padrão:**
-- Logging patterns
-- Error handling patterns
-- Validation patterns
-- File structure patterns
-- Naming conventions
-
-**REGRA:** Se está na especificação técnica, DEVE ser seguido.
-
-### 2.6 Environment Variables Validation
-
-**⚠️ OBRIGATÓRIO:** Verificar se TODAS as variáveis de ambiente usadas no código estão documentadas no `.env.example`.
-
-**Processo de verificação:**
+### Validation Commands
 
 ```bash
-# 1. Buscar variáveis de ambiente nos arquivos implementados
-grep -rE "process\.env\.|getEnv\(|config\.(get|has)" apps/ libs/ --include="*.ts" | grep -v node_modules
+# IoC: Check module imports
+cat apps/backend/src/api/app.module.ts | grep -E "imports:"
 
-# 2. Verificar IConfigurationService para novos métodos
-cat apps/backend/src/shared/services/configuration.service.ts
+# IoC: Check barrel exports
+cat libs/app-database/src/repositories/index.ts
+cat libs/app-database/src/interfaces/index.ts
+cat libs/domain/src/entities/index.ts
+cat libs/domain/src/enums/index.ts
 
-# 3. Comparar com .env.example
-cat .env.example
+# RESTful: Check for verbs in routes (anti-pattern)
+grep -rE "@(Get|Post|Put|Patch|Delete)\(['\"].*?(get|create|update|delete)" apps/backend/src --include="*.controller.ts"
+
+# Env vars: Check .env.example
+grep -rE "process\.env\." apps/ libs/ --include="*.ts" | grep -v node_modules
 ```
 
-**Checklist de Variáveis de Ambiente:**
-- [ ] Toda nova variável `process.env.NOVA_VAR` está no `.env.example`
-- [ ] Novos métodos em `IConfigurationService` têm variável correspondente
-- [ ] Variáveis têm valor de exemplo ou placeholder (não valores reais)
-- [ ] Variáveis sensíveis têm comentário indicando que são secrets
+### Key Violations to Check
 
-**Se encontrar variável não documentada:**
-1. Adicionar ao `.env.example` com valor placeholder
-2. Adicionar comentário explicativo se necessário
-3. Documentar no relatório de review
+| Category | Violation | Fix |
+|----------|-----------|-----|
+| IoC | Service not in providers | Add to module providers |
+| IoC | Module not in AppModule imports | Add to AppModule imports |
+| IoC | Missing barrel export | Add export to index.ts |
+| RESTful | Verb in URL | Use noun-based paths |
+| RESTful | POST returning 200 | Add @HttpCode(201) |
+| Database | JSONB double-parse | Remove JSON.parse |
+| Contract | DTO mismatch | Sync frontend/backend types |
 
-**Exemplo de correção:**
-```bash
-# Antes (.env.example sem a variável)
-# ... outras variáveis ...
-
-# Depois (.env.example com a variável adicionada)
-# Nova Feature - [Nome da Feature]
-NOVA_VARIAVEL=seu-valor-aqui  # Descrição breve do propósito
-```
+**CRITICAL:** Use skill patterns as source of truth for all validations.
 
 ---
 
@@ -335,165 +307,57 @@ cat docs/instructions/security.md
 - [ ] Sem código para requisitos hipotéticos
 - [ ] Soluções simples para problemas simples
 
+### 5.9 RESTful API Compliance (Backend)
+
+**Reference:** `.claude/skills/backend-development/SKILL.md` - Section "RESTful API Standards"
+
+**Quick Check:**
+```bash
+# Find verbs in routes (anti-pattern)
+grep -rE "@(Get|Post|Put|Patch|Delete)\(['\"].*?(get|create|update|delete)" apps/backend/src --include="*.controller.ts"
+
+# Check HttpCode usage
+grep -rE "@HttpCode" apps/backend/src --include="*.controller.ts"
+```
+
+**Common Fixes:**
+- POST without 201 → Add `@HttpCode(HttpStatus.CREATED)`
+- DELETE with response → Add `@HttpCode(HttpStatus.NO_CONTENT)`
+- Verb in URL → Use noun-based paths
+
 ---
 
 ## Phase 5.5: Contract & Runtime Validation
 
-**⚠️ NOVA FASE CRÍTICA:** Validar contratos entre frontend/backend e comportamentos de bibliotecas para prevenir erros em tempo de execução.
+**Reference:** `.claude/skills/code-review/SKILL.md` - Section "Contract & Runtime Validation"
 
-### 5.5.1 Frontend/Backend Contract Validation
-
-**Objetivo:** Garantir que DTOs do frontend espelham corretamente os contratos do backend.
-
-**Verificar:**
+### Quick Validation
 
 ```bash
-# 1. Buscar DTOs do backend alterados na feature
+# Check for JSONB misuse
+grep -rE "JSON\.(parse|stringify)" libs/app-database/src --include="*.ts"
+
+# Check for backend DTOs
 grep -rE "export (class|interface) \w+(Dto|Response)" apps/backend/src --include="*.ts"
 
-# 2. Comparar com types do frontend
+# Compare with frontend types
 ls apps/frontend/src/types/
 ```
 
-**Checklist de Contratos:**
+### Key Validations
 
-| Verificação | Ação se Falhar |
-|-------------|----------------|
-| Novo DTO no backend tem interface correspondente no frontend? | Criar interface em `apps/frontend/src/types/` |
-| Campos obrigatórios coincidem? | Alinhar campos entre backend e frontend |
-| Tipos são compatíveis? (Date→string, Enum→union types) | Ajustar tipos no frontend |
-| Enums têm mesmos valores? | Sincronizar valores |
-| Campos opcionais são tratados corretamente? (`?` no TS) | Adicionar `?` onde necessário |
+| Category | What to Check | Skill Reference |
+|----------|---------------|-----------------|
+| **Contracts** | DTOs match frontend interfaces | `code-review/SKILL.md` |
+| **Kysely/JSONB** | No double-parse, no double-stringify | `database-development/SKILL.md` |
+| **Date handling** | Date→string in JSON responses | `code-review/SKILL.md` |
+| **NestJS IoC** | Providers registered, modules imported | `backend-development/SKILL.md` |
 
-**Padrões de Contrato:**
-```typescript
-// Backend DTO
-export class UserResponseDto {
-  id: string;
-  email: string;
-  role: UserRole;
-  createdAt: Date;
-}
+### Severities
 
-// Frontend Interface (DEVE espelhar)
-export interface UserResponse {
-  id: string;
-  email: string;
-  role: 'owner' | 'admin' | 'member';  // Union ao invés de enum import
-  createdAt: string;  // Date serializa como string no JSON
-}
-```
-
-**Erros Comuns de Contrato:**
-- ❌ Frontend espera campo que backend não envia
-- ❌ Tipos incompatíveis (Date no backend, espera Date no frontend mas recebe string)
-- ❌ Enum importado do backend (deve usar union type ou espelhar)
-- ❌ Campo obrigatório no frontend mas opcional no backend
-
-### 5.5.2 Library Behavior Validation
-
-**Objetivo:** Identificar usos incorretos de bibliotecas que causarão erros em runtime.
-
-#### Kysely / PostgreSQL Patterns
-
-| Pattern Incorreto | Pattern Correto | Razão |
-|-------------------|-----------------|-------|
-| `JSON.parse(row.jsonbColumn)` | `row.jsonbColumn` (direto) | Kysely retorna JSONB já parseado |
-| `JSON.stringify(obj)` em insert de JSONB | `obj` (direto) | Kysely serializa automaticamente |
-| `eb.val(JSON.stringify(x))` | `eb.val(x)` | Evitar double-stringify |
-| `.where('id', '=', id)` sem cast | `.where('id', '=', sql\`${id}::uuid\`)` | UUID precisa de cast explícito |
-
-```typescript
-// ❌ ERRADO - Double parse
-const data = JSON.parse(result.metadata); // metadata já é objeto
-
-// ✅ CORRETO
-const data = result.metadata; // Kysely já fez o parse
-```
-
-#### Date/Timestamp Handling
-
-| Pattern Incorreto | Pattern Correto | Razão |
-|-------------------|-----------------|-------|
-| `new Date(row.created_at)` (redundante) | `row.created_at` | Postgres retorna Date object |
-| Comparar Date com string | Usar `Date` objects ou timestamps | Evitar comparação de tipos diferentes |
-
-```typescript
-// ❌ ERRADO
-const isRecent = row.created_at > '2024-01-01'; // String comparison
-
-// ✅ CORRETO
-const isRecent = row.created_at > new Date('2024-01-01');
-```
-
-#### Supabase Auth Patterns
-
-| Pattern Incorreto | Pattern Correto | Razão |
-|-------------------|-----------------|-------|
-| `supabase.auth.getUser()` sem await | `await supabase.auth.getUser()` | Retorna Promise |
-| Acessar `session.user` sem null check | `session?.user` | Pode ser null |
-| Confiar no user do body | Extrair do JWT token | Segurança |
-
-#### NestJS Patterns
-
-| Pattern Incorreto | Pattern Correto | Razão |
-|-------------------|-----------------|-------|
-| `@Injectable()` sem provider | Registrar no module | Erro de DI em runtime |
-| Circular dependency sem forwardRef | `@Inject(forwardRef(() => Service))` | Evitar erro de inicialização |
-| Serviço sem interface | Implementar interface | Facilitar testes e DI |
-
-#### BullMQ Patterns
-
-| Pattern Incorreto | Pattern Correto | Razão |
-|-------------------|-----------------|-------|
-| Job data com funções | Apenas dados serializáveis | Jobs são JSON serialized |
-| Assumir job.data tipado | Validar estrutura em runtime | Type safety não persiste |
-
-### 5.5.3 Runtime Error Detection Checklist
-
-**Para CADA arquivo TypeScript modificado, verificar:**
-
-```markdown
-### Type Coercion Issues
-- [ ] Sem `JSON.parse` em campos JSONB do Kysely
-- [ ] Sem `JSON.stringify` desnecessário em inserts JSONB
-- [ ] Sem `new Date()` redundante em campos timestamp
-- [ ] Sem comparação de Date com string
-
-### Null/Undefined Safety
-- [ ] Optional chaining em acessos que podem ser null
-- [ ] Nullish coalescing (`??`) ao invés de `||` para valores falsy válidos
-- [ ] Verificação de null antes de destructuring
-
-### Async/Await Issues
-- [ ] Todas as Promises têm await ou são handled
-- [ ] Sem Promise em condições (ex: `if (promise)` ao invés de `if (await promise)`)
-- [ ] Sem `.then()` misturado com async/await
-
-### Type Assertions
-- [ ] Sem `as any` (usar unknown + type guard)
-- [ ] Assertions (`as Type`) validadas em runtime quando dados externos
-- [ ] Sem non-null assertion (operador !) em dados não garantidos
-
-### Array/Object Operations
-- [ ] `.find()` result verificado antes de uso (pode ser undefined)
-- [ ] `.map()` em array garantidamente não-null
-- [ ] Object spread em objeto garantidamente não-null
-```
-
-### 5.5.4 Validação Automática
-
-**Se encontrar violações:**
-
-1. **Identificar** o padrão incorreto
-2. **Corrigir** automaticamente
-3. **Documentar** no relatório com antes/depois
-4. **Verificar** que build ainda passa
-
-**Severidades:**
-- 🔴 **Critical** - Causará erro em runtime (JSON.parse de JSONB, Promise sem await)
-- 🟡 **High** - Pode causar bugs sutis (contrato desalinhado, type coercion)
-- 🟠 **Medium** - Code smell que pode evoluir para bug (any, assertions)
+- 🔴 **Critical** - Runtime error (JSONB misuse, Promise without await)
+- 🟡 **High** - Subtle bugs (contract mismatch, type coercion)
+- 🟠 **Medium** - Code smell (any, assertions)
 
 ---
 
@@ -512,12 +376,13 @@ const isRecent = row.created_at > new Date('2024-01-01');
 
 ```
 1. Project-specific pattern violations (mais importantes)
-2. DI/Service injection violations
-3. Architecture violations
-4. SOLID violations
-5. Security violations
-6. Contract & Runtime violations (frontend/backend, library misuse)
-7. Code quality issues
+2. IoC Configuration violations (module imports, providers, exports)
+3. DI/Service injection violations
+4. Architecture violations
+5. SOLID violations
+6. Security violations
+7. Contract & Runtime violations (frontend/backend, library misuse)
+8. Code quality issues
 ```
 
 ### Build Verification:
@@ -562,10 +427,12 @@ npm run build
 | Category | Score | Status |
 |----------|-------|--------|
 | Project Patterns | X/10 | ✅/⚠️/❌ |
+| **IoC Configuration** | X/10 | ✅/⚠️/❌ |
+| **RESTful API Compliance** | X/10 | ✅/⚠️/❌ |
 | Architecture & SOLID | X/10 | ✅/⚠️/❌ |
 | Security & Multi-Tenancy | X/10 | ✅/⚠️/❌ |
 | Code Quality (types, exports, dead code) | X/10 | ✅/⚠️/❌ |
-| **Contract & Runtime (NEW)** | X/10 | ✅/⚠️/❌ |
+| **Contract & Runtime** | X/10 | ✅/⚠️/❌ |
 | Database & Migrations | X/10 | ✅/⚠️/❌ |
 | **OVERALL** | **X/10** | **✅** |
 
@@ -658,48 +525,38 @@ Próximos Passos:
 - SEMPRE verifique o build após correções
 - Só finalize quando código estiver 100% correto
 
-**⚠️ ESPECIFICAÇÃO TÉCNICA É A FONTE DA VERDADE:**
-- SEMPRE leia `docs/architecture/technical-spec.md` ANTES de revisar (ou CLAUDE.md como fallback)
-- TODO padrão definido na especificação DEVE ser seguido
-- Se código viola padrão da especificação → é uma violação CRÍTICA
-- Não invente padrões - use apenas os definidos no projeto
-- Se spec não existir, recomendar `/architecture` e usar CLAUDE.md
+**⚠️ SKILLS SÃO A FONTE DA VERDADE:**
+- SEMPRE carregue `.claude/skills/code-review/SKILL.md` ANTES de revisar
+- Use skills de referência: `backend-development`, `database-development`, `security-audit`
+- TODO padrão definido nas skills DEVE ser seguido
+- Se código viola padrão da skill → é uma violação CRÍTICA
 
 **⚠️ IDENTIFICAR TODOS OS ARQUIVOS:**
 - SEMPRE execute `bash .claude/scripts/detect-project-state.sh --branch-changes`
 - Revise TODOS os arquivos em `FILES_TO_REVIEW`, não apenas implementation.md
-- Subagentes devem usar o script para mapear escopo completo
-
-**⚠️ VALIDAÇÃO DE CONTRATOS E RUNTIME:**
-- SEMPRE validar contratos frontend/backend (DTOs espelhados)
-- SEMPRE verificar uso correto de bibliotecas (Kysely JSONB, Supabase Auth, etc.)
-- Erros de runtime são CRÍTICOS - causam falhas em produção
-- Date serializa como string no JSON - frontend deve esperar string
-- Kysely retorna JSONB já parseado - não usar JSON.parse
 
 **BE CRITICAL:**
-- Find ALL violations against project patterns (from technical-spec.md or CLAUDE.md)
-- Check EVERY pattern defined in the project
-- Validate EVERY query has proper filters (if multi-tenancy defined)
-- Check frontend/backend contract alignment for NEW DTOs
-- Detect library misuse that causes runtime errors
-
-**DO NOT:**
-- Generate report without fixing issues
-- Skip project-specific pattern validation
-- Accept "it works" as justification for violations
-- Leave code in non-compiling state
-- Invent patterns not defined in the specification
-- Assume patterns without checking the spec first
-- Use JSON.parse on Kysely JSONB columns
-- Import backend enums in frontend (use union types)
-
-**DO:**
-- Run detect-project-state.sh --branch-changes FIRST
-- Read technical-spec.md (or CLAUDE.md) completely first
+- Use skill patterns as validation source
 - Fix ALL issues automatically
 - Verify build passes after fixes
 - Document before/after for each fix
-- Reference CLAUDE.md in explanations
-- Check Date→string serialization in contracts
-- Validate library patterns match documentation
+
+**DO NOT:**
+- Generate report without fixing issues
+- Skip skill-based validation
+- Accept "it works" as justification for violations
+- Leave code in non-compiling state
+
+**DO:**
+- Load code-review skill FIRST
+- Run detect-project-state.sh --branch-changes
+- Follow skill patterns rigorously
+- Fix ALL issues automatically
+- Verify build passes after fixes
+
+**Skills Reference:**
+- Code Review: `.claude/skills/code-review/SKILL.md`
+- Backend: `.claude/skills/backend-development/SKILL.md`
+- Database: `.claude/skills/database-development/SKILL.md`
+- Frontend: `.claude/skills/frontend-development/SKILL.md`
+- Security: `.claude/skills/security-audit/SKILL.md`

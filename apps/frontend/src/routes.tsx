@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth-store'
 import { PageSkeleton } from '@/components/ui/page-skeleton'
+import { AdminRoute } from '@/components/guards/admin-route'
 
 // Lazy load pages
 const LoginPage = lazy(() => import('@/pages/auth/login'))
@@ -12,10 +13,16 @@ const VerifyEmailPage = lazy(() => import('@/pages/auth/verify-email'))
 const EmailNotVerifiedPage = lazy(() => import('@/pages/auth/email-not-verified'))
 
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
-const SessionsPage = lazy(() => import('@/pages/sessions'))
-const WorkspacesPage = lazy(() => import('@/pages/workspaces'))
-const WorkspaceSettingsPage = lazy(() => import('@/pages/workspace-settings'))
+const SettingsPage = lazy(() => import('@/pages/settings'))
 const BillingPage = lazy(() => import('@/pages/billing'))
+
+// Admin pages
+const WorkspacesPage = lazy(() => import('@/pages/admin/workspaces'))
+const WorkspaceSettingsPage = lazy(() => import('@/pages/admin/workspace-settings'))
+const UsersManagementPage = lazy(() => import('@/pages/admin/users-management'))
+const AdminSessionsPage = lazy(() => import('@/pages/admin/sessions'))
+const InvitesPage = lazy(() => import('@/pages/admin/invites'))
+const AuditPage = lazy(() => import('@/pages/admin/audit'))
 
 // Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -101,26 +108,10 @@ export function AppRoutes() {
           }
         />
         <Route
-          path="/sessions"
+          path="/settings"
           element={
             <ProtectedRoute>
-              <SessionsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings/workspaces"
-          element={
-            <ProtectedRoute>
-              <WorkspacesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings/workspace/:id"
-          element={
-            <ProtectedRoute>
-              <WorkspaceSettingsPage />
+              <SettingsPage />
             </ProtectedRoute>
           }
         />
@@ -130,6 +121,56 @@ export function AppRoutes() {
             <ProtectedRoute>
               <BillingPage />
             </ProtectedRoute>
+          }
+        />
+
+        {/* Admin routes - protected by AdminRoute guard */}
+        <Route
+          path="/admin/workspaces"
+          element={
+            <AdminRoute>
+              <WorkspacesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/workspace/:id"
+          element={
+            <AdminRoute>
+              <WorkspaceSettingsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <UsersManagementPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/sessions"
+          element={
+            <AdminRoute>
+              <AdminSessionsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/invites"
+          element={
+            <AdminRoute>
+              <InvitesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/audit"
+          element={
+            <AdminRoute>
+              <AuditPage />
+            </AdminRoute>
           }
         />
 

@@ -27,7 +27,7 @@ export function WorkspaceSettingsPage() {
   // Loading state while workspace list might still be loading
   if (workspaceList.length === 0) {
     return (
-      <AppShell currentPath={location.pathname}>
+      <AppShell currentPath={location.pathname} breadcrumb={["Administração", "Workspaces", "Configurações"]}>
         <div className="space-y-6">
           <PageHeader
             title="Configurações do Workspace"
@@ -44,7 +44,7 @@ export function WorkspaceSettingsPage() {
   // If workspace not found, show alert
   if (!workspace) {
     return (
-      <AppShell currentPath={location.pathname}>
+      <AppShell currentPath={location.pathname} breadcrumb={["Administração", "Workspaces", "Configurações"]}>
         <div className="space-y-6">
           <PageHeader
             title="Configurações do Workspace"
@@ -57,7 +57,7 @@ export function WorkspaceSettingsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/settings/workspaces")}
+                onClick={() => navigate("/admin/workspaces")}
               >
                 Ver Workspaces
               </Button>
@@ -69,7 +69,7 @@ export function WorkspaceSettingsPage() {
   }
 
   return (
-    <AppShell currentPath={location.pathname}>
+    <AppShell currentPath={location.pathname} breadcrumb={["Administração", "Workspaces", workspace.name]}>
       <div className="space-y-6">
         <PageHeader
           title="Configurações do Workspace"
