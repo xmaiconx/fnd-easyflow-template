@@ -9,8 +9,10 @@ import {
   WorkspaceRepository,
   WorkspaceUserRepository,
   AuthTokenRepository,
+  SessionRepository,
 } from '@fnd/database';
 import { PasswordService } from '../services/password.service';
+import { TokenService } from '../services/token.service';
 import { AccountCreatedEvent } from '../events/AccountCreatedEvent';
 import * as crypto from 'crypto';
 
@@ -39,11 +41,14 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
     private readonly workspaceUserRepository: WorkspaceUserRepository,
     @Inject('IAuthTokenRepository')
     private readonly authTokenRepository: AuthTokenRepository,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: SessionRepository,
     @Inject('IInviteRepository')
     private readonly inviteRepository: any,
     @Inject('IConfigurationService')
     private readonly configService: IConfigurationService,
     private readonly passwordService: PasswordService,
+    private readonly tokenService: TokenService,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -54,12 +59,11 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
       email: string;
       fullName: string;
     };
+    // Tokens are returned when signup is via invite (auto-login)
+    accessToken?: string;
+    refreshToken?: string;
   }> {
-    // Check if user already exists
-    const existingUser = await this.userRepository.findByEmail(command.email);
-    if (existingUser) {
-      throw new ConflictException('User already exists');
-    }
+    const isInviteSignup = !!command.inviteToken;
 
     // Hash password
     const passwordHash = await this.passwordService.hashPassword(command.password);
@@ -67,6 +71,8 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
     let account;
     let userRole: UserRole;
     let workspaceIds: string[] = [];
+    // Email to use - from invite (trusted) or command (user input)
+    let userEmail = command.email;
 
     // If invite token provided, validate and accept invite
     if (command.inviteToken) {
@@ -85,9 +91,9 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
         throw new BadRequestException('Invite has expired');
       }
 
-      if (invite.email.toLowerCase() !== command.email.toLowerCase()) {
-        throw new BadRequestException('Email does not match invite');
-      }
+      // SECURITY: Use email from invite, NOT from payload
+      // This prevents users from manipulating the email field
+      userEmail = invite.email;
 
       // Use account and role from invite
       account = await this.accountRepository.findById(invite.accountId);
@@ -107,7 +113,7 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
       });
 
       // Determine user role based on super admin email
-      const isSuperAdmin = this.configService.isSuperAdminEmail(command.email);
+      const isSuperAdmin = this.configService.isSuperAdminEmail(userEmail);
       userRole = isSuperAdmin ? UserRole.SUPER_ADMIN : UserRole.OWNER;
 
       // Create default workspace
@@ -121,13 +127,20 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
       workspaceIds = [workspace.id];
     }
 
+    // Check if user already exists (using trusted email)
+    const existingUser = await this.userRepository.findByEmail(userEmail);
+    if (existingUser) {
+      throw new ConflictException('User already exists');
+    }
+
     // Create user
+    // Invite signup = email already verified (they clicked link from email)
     const user = await this.userRepository.create({
       accountId: account.id,
       fullName: command.fullName,
-      email: command.email,
+      email: userEmail, // Use trusted email (from invite or command)
       passwordHash,
-      emailVerified: false,
+      emailVerified: isInviteSignup, // true if invite, false if normal signup
       role: userRole,
       status: EntityStatus.ACTIVE,
     });
@@ -141,6 +154,41 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
       });
     }
 
+    // If invite signup, create session and return tokens for auto-login
+    if (isInviteSignup) {
+      // Generate refresh token and hash
+      const refreshToken = this.tokenService.generateRefreshToken();
+      const refreshTokenHash = this.passwordService.hashToken(refreshToken);
+
+      // Create session
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+      const session = await this.sessionRepository.create({
+        userId: user.id,
+        refreshTokenHash,
+        ipAddress: command.ipAddress,
+        userAgent: command.userAgent,
+        deviceName: null,
+        lastActivityAt: new Date(),
+        expiresAt,
+        revokedAt: null,
+      });
+
+      // Generate access token
+      const accessToken = this.tokenService.generateAccessToken(user.id, account.id, user.email, session.id);
+
+      return {
+        message: 'Account created successfully. Welcome!',
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+        },
+        accessToken,
+        refreshToken,
+      };
+    }
+
+    // Normal signup flow - requires email verification
     // Generate verification token
     const verificationToken = this.passwordService.generateRandomToken();
     const tokenHash = this.passwordService.hashToken(verificationToken);

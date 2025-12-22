@@ -273,3 +273,102 @@ NÃO adicionei modal de confirmação no botão "Active" porque ativar um usuár
 - [x] Seguiu padrões de UX do projeto
 
 ---
+
+## Fix 006 - Signup via Convite Exigia Verificação de Email e Criava Nova Account
+
+**Date:** 2025-12-21
+**Fixed By:** Claude Code
+
+### Bugs Reportados
+
+**Bug 1 - Verificação de email exigida em signup via convite:**
+- **Esperado:** Signup via convite deve criar usuário com email já verificado (usuário clicou no link do email)
+- **Atual:** Sistema sempre criava usuário com `emailVerified: false` e enviava email de verificação
+
+**Bug 2 - Nova account criada ao invés de usar account do convite:**
+- **Esperado:** Usuário convidado deve ser adicionado à account existente do convite
+- **Atual:** Sistema criava nova account para o usuário convidado
+
+**Bug 3 - Convite permanecia pendente após aceitar:**
+- **Esperado:** Convite deve ser marcado como `accepted` após signup
+- **Atual:** Convite continuava com status `pending`
+
+### Root Cause
+
+**Frontend - inviteToken não enviado:**
+O `signup-form.tsx` não extraia o parâmetro `invite` da URL (`/signup?invite=xxx`) e não passava para o backend. Resultado: backend recebia `inviteToken: undefined` e seguia fluxo normal de signup.
+
+**Backend - sempre exigia verificação:**
+Mesmo que `inviteToken` fosse enviado, o `SignUpCommandHandler` sempre:
+1. Criava usuário com `emailVerified: false` (linha 130)
+2. Gerava token de verificação (linhas 144-155)
+3. Publicava `AccountCreatedEvent` que envia email de verificação (linhas 157-164)
+
+### Fix Applied
+
+| File | Change |
+|------|--------|
+| [types/index.ts:19](apps/frontend/src/types/index.ts#L19) | Adicionado `inviteToken?: string` ao `SignupDto` |
+| [types/index.ts:28-38](apps/frontend/src/types/index.ts#L28-L38) | Criado tipo `SignupResponse` com tokens opcionais para auto-login |
+| [signup-form.tsx:7](apps/frontend/src/components/features/auth/signup-form.tsx#L7) | Adicionado `useSearchParams` ao import |
+| [signup-form.tsx:33-38](apps/frontend/src/components/features/auth/signup-form.tsx#L33-L38) | Extraindo `invite` da URL query string |
+| [signup-form.tsx:54-72](apps/frontend/src/components/features/auth/signup-form.tsx#L54-L72) | Passando `inviteToken` para signup, redirecionando para `/` se tokens retornados |
+| [auth-store.ts:4](apps/frontend/src/stores/auth-store.ts#L4) | Importando `SignupResponse` |
+| [auth-store.ts:17](apps/frontend/src/stores/auth-store.ts#L17) | Alterado retorno de signup para `Promise<SignupResponse \| undefined>` |
+| [auth-store.ts:84-115](apps/frontend/src/stores/auth-store.ts#L84-L115) | Atualizado método signup para auto-login quando tokens retornados |
+| [SignUpCommand.ts:12](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L12) | Importado `SessionRepository` |
+| [SignUpCommand.ts:15](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L15) | Importado `TokenService` |
+| [SignUpCommand.ts:44-45](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L44-L45) | Injetado `ISessionRepository` |
+| [SignUpCommand.ts:51](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L51) | Injetado `TokenService` |
+| [SignUpCommand.ts:62-64](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L62-L64) | Adicionado `accessToken?` e `refreshToken?` ao tipo de retorno |
+| [SignUpCommand.ts:140](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L140) | `emailVerified: isInviteSignup` (true se convite, false se normal) |
+| [SignUpCommand.ts:154-186](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L154-L186) | Quando convite: criar sessão, gerar tokens, retornar auto-login |
+
+### Fluxo Corrigido
+
+**Signup via Convite:**
+1. Frontend extrai `invite` da URL query string
+2. Passa `inviteToken` para backend
+3. Backend valida token, busca account do convite
+4. Cria usuário com `emailVerified: true`
+5. Marca convite como `accepted`
+6. Cria sessão e gera tokens
+7. Retorna tokens para auto-login
+8. Frontend recebe tokens, seta no store, redireciona para dashboard
+
+**Signup Normal (sem convite):**
+1. Mantém comportamento original
+2. Cria nova account
+3. Cria usuário com `emailVerified: false`
+4. Envia email de verificação
+5. Redireciona para `/email-not-verified`
+
+### Security Enhancement (Adicionado após revisão)
+
+**Problema:** Campo de email no formulário de signup era editável mesmo com convite, permitindo que usuário tentasse alterar o email via DevTools.
+
+**Solução aplicada:**
+
+| File | Change |
+|------|--------|
+| [auth.controller.ts:66-89](apps/backend/src/api/modules/auth/auth.controller.ts#L66-L89) | Novo endpoint `GET /auth/invite/:token` para validar convite e retornar email |
+| [signup-form.tsx:32-36](apps/frontend/src/components/features/auth/signup-form.tsx#L32-L36) | Interface `InviteInfo` e estados `inviteInfo`, `isLoadingInvite` |
+| [signup-form.tsx:59-76](apps/frontend/src/components/features/auth/signup-form.tsx#L59-L76) | useEffect para buscar info do convite via API |
+| [signup-form.tsx:143-167](apps/frontend/src/components/features/auth/signup-form.tsx#L143-L167) | Campo email desabilitado e com loading state quando é convite |
+| [SignUpCommand.ts:74-96](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts#L74-L96) | Backend usa email do invite (trusted), ignora email do payload |
+
+**Defesa em profundidade:**
+- Frontend: campo desabilitado + readonly + estilo visual
+- Backend: ignora `command.email` e usa `invite.email` quando há convite
+
+### Status
+- [x] Bug 1 resolvido - Convite não exige verificação de email
+- [x] Bug 2 resolvido - Usuário adicionado à account do convite
+- [x] Bug 3 resolvido - Convite marcado como aceito
+- [x] Auto-login após signup via convite funcionando
+- [x] Campo email desabilitado no frontend quando convite
+- [x] Backend usa email do invite (não do payload) - defesa em profundidade
+- [x] Build passa 100%
+- [x] Sem regressões no fluxo normal de signup
+
+---

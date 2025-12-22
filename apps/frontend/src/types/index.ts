@@ -16,12 +16,26 @@ export interface SignupDto {
   fullName: string
   email: string
   password: string
+  inviteToken?: string
 }
 
 export interface AuthResponse {
   user: User
   accessToken: string
   refreshToken: string
+}
+
+// SignupResponse pode ou não ter tokens (depende se foi via convite)
+export interface SignupResponse {
+  message: string
+  user: {
+    id: string
+    email: string
+    fullName: string
+  }
+  // Tokens são retornados quando signup é via convite (login automático)
+  accessToken?: string
+  refreshToken?: string
 }
 
 export interface ForgotPasswordDto {

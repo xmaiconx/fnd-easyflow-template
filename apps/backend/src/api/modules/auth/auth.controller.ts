@@ -35,8 +35,10 @@ import {
   VerifyEmailCommand,
   ResendVerificationCommand,
 } from './commands';
-import { SessionRepository } from '@fnd/database';
-import { Inject } from '@nestjs/common';
+import { SessionRepository, InviteRepository } from '@fnd/database';
+import { Inject, BadRequestException } from '@nestjs/common';
+import { InviteStatus } from '@fnd/domain';
+import * as crypto from 'crypto';
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +46,8 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     @Inject('ISessionRepository')
     private readonly sessionRepository: SessionRepository,
+    @Inject('IInviteRepository')
+    private readonly inviteRepository: InviteRepository,
   ) {}
 
   @Post('signup')
@@ -57,6 +61,31 @@ export class AuthController {
     return this.commandBus.execute(
       new SignUpCommand(dto.email, dto.password, dto.fullName, dto.workspaceName, ipAddress, userAgent, dto.inviteToken)
     );
+  }
+
+  // GET /auth/invite/:token - Validate invite and return email for signup form
+  @Get('invite/:token')
+  async validateInvite(@Param('token') token: string) {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const invite = await this.inviteRepository.findByToken(tokenHash);
+
+    if (!invite) {
+      throw new NotFoundException('Invalid invite token');
+    }
+
+    if (invite.status !== InviteStatus.PENDING) {
+      throw new BadRequestException('Invite has already been used or canceled');
+    }
+
+    if (invite.expiresAt < new Date()) {
+      throw new BadRequestException('Invite has expired');
+    }
+
+    return {
+      email: invite.email,
+      role: invite.role,
+      expiresAt: invite.expiresAt.toISOString(),
+    };
   }
 
   @Post('signin')

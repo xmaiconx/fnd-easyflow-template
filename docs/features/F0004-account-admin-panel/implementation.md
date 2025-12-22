@@ -226,4 +226,10 @@ Implementação completa full-stack do painel administrativo de account. Backend
 **Files:** [types/index.ts](apps/frontend/src/types/index.ts), [activity-card.tsx](apps/frontend/src/components/features/account-admin/activity-card.tsx), [pending-invites-table.tsx](apps/frontend/src/components/features/account-admin/pending-invites-table.tsx), [user-details-sheet.tsx](apps/frontend/src/components/features/account-admin/user-details-sheet.tsx)
 **See:** [fixes.md](fixes.md#fix-005---invalid-time-value-no-activitycard-e-modais-de-confirmação)
 
+### Revision 006 - 2025-12-21
+**Type:** Bug Fix - Invite Signup Flow + Security
+**Summary:** Signup via convite exigia verificação de email e criava nova account. Frontend não extraia `inviteToken` da URL. Backend sempre criava usuário com `emailVerified: false`. Corrigido fluxo completo com defesa em profundidade: frontend busca email via API e desabilita campo, backend ignora email do payload e usa email do convite.
+**Files:** [types/index.ts](apps/frontend/src/types/index.ts), [signup-form.tsx](apps/frontend/src/components/features/auth/signup-form.tsx), [auth-store.ts](apps/frontend/src/stores/auth-store.ts), [SignUpCommand.ts](apps/backend/src/api/modules/auth/commands/SignUpCommand.ts), [auth.controller.ts](apps/backend/src/api/modules/auth/auth.controller.ts)
+**See:** [fixes.md](fixes.md#fix-006---signup-via-convite-exigia-verificação-de-email-e-criava-nova-account)
+
 ---
