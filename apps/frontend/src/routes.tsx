@@ -116,11 +116,11 @@ export function AppRoutes() {
           }
         />
         <Route
-          path="/settings/billing"
+          path="/admin/billing"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <BillingPage />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
 

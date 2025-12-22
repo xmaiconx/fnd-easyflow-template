@@ -150,7 +150,7 @@ export default function BillingPage() {
   }
 
   return (
-    <AppShell currentPath="/settings/billing" breadcrumb={["Configurações", "Assinatura"]}>
+    <AppShell currentPath="/admin/billing" breadcrumb={["Administração", "Assinatura"]}>
       <div className="space-y-6">
         <PageHeader
           title="Assinatura e Cobrança"

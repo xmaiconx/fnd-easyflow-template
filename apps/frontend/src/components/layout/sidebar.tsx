@@ -1,6 +1,6 @@
 import * as React from "react"
 import { motion } from "framer-motion"
-import { Home, Building2, Settings, ChevronDown, PanelLeftClose, PanelLeft, Check, Loader2, Users, Mail, Shield, FileText } from "lucide-react"
+import { Home, Building2, Settings, ChevronDown, PanelLeftClose, PanelLeft, Check, Loader2, Users, Mail, Shield, FileText, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -87,6 +87,7 @@ export function Sidebar({
         { icon: Mail, label: 'Convites', href: '/admin/invites' },
         { icon: Shield, label: 'Sessões', href: '/admin/sessions' },
         { icon: FileText, label: 'Auditoria', href: '/admin/audit' },
+        { icon: CreditCard, label: 'Assinatura', href: '/admin/billing' },
       ]
     }
   ]
