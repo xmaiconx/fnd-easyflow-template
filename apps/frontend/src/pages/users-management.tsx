@@ -44,13 +44,14 @@ export default function UsersManagementPage() {
         <PageHeader
           title="Gestão de Usuários"
           description="Gerencie usuários e permissões da conta"
-        >
-          <Button onClick={() => setInviteDialogOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Convidar Usuário</span>
-            <span className="sm:hidden">Convidar</span>
-          </Button>
-        </PageHeader>
+          action={
+            <Button onClick={() => setInviteDialogOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Convidar Usuário</span>
+              <span className="sm:hidden">Convidar</span>
+            </Button>
+          }
+        />
 
         <Tabs defaultValue="users" className="space-y-4">
           <TabsList>

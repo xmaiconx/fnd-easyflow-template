@@ -47,6 +47,19 @@ export class UpdateUserStatusCommandHandler implements ICommandHandler<UpdateUse
       throw new ForbiddenException('Cannot modify user from different account');
     }
 
+    // Self-protection: cannot deactivate yourself
+    if (userId === changedBy && (status === 'inactive' || status === 'deleted')) {
+      throw new ForbiddenException('Você não pode inativar sua própria conta. Entre em contato com outro administrador.');
+    }
+
+    // Sole owner protection: cannot deactivate the last active owner
+    if (user.role === 'owner' && (status === 'inactive' || status === 'deleted') && user.status === 'active') {
+      const activeOwnersCount = await this.userRepository.countActiveOwnersByAccountId(accountId);
+      if (activeOwnersCount <= 1) {
+        throw new ForbiddenException('Você é o último Owner ativo. Promova outro usuário a Owner antes de inativar sua conta.');
+      }
+    }
+
     const oldStatus = user.status;
 
     // Update user status

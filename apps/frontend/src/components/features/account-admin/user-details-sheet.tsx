@@ -30,6 +30,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { Separator } from "@/components/ui/separator"
 import { UserSessionCard } from "./user-session-card"
 import { ActivityCard } from "./activity-card"
@@ -40,6 +46,7 @@ import {
   useRevokeSession,
   useRevokeAllUserSessions,
 } from "@/hooks/use-account-admin"
+import { useAuthStore } from "@/stores/auth-store"
 import type { UserRole, UserStatus } from "@/types"
 
 interface UserDetailsSheetProps {
@@ -56,6 +63,7 @@ const roleLabels: Record<string, string> = {
 
 export function UserDetailsSheet({ userId, open, onOpenChange }: UserDetailsSheetProps) {
   const { data: user, isLoading } = useAccountUserDetails(userId, open)
+  const currentUser = useAuthStore((state) => state.user)
   const updateRole = useUpdateUserRole()
   const updateStatus = useUpdateUserStatus()
   const revokeSession = useRevokeSession()
@@ -76,6 +84,11 @@ export function UserDetailsSheet({ userId, open, onOpenChange }: UserDetailsShee
   const handleRevokeAllSessions = () => {
     revokeAllSessions.mutate(userId)
   }
+
+  // Validations
+  const isCurrentUser = currentUser?.id === userId
+  const isAdmin = currentUser?.role === 'admin'
+  const canChangeToOwner = !isAdmin // Only owner can promote to owner
 
   if (!open) return null
 
@@ -119,7 +132,9 @@ export function UserDetailsSheet({ userId, open, onOpenChange }: UserDetailsShee
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="owner">Owner</SelectItem>
+                    <SelectItem value="owner" disabled={!canChangeToOwner}>
+                      Owner {!canChangeToOwner && '(Admin cannot promote to Owner)'}
+                    </SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="member">Member</SelectItem>
                   </SelectContent>
@@ -133,14 +148,53 @@ export function UserDetailsSheet({ userId, open, onOpenChange }: UserDetailsShee
                   >
                     Active
                   </Button>
-                  <Button
-                    variant={user.status === 'inactive' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusToggle('inactive')}
-                    className="flex-1"
-                  >
-                    Inactive
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex-1">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant={user.status === 'inactive' ? 'default' : 'outline'}
+                                size="sm"
+                                className="w-full"
+                                disabled={isCurrentUser}
+                              >
+                                Inactive
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Desativar Usuário?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  O usuário{' '}
+                                  <span className="font-semibold text-foreground">
+                                    {user.fullName}
+                                  </span>{' '}
+                                  será desativado e todas as suas sessões ativas serão revogadas.
+                                  Ele não poderá acessar a plataforma até ser reativado.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleStatusToggle('inactive')}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Desativar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TooltipTrigger>
+                      {isCurrentUser && (
+                        <TooltipContent>
+                          <p>Você não pode inativar sua própria conta</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
 
@@ -150,9 +204,34 @@ export function UserDetailsSheet({ userId, open, onOpenChange }: UserDetailsShee
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold text-sm">Active Sessions</h4>
                   {user.sessions && user.sessions.length > 0 && (
-                    <Button variant="destructive" size="sm" onClick={handleRevokeAllSessions}>
-                      Revoke All
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm">
+                          Revoke All
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Revogar Todas as Sessões?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Todas as sessões ativas de{' '}
+                            <span className="font-semibold text-foreground">
+                              {user.fullName}
+                            </span>{' '}
+                            serão encerradas. O usuário precisará fazer login novamente em todos os dispositivos.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleRevokeAllSessions}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Revogar Todas
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
                 <div className="space-y-3">

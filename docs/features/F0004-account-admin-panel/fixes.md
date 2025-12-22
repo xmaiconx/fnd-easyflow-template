@@ -137,3 +137,139 @@ Rotas antigas eram muito verbosas e redundantes (account-admin contém "account"
 - [x] Sem breaking changes (nova API pronta para uso)
 
 ---
+
+## Fix 004 - Template user-invite não encontrado
+
+**Date:** 2025-12-21
+**Fixed By:** Claude Code
+
+### Bug
+**Esperado:** Ao criar um convite, o sistema deveria enviar um email com link de convite para o usuário.
+
+**Atual:** Logs mostram erro `Template user-invite not found` após criar convite com sucesso. O convite é criado e enfileirado, mas o email não é enviado.
+
+### Root Cause
+O `InviteCreatedHandler` ([InviteCreatedHandler.ts:37](apps/backend/src/api/modules/account-admin/events/handlers/InviteCreatedHandler.ts#L37)) referencia template `'user-invite'`, mas o `ResendEmailService` **não tinha** esse template registrado.
+
+Usuário assumiu que templates eram criados no dashboard do Resend externamente, mas na verdade **todos os templates são hardcoded** no `ResendEmailService` ([resend-email.service.ts:27-32](apps/backend/src/shared/services/resend-email.service.ts#L27-L32)).
+
+Templates existentes:
+- `'welcome'` → `getWelcomeTemplate()`
+- `'email-confirmation'` → `getEmailConfirmationTemplate()`
+- `'email-verification'` → `getEmailVerificationTemplate()`
+- `'password-reset'` → `getPasswordResetTemplate()`
+
+Faltava:
+- `'user-invite'` ❌
+
+### Fix Applied
+| File | Change |
+|------|--------|
+| [resend-email.service.ts:32](apps/backend/src/shared/services/resend-email.service.ts#L32) | Adicionado `'user-invite': this.getUserInviteTemplate(variables)` ao objeto de templates |
+| [resend-email.service.ts:99-123](apps/backend/src/shared/services/resend-email.service.ts#L99-L123) | Criado método privado `getUserInviteTemplate()` que recebe `inviteUrl`, `role`, `expiresAt` e gera HTML do email |
+
+### Template Implementado
+O template `getUserInviteTemplate()` inclui:
+- Subject: "Você foi convidado para participar de uma conta - Rugido Digital"
+- HTML com botão de call-to-action para aceitar convite
+- Exibição da role traduzida (admin → Administrador, member → Membro, owner → Owner)
+- Data de expiração formatada em pt-BR (ex: "21 de dezembro de 2025, 10:30")
+- Estilo consistente com outros templates (botão #4F46E5)
+
+### Status
+- [x] Bug resolvido
+- [x] Build passa 100%
+- [x] Template funcional e testado
+- [x] Seguiu padrão dos outros templates
+
+---
+
+## Fix 005 - Invalid time value no ActivityCard e Modais de Confirmação
+
+**Date:** 2025-12-21
+**Fixed By:** Claude Code
+
+### Bugs Reportados
+
+**Bug 1 - Invalid time value no ActivityCard:**
+- **Esperado:** Frontend deveria renderizar atividades recentes do usuário com timestamp formatado
+- **Atual:** Frontend lança `RangeError: Invalid time value at ActivityCard (activity-card.tsx:33:16)` ao clicar em detalhes do usuário
+
+**Bug 2 - Falta de confirmação no cancelamento de convite:**
+- **Esperado:** Ao clicar no botão de cancelar convite, deveria aparecer modal de confirmação antes de executar ação destrutiva
+- **Atual:** Convite é cancelado imediatamente sem confirmação
+
+**Bug 3 - Falta de confirmação na desativação de usuário:**
+- **Esperado:** Ao clicar no botão "Inactive" para desativar usuário, deveria aparecer modal de confirmação
+- **Atual:** Usuário é desativado imediatamente sem confirmação
+
+**Bug 4 - Falta de confirmação na revogação de todas as sessões:**
+- **Esperado:** Ao clicar no botão "Revoke All", deveria aparecer modal de confirmação antes de revogar todas as sessões
+- **Atual:** Todas as sessões são revogadas imediatamente sem confirmação
+
+### Root Cause - Bug 1 (Invalid time value)
+
+O `ActivityCard` ([activity-card.tsx:12](apps/frontend/src/components/features/account-admin/activity-card.tsx#L12)) estava tipado para receber `AuditLog` que tem campo `createdAt: string`.
+
+Porém, o backend estava retornando `ActivityDto` ([UserDetailsDto.ts:14-19](apps/backend/src/api/modules/account-admin/dtos/UserDetailsDto.ts#L14-L19)) que tem campo `timestamp: string`.
+
+**Contract Mismatch:**
+- Backend DTO: `ActivityDto { id, action, timestamp, details }`
+- Frontend Type: `AuditLog { id, accountId, userId, action, entityType, entityId, metadata, ipAddress, createdAt, user? }`
+
+O `ActivityCard` tentava acessar `activity.createdAt` (linha 33), mas o backend enviava `activity.timestamp`, resultando em `undefined` e causando `Invalid time value` no `formatDistanceToNow()`.
+
+### Root Cause - Bugs 2, 3, 4 (Falta de confirmação)
+
+Os componentes não implementavam `AlertDialog` para ações destrutivas:
+- `PendingInvitesTable` - Botão cancelar sem confirmação
+- `UserDetailsSheet` - Botão "Inactive" sem confirmação
+- `UserDetailsSheet` - Botão "Revoke All" sem confirmação
+
+Apenas o `UserSessionCard` já tinha modal de confirmação implementado corretamente.
+
+### Fix Applied
+
+| File | Change |
+|------|--------|
+| [types/index.ts:205-211](apps/frontend/src/types/index.ts#L205-L211) | Criado novo tipo `Activity` espelhando `ActivityDto` do backend com campo `timestamp` |
+| [types/index.ts:215](apps/frontend/src/types/index.ts#L215) | Alterado `AccountUserDetails.recentActivities` de `AuditLog[]` para `Activity[]` |
+| [activity-card.tsx:6](apps/frontend/src/components/features/account-admin/activity-card.tsx#L6) | Renomeado import `Activity` (lucide-react) para `ActivityIcon` para evitar conflito |
+| [activity-card.tsx:9](apps/frontend/src/components/features/account-admin/activity-card.tsx#L9) | Alterado import de `AuditLog` para `Activity` |
+| [activity-card.tsx:12](apps/frontend/src/components/features/account-admin/activity-card.tsx#L12) | Alterado prop `activity: AuditLog` para `activity: Activity` |
+| [activity-card.tsx:27-31](apps/frontend/src/components/features/account-admin/activity-card.tsx#L27-L31) | Alterado `activity.createdAt` para `activity.timestamp`, removido renderização condicional de `activity.user` (não existe em Activity) |
+| [pending-invites-table.tsx:18-28](apps/frontend/src/components/features/account-admin/pending-invites-table.tsx#L18-L28) | Adicionado import de `AlertDialog` e componentes relacionados |
+| [pending-invites-table.tsx:119-150](apps/frontend/src/components/features/account-admin/pending-invites-table.tsx#L119-L150) | Envolvido botão de cancelar convite com `AlertDialog` com mensagem "O convite para {email} será cancelado..." |
+| [user-details-sheet.tsx:136-168](apps/frontend/src/components/features/account-admin/user-details-sheet.tsx#L136-L168) | Envolvido botão "Inactive" com `AlertDialog` com mensagem "O usuário {fullName} será desativado e todas as suas sessões ativas serão revogadas..." |
+| [user-details-sheet.tsx:178-206](apps/frontend/src/components/features/account-admin/user-details-sheet.tsx#L178-L206) | Envolvido botão "Revoke All" com `AlertDialog` com mensagem "Todas as sessões ativas de {fullName} serão encerradas..." |
+
+### Design Decisions
+
+**Tipo Activity vs AuditLog:**
+Criei um novo tipo `Activity` ao invés de alterar `AuditLog` porque:
+- `AuditLog` é um tipo completo usado em outros contextos (histórico geral de auditoria)
+- `Activity` é uma versão simplificada, específica para "recent activities" nos detalhes do usuário
+- Backend já retorna `ActivityDto` simplificado para evitar joins desnecessários
+- Mantém separação de responsabilidades entre audit logs completos e atividades resumidas
+
+**Modais de Confirmação:**
+Seguiu padrão do `UserSessionCard` que já tinha implementação correta:
+- AlertDialog do shadcn/ui
+- Título claro descrevendo a ação
+- Descrição explicando consequências com nome do recurso em `<span className="font-semibold">`
+- Botão destrutivo com `className="bg-destructive text-destructive-foreground hover:bg-destructive/90"`
+- Textos em português brasileiro
+
+**Decisão de UX - Botão "Active":**
+NÃO adicionei modal de confirmação no botão "Active" porque ativar um usuário **não é uma ação destrutiva**. Apenas inativar usuário (que revoga sessões) precisa de confirmação.
+
+### Status
+- [x] Bug 1 resolvido - ActivityCard renderiza corretamente
+- [x] Bug 2 resolvido - Modal de confirmação no cancelar convite
+- [x] Bug 3 resolvido - Modal de confirmação na desativação de usuário
+- [x] Bug 4 resolvido - Modal de confirmação na revogação de todas as sessões
+- [x] Build passa 100%
+- [x] Sem regressões
+- [x] Seguiu padrões de UX do projeto
+
+---

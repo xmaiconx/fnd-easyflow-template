@@ -7,4 +7,5 @@ export interface IUserRepository {
   create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   update(id: string, user: Partial<User>): Promise<User>;
   delete(id: string): Promise<void>;
+  countActiveOwnersByAccountId(accountId: string): Promise<number>;
 }

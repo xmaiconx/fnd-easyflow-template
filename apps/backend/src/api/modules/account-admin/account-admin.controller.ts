@@ -153,6 +153,7 @@ export class AccountAdminController {
         dto.role,
         dto.workspaceIds,
         req.user.id,
+        req.user.role,
         req.user.accountId,
       ),
     );

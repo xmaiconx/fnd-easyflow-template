@@ -214,4 +214,16 @@ Implementação completa full-stack do painel administrativo de account. Backend
 **Files:** [account-admin.controller.ts](apps/backend/src/api/modules/account-admin/account-admin.controller.ts), [admin.guard.ts](apps/backend/src/api/guards/admin.guard.ts), [use-account-admin.ts](apps/frontend/src/hooks/use-account-admin.ts)
 **See:** [fixes.md](fixes.md#fix-003---refatoração-de-rotas-account-admin-para-admin)
 
+### Revision 004 - 2025-12-21
+**Type:** Bug Fix - Missing Email Template
+**Summary:** Template `user-invite` não estava registrado no ResendEmailService causando erro ao enviar emails de convite. Adicionado método getUserInviteTemplate() seguindo padrão dos outros templates hardcoded (welcome, email-verification, password-reset).
+**Files:** [resend-email.service.ts](apps/backend/src/shared/services/resend-email.service.ts)
+**See:** [fixes.md](fixes.md#fix-004---template-user-invite-não-encontrado)
+
+### Revision 005 - 2025-12-21
+**Type:** Bug Fix - Contract Violation + UX Improvements
+**Summary:** Corrigido erro "Invalid time value" no ActivityCard causado por desalinhamento de contrato (backend enviava `timestamp`, frontend esperava `createdAt`). Criado tipo `Activity` simplificado espelhando `ActivityDto`. Adicionados modais de confirmação com AlertDialog para ações destrutivas (cancelar convite, desativar usuário, revogar todas sessões) seguindo padrão shadcn/ui.
+**Files:** [types/index.ts](apps/frontend/src/types/index.ts), [activity-card.tsx](apps/frontend/src/components/features/account-admin/activity-card.tsx), [pending-invites-table.tsx](apps/frontend/src/components/features/account-admin/pending-invites-table.tsx), [user-details-sheet.tsx](apps/frontend/src/components/features/account-admin/user-details-sheet.tsx)
+**See:** [fixes.md](fixes.md#fix-005---invalid-time-value-no-activitycard-e-modais-de-confirmação)
+
 ---

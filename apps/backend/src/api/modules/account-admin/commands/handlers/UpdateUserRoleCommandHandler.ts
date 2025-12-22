@@ -63,6 +63,14 @@ export class UpdateUserRoleCommandHandler implements ICommandHandler<UpdateUserR
       }
     }
 
+    // Sole owner protection: cannot downgrade the last active owner
+    if (user.role === UserRole.OWNER && role !== UserRole.OWNER && user.status === 'active') {
+      const activeOwnersCount = await this.userRepository.countActiveOwnersByAccountId(accountId);
+      if (activeOwnersCount <= 1) {
+        throw new ForbiddenException('Você é o único Owner. Promova outro usuário a Owner antes de alterar seu papel.');
+      }
+    }
+
     const oldRole = user.role;
 
     // Update user role

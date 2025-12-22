@@ -15,6 +15,7 @@ export class CreateInviteCommand implements ICommand {
     public readonly role: UserRole,
     public readonly workspaceIds: string[],
     public readonly createdBy: string,
+    public readonly createdByRole: UserRole,
     public readonly accountId: string,
   ) {}
 }

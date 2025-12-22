@@ -202,9 +202,17 @@ export interface AccountUser {
   }[]
 }
 
+// Activity types (simplified audit log for recent activities)
+export interface Activity {
+  id: string
+  action: string
+  timestamp: string
+  details: Record<string, any>
+}
+
 export interface AccountUserDetails extends AccountUser {
   sessions: Session[]
-  recentActivities: AuditLog[]
+  recentActivities: Activity[]
 }
 
 export interface AccountInvite {

@@ -49,9 +49,7 @@ export function useUpdateUserRole() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId] })
       toast.success('Permissão atualizada com sucesso')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erro ao atualizar permissão')
-    },
+    // Error toast handled by api interceptor
   })
 }
 
@@ -67,9 +65,7 @@ export function useUpdateUserStatus() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', variables.userId] })
       toast.success('Status atualizado com sucesso')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erro ao atualizar status')
-    },
+    // Error toast handled by api interceptor
   })
 }
 
@@ -85,9 +81,7 @@ export function useRevokeSession() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
       toast.success('Sessão revogada com sucesso')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erro ao revogar sessão')
-    },
+    // Error toast handled by api interceptor
   })
 }
 
@@ -102,9 +96,7 @@ export function useRevokeAllUserSessions() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
       toast.success('Todas as sessões foram revogadas')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erro ao revogar sessões')
-    },
+    // Error toast handled by api interceptor
   })
 }
 
@@ -131,9 +123,7 @@ export function useCreateInvite() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'invites'] })
       toast.success('Convite enviado com sucesso')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erro ao enviar convite')
-    },
+    // Error toast handled by api interceptor
   })
 }
 
@@ -148,9 +138,7 @@ export function useResendInvite() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'invites'] })
       toast.success('Convite reenviado com sucesso')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erro ao reenviar convite')
-    },
+    // Error toast handled by api interceptor
   })
 }
 
@@ -165,9 +153,7 @@ export function useCancelInvite() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'invites'] })
       toast.success('Convite cancelado com sucesso')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erro ao cancelar convite')
-    },
+    // Error toast handled by api interceptor
   })
 }
 

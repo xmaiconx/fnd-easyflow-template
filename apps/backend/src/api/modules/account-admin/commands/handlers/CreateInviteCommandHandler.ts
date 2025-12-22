@@ -32,7 +32,7 @@ export class CreateInviteCommandHandler implements ICommandHandler<CreateInviteC
   ) {}
 
   async execute(command: CreateInviteCommand): Promise<string> {
-    const { email, role, workspaceIds, createdBy, accountId } = command;
+    const { email, role, workspaceIds, createdBy, createdByRole, accountId } = command;
 
     this.logger.info('Creating invite', {
       operation: 'account-admin.create_invite.start',
@@ -51,6 +51,11 @@ export class CreateInviteCommandHandler implements ICommandHandler<CreateInviteC
     // Validate role whitelist (reject SUPER_ADMIN)
     if (![UserRole.OWNER, UserRole.ADMIN, UserRole.MEMBER].includes(role)) {
       throw new BadRequestException(`Invalid role: ${role}. Only owner, admin, member are allowed.`);
+    }
+
+    // Hierarchy validation: admin cannot invite as owner
+    if (createdByRole === UserRole.ADMIN && role === UserRole.OWNER) {
+      throw new BadRequestException('Admin cannot invite users with Owner role');
     }
 
     // Check if user already exists with this email
