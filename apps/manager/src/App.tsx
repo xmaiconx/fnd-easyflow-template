@@ -1,13 +1,14 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuthStore } from './stores/auth-store';
-import { ThemeProvider } from './contexts/theme-context';
-import { ManagerLayout } from './components/layout/ManagerLayout';
-import { Toaster } from './components/ui/toaster';
-import { ManagerLoginPage } from './pages/login';
-import { UsersPage } from './pages/users';
-import { UserDetailsPage } from './pages/user-details';
-import { MetricsPage } from './pages/metrics';
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
+import { useUIStore } from './stores/ui-store'
+import { ManagerShell } from './components/layout/manager-shell'
+import { ProtectedRoute } from './components/guards/protected-route'
+import { LoginPage } from './pages/login'
+import { UsersPage } from './pages/users'
+import { UserDetailsPage } from './pages/user-details'
+import { MetricsPage } from './pages/metrics'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,66 +17,52 @@ const queryClient = new QueryClient({
       retry: 1,
     },
   },
-});
+})
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuthStore();
+function App() {
+  const theme = useUIStore((state) => state.theme)
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  useEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove('light', 'dark')
 
-  return <ManagerLayout>{children}</ManagerLayout>;
-};
-
-export const App = () => {
-  const { isAuthenticated } = useAuthStore();
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      root.classList.add(systemTheme)
+    } else {
+      root.classList.add(theme)
+    }
+  }, [theme])
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path="/login"
-              element={
-                isAuthenticated ? <Navigate to="/users" replace /> : <ManagerLoginPage />
-              }
-            />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
 
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <UsersPage />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <ManagerShell />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/users" replace />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="users/:id" element={<UserDetailsPage />} />
+            <Route path="metrics" element={<MetricsPage />} />
+          </Route>
 
-            <Route
-              path="/users/:id"
-              element={
-                <ProtectedRoute>
-                  <UserDetailsPage />
-                </ProtectedRoute>
-              }
-            />
+          <Route path="*" element={<Navigate to="/users" replace />} />
+        </Routes>
+      </BrowserRouter>
 
-            <Route
-              path="/metrics"
-              element={
-                <ProtectedRoute>
-                  <MetricsPage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route path="/" element={<Navigate to="/users" replace />} />
-            <Route path="*" element={<Navigate to="/users" replace />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
-      </ThemeProvider>
+      <Toaster position="top-right" richColors />
     </QueryClientProvider>
-  );
-};
+  )
+}
+
+export default App

@@ -21,7 +21,7 @@ npm run dev                    # API + Frontend parallel
 
 > Seção otimizada para consumo por IA. Formato token-efficient.
 
-**Generated:** 2025-12-21 | **Type:** Monorepo
+**Generated:** 2025-12-22 | **Type:** Monorepo
 
 ### Stack
 {"pkg":"npm","build":"turbo","ts":"5.0+ strict"}
@@ -54,7 +54,7 @@ domain → interfaces → database → api
 
 ### API Routes
 {"globalPrefix":"/api/v1","prefixLocation":"apps/backend/src/main.api.ts:43"}
-{"routes":[{"module":"auth","prefix":"/auth","endpoints":["POST /signup","POST /signin","POST /logout","POST /refresh","POST /forgot-password","POST /reset-password","POST /verify-email","POST /resend-verification","GET /me","GET /sessions","DELETE /sessions/:id"]},{"module":"audit","prefix":"/audit-logs","endpoints":["GET /","GET /:id"]},{"module":"workspace","prefix":"/workspaces","endpoints":["POST /","GET /","GET /my","GET /:id","PATCH /:id","PATCH /:id/archive","PATCH /:id/restore","DELETE /:id","POST /:id/users","GET /:id/users","PATCH /:id/users/:userId/role","DELETE /:id/users/:userId"]},{"module":"billing","prefix":"/billing","endpoints":["POST /checkout","POST /portal","GET /workspace/:workspaceId","GET /plans","POST /webhook"]},{"module":"manager","prefix":"/manager","endpoints":["GET /users","GET /users/:id","PATCH /users/:id/status","POST /impersonate","DELETE /impersonate","GET /metrics"]},{"module":"account-admin","prefix":"/admin","endpoints":["GET /users","GET /users/:id","PATCH /users/:id/role","PATCH /users/:id/status","DELETE /sessions/:id","POST /sessions/:userId/revoke-all","GET /invites","POST /invites","PATCH /invites/:id/resend","DELETE /invites/:id","GET /audit-logs"]}]}
+{"routes":[{"module":"auth","prefix":"/auth","endpoints":["POST /signup","GET /invite/:token","POST /signin","POST /refresh","POST /logout","POST /forgot-password","POST /reset-password","POST /verify-email","POST /resend-verification","GET /me","PATCH /me","GET /sessions","DELETE /sessions/:id"]},{"module":"audit","prefix":"/audit-logs","endpoints":["GET /","GET /:id"]},{"module":"workspace","prefix":"/workspaces","endpoints":["POST /","GET /","GET /my","GET /:id","PATCH /:id","PATCH /:id/archive","PATCH /:id/restore","DELETE /:id","POST /:id/users","GET /:id/users","PATCH /:id/users/:userId/role","DELETE /:id/users/:userId"]},{"module":"billing","prefix":"/billing","endpoints":["POST /checkout","POST /portal","GET /workspace/:workspaceId","GET /plans","POST /webhook"]},{"module":"manager","prefix":"/manager","endpoints":["GET /users","GET /users/:id","PATCH /users/:id/status","POST /impersonate","DELETE /impersonate","GET /metrics"]},{"module":"account-admin","prefix":"/admin","endpoints":["GET /users","GET /users/:id","PATCH /users/:id/role","PATCH /users/:id/status","GET /sessions","DELETE /sessions/:id","POST /sessions/:userId/revoke-all","GET /invites","POST /invites","PATCH /invites/:id/resend","DELETE /invites/:id","GET /audit-logs"]}]}
 
 ### Config
 {"envAccess":"IConfigurationService (NUNCA process.env)","configFile":"apps/backend/src/shared/services/configuration.service.ts","envExample":".env.example"}

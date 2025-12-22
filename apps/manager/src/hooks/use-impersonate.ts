@@ -1,26 +1,42 @@
-import { useMutation } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import type { ImpersonateDto, ImpersonateResponse } from '../types/manager.types';
+import { useMutation } from '@tanstack/react-query'
+import { api } from '@/lib/api'
+import type { ImpersonateRequest, ImpersonateResponse } from '@/types'
+import { useManagerStore } from '@/stores/manager-store'
+import { toast } from 'sonner'
 
-export const useImpersonate = () => {
-  const start = useMutation({
-    mutationFn: (data: ImpersonateDto) =>
-      api.post<ImpersonateResponse>('/manager/impersonate', data),
-    onSuccess: (response) => {
-      // Open frontend app in new tab with impersonation token
-      const frontendUrl = import.meta.env.VITE_FRONTEND_URL || 'http://localhost:3000';
-      window.open(`${frontendUrl}?impersonateToken=${response.data.accessToken}`, '_blank');
+export function useImpersonate() {
+  const setImpersonation = useManagerStore((state) => state.setImpersonation)
+
+  return useMutation({
+    mutationFn: async (data: ImpersonateRequest) => {
+      const response = await api.post<ImpersonateResponse>('/manager/impersonate', data)
+      return response.data
     },
-  });
+    onSuccess: (data) => {
+      setImpersonation(data)
+      toast.success(`Impersonando ${data.targetUser.name}`)
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || 'Erro ao impersonar usuário'
+      toast.error(message)
+    },
+  })
+}
 
-  const end = useMutation({
-    mutationFn: () => api.delete<void>('/manager/impersonate'),
-  });
+export function useEndImpersonate() {
+  const setImpersonation = useManagerStore((state) => state.setImpersonation)
 
-  return {
-    start: start.mutate,
-    end: end.mutate,
-    isStarting: start.isPending,
-    isEnding: end.isPending,
-  };
-};
+  return useMutation({
+    mutationFn: async (sessionId: string) => {
+      await api.delete(`/manager/impersonate/${sessionId}`)
+    },
+    onSuccess: () => {
+      setImpersonation(null)
+      toast.success('Impersonação encerrada')
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || 'Erro ao encerrar impersonação'
+      toast.error(message)
+    },
+  })
+}

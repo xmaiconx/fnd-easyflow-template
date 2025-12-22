@@ -24,7 +24,9 @@
       "Skill(fix)",
       "Skill(fix:*)",
       "Skill(code-review)",
-      "Skill(code-review:*)"
+      "Skill(code-review:*)",
+      "Skill(architecture)",
+      "Skill(architecture:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

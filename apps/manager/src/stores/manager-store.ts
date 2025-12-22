@@ -1,18 +1,39 @@
-import { create } from 'zustand';
-import type { ListUsersDto } from '../types/manager.types';
+import { create } from 'zustand'
+import type { ImpersonateResponse } from '@/types'
 
 interface ManagerState {
-  filters: ListUsersDto;
-  selectedUserId: string | null;
-
-  setFilters: (filters: ListUsersDto) => void;
-  setSelectedUser: (userId: string | null) => void;
+  impersonation: ImpersonateResponse | null
+  usersSearchQuery: string
+  usersStatusFilter: string
+  setImpersonation: (data: ImpersonateResponse | null) => void
+  setUsersSearchQuery: (query: string) => void
+  setUsersStatusFilter: (status: string) => void
+  clearFilters: () => void
 }
 
 export const useManagerStore = create<ManagerState>((set) => ({
-  filters: { page: 1, limit: 20 },
-  selectedUserId: null,
+  impersonation: null,
+  usersSearchQuery: '',
+  usersStatusFilter: 'all',
 
-  setFilters: (filters) => set({ filters }),
-  setSelectedUser: (userId) => set({ selectedUserId: userId }),
-}));
+  setImpersonation: (data) =>
+    set({
+      impersonation: data,
+    }),
+
+  setUsersSearchQuery: (query) =>
+    set({
+      usersSearchQuery: query,
+    }),
+
+  setUsersStatusFilter: (status) =>
+    set({
+      usersStatusFilter: status,
+    }),
+
+  clearFilters: () =>
+    set({
+      usersSearchQuery: '',
+      usersStatusFilter: 'all',
+    }),
+}))

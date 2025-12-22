@@ -1,164 +1,157 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useUserDetails } from '../hooks/use-manager-users';
-import { useManagerUsers } from '../hooks/use-manager-users';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
-import { UserStatusBadge } from '../components/UserStatusBadge';
-import { ImpersonateDialog } from '../components/ImpersonateDialog';
+import { useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft, UserCog, Building2, Activity } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useUser, useUpdateUserStatus } from '@/hooks/use-users'
+import { UserStatusBadge } from '@/components/features/manager/user-status-badge'
+import { ImpersonateDialog } from '@/components/features/manager/impersonate-dialog'
+import { format } from 'date-fns'
+import type { EntityStatus } from '@/types'
 
-export const UserDetailsPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { data: user, isLoading } = useUserDetails(id!);
-  const { updateStatus, isUpdating } = useManagerUsers({});
+export function UserDetailsPage() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { data: user, isLoading } = useUser(id!)
+  const updateStatus = useUpdateUserStatus()
+  const [impersonateDialogOpen, setImpersonateDialogOpen] = useState(false)
 
-  const handleToggleStatus = () => {
-    if (!user) return;
-    const newStatus = user.status === 'active' ? 'inactive' : 'active';
-    updateStatus({ userId: user.id, status: newStatus });
-  };
+  const handleStatusChange = (status: string) => {
+    if (!id) return
+    updateStatus.mutate({ userId: id, status: status as EntityStatus })
+  }
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground">Loading user details...</p>
-        </div>
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-96 w-full" />
       </div>
-    );
+    )
   }
 
   if (!user) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground">User not found</p>
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl font-bold">Usuário não encontrado</h1>
         </div>
+        <Button onClick={() => navigate('/users')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar
+        </Button>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6">
-        <Button variant="outline" onClick={() => navigate('/users')}>
-          Back to Users
+    <div className="space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => navigate('/users')}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Voltar
+      </Button>
+
+      {/* Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl font-bold">{user.name}</h1>
+          <p className="text-muted-foreground mt-1">{user.email}</p>
+        </div>
+        <Button onClick={() => setImpersonateDialogOpen(true)}>
+          <UserCog className="mr-2 h-4 w-4" />
+          Impersonar
         </Button>
       </div>
 
-      <div className="grid gap-6">
+      {/* Info Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* User Info */}
         <Card>
           <CardHeader>
-            <CardTitle>User Information</CardTitle>
-            <CardDescription>Basic user account details</CardDescription>
+            <CardTitle className="text-base">Informações</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Name</p>
-                <p className="text-lg">{user.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Email</p>
-                <p className="text-lg">{user.email}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Status</p>
-                <div className="mt-1">
-                  <UserStatusBadge status={user.status} />
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Email Verified</p>
-                <p className="text-lg">{user.emailVerified ? 'Yes' : 'No'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Account ID</p>
-                <p className="text-sm font-mono">{user.accountId}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">User ID</p>
-                <p className="text-sm font-mono">{user.id}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Created At</p>
-                <p className="text-lg">{new Date(user.createdAt).toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Last Login</p>
-                <p className="text-lg">
-                  {user.lastLoginAt
-                    ? new Date(user.lastLoginAt).toLocaleString()
-                    : 'Never'}
-                </p>
+          <CardContent className="space-y-3">
+            <div>
+              <div className="text-sm text-muted-foreground">Status</div>
+              <div className="mt-1 flex items-center gap-2">
+                <UserStatusBadge status={user.status} />
+                <Select value={user.status} onValueChange={handleStatusChange} disabled={updateStatus.isPending}>
+                  <SelectTrigger className="h-8 w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="inactive">Inativo</SelectItem>
+                    <SelectItem value="deleted">Deletado</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Email Verificado</div>
+              <div className="mt-1 font-medium">{user.emailVerified ? 'Sim' : 'Não'}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Criado em</div>
+              <div className="mt-1 font-medium">{format(new Date(user.createdAt), 'dd/MM/yyyy HH:mm')}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Account ID</div>
+              <div className="mt-1 font-mono text-sm">{user.accountId}</div>
+            </div>
           </CardContent>
-          <CardFooter className="flex gap-2">
-            <Button
-              variant={user.status === 'active' ? 'destructive' : 'default'}
-              onClick={handleToggleStatus}
-              disabled={isUpdating}
-            >
-              {isUpdating
-                ? 'Updating...'
-                : user.status === 'active'
-                ? 'Deactivate User'
-                : 'Activate User'}
-            </Button>
-            <ImpersonateDialog userId={user.id} />
-          </CardFooter>
         </Card>
 
+        {/* Workspaces */}
         <Card>
           <CardHeader>
-            <CardTitle>Workspaces</CardTitle>
-            <CardDescription>User workspace memberships</CardDescription>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Workspaces
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {user.workspaces.length > 0 ? (
-              <ul className="space-y-2">
+              <div className="space-y-3">
                 {user.workspaces.map((workspace) => (
-                  <li key={workspace.id} className="flex items-center gap-2 p-3 border rounded-md">
-                    <div>
-                      <p className="font-medium">{workspace.name}</p>
-                      <p className="text-sm text-muted-foreground font-mono">{workspace.id}</p>
-                    </div>
-                  </li>
+                  <div key={workspace.id} className="border-b pb-2 last:border-0">
+                    <div className="font-medium">{workspace.name}</div>
+                    <div className="text-sm text-muted-foreground">Role: {workspace.role}</div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p className="text-muted-foreground">No workspaces</p>
+              <p className="text-sm text-muted-foreground">Nenhum workspace associado</p>
             )}
           </CardContent>
         </Card>
 
+        {/* Sessions */}
         <Card>
           <CardHeader>
-            <CardTitle>Active Sessions</CardTitle>
-            <CardDescription>Current user sessions</CardDescription>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Sessões Ativas
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {user.activeSessions.length > 0 ? (
-              <ul className="space-y-2">
-                {user.activeSessions.map((session) => (
-                  <li key={session.id} className="flex items-center gap-2 p-3 border rounded-md">
-                    <div className="flex-1">
-                      <p className="font-medium">{session.deviceName || 'Unknown Device'}</p>
-                      <p className="text-sm text-muted-foreground">IP: {session.ipAddress}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Last Activity: {new Date(session.lastActivityAt).toLocaleString()}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">No active sessions</p>
-            )}
+            <div className="text-3xl font-bold">{user.activeSessions}</div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {user.activeSessions === 1 ? 'sessão ativa' : 'sessões ativas'}
+            </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Impersonate Dialog */}
+      <ImpersonateDialog
+        user={user}
+        open={impersonateDialogOpen}
+        onOpenChange={setImpersonateDialogOpen}
+      />
     </div>
-  );
-};
+  )
+}
