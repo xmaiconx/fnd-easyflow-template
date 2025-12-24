@@ -257,6 +257,12 @@ Implemented comprehensive plan and subscription management functionality for the
 
 ## Revision History
 
+### Revision 009 - 2025-12-24
+**Type:** Bug Fix
+**Summary:** Fixed trial subscriptions not appearing in frontend billing page. Modified SubscriptionRepository to consider 'trialing' status, and implemented proper plan lookup via join in PlanService.
+**Files:** `SubscriptionRepository.ts`, `plan.service.ts`
+**See:** `fixes.md` - Fix 009
+
 ### Revision 008 - 2025-12-24
 **Type:** Bug Fix
 **Summary:** Fixed RangeError in subscription table caused by missing currentPeriodStart field. Added column to database, updated DTO and service, plus defensive date validation on frontend.

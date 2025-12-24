@@ -577,3 +577,111 @@ ALTER TABLE subscriptions ADD COLUMN current_period_start TIMESTAMP WITH TIME ZO
 - Mitigação dupla: backend nunca deveria retornar NULL em nova data, frontend protege se acontecer
 
 ---
+
+## Fix 009 - Trial Subscription Not Showing in Frontend Billing Page
+
+**Date:** 2025-12-24
+**Fixed By:** Claude Code
+
+### Bug
+**Expected:** Trial concedido pelo Manager deve aparecer na página de billing do frontend
+**Actual:** Página de billing (`/admin/billing`) exibe plano FREE e `subscription: null`, mesmo após trial ter sido concedido com sucesso
+
+**API Responses:**
+```
+GET /api/v1/manager/subscriptions → status: "trialing" ✅
+GET /api/v1/billing/workspace/:id → plan: FREE, subscription: null ❌
+```
+
+### Root Cause
+Dois bugs independentes que, combinados, impediam trials de aparecerem:
+
+**Bug 1:** [SubscriptionRepository.ts:52-60](libs/app-database/src/repositories/SubscriptionRepository.ts#L52-L60) - método `findActiveByWorkspaceId()` buscava apenas `WHERE status = 'active'`, ignorando subscriptions com status `'trialing'`.
+
+**Bug 2:** [plan.service.ts:43-71](apps/backend/src/api/modules/billing/plan.service.ts#L43-L71) - método `getWorkspacePlan()` tinha placeholder `return freePlan` mesmo quando subscription existia. Não implementava join para obter plano correto via `plan_price_id → plan_id`.
+
+**Por quê:**
+- Manager cria trial com status `'trialing'` (válido conforme enum `SubscriptionStatus`)
+- Repository filtrava apenas `'active'`, então trial não era encontrado
+- Mesmo se encontrasse, PlanService retornava FREE (placeholder não implementado)
+
+### Fix Applied
+| Arquivo | Mudança |
+|---------|---------|
+| [SubscriptionRepository.ts](libs/app-database/src/repositories/SubscriptionRepository.ts) | Modificado `findActiveByWorkspaceId()` (linha 57) para buscar `WHERE status IN ('active', 'trialing')`. Agora considera trials como subscriptions ativas do workspace. |
+| [plan.service.ts](apps/backend/src/api/modules/billing/plan.service.ts) | Injetado `Kysely<Database>` no construtor (linhas 3-4, 21-22). Implementado join correto em `getWorkspacePlan()` (linhas 50-84): `plan_prices → plans` via `plan_price_id`. Remove placeholder, retorna plano real da subscription. |
+
+### Comportamento Corrigido
+
+**Antes:**
+```typescript
+// Repository - só buscava 'active'
+async findActiveByWorkspaceId(workspaceId: string) {
+  return this.db
+    .where('workspace_id', '=', workspaceId)
+    .where('status', '=', 'active')  // ❌ Ignora 'trialing'
+    .executeTakeFirst();
+}
+
+// PlanService - placeholder hardcoded
+async getWorkspacePlan(workspaceId: string) {
+  const subscription = await this.subscriptionRepository.findActiveByWorkspaceId(workspaceId);
+
+  if (subscription) {
+    const freePlan = allPlans.find(p => p.code === PlanCode.FREE);
+    return freePlan; // ❌ Sempre FREE, mesmo com subscription
+  }
+  // ...
+}
+```
+
+**Depois:**
+```typescript
+// Repository - busca 'active' OU 'trialing'
+async findActiveByWorkspaceId(workspaceId: string) {
+  return this.db
+    .where('workspace_id', '=', workspaceId)
+    .where('status', 'in', ['active', 'trialing'])  // ✅ Considera trials
+    .executeTakeFirst();
+}
+
+// PlanService - join implementado
+async getWorkspacePlan(workspaceId: string) {
+  const subscription = await this.subscriptionRepository.findActiveByWorkspaceId(workspaceId);
+
+  if (subscription) {
+    // Join: plan_prices → plans via plan_price_id
+    const result = await this.db
+      .selectFrom('plan_prices as pp')
+      .innerJoin('plans as p', 'p.id', 'pp.plan_id')
+      .select(['p.id', 'p.code', 'p.name', ...])
+      .where('pp.id', '=', subscription.planPriceId)
+      .executeTakeFirst();
+
+    // ✅ Retorna plano real da subscription
+    return { id: result.id, code: result.code, ... };
+  }
+  // ...
+}
+```
+
+### Status
+- [x] Bug resolvido
+- [x] Build compila 100%
+- [x] Trial do Manager agora aparece corretamente no billing do frontend
+- [x] Plano correto é retornado (STARTER ao invés de FREE)
+
+### Análise de Impacto
+- **Escopo:** Billing module e Plan service
+- **Segurança:** Melhora - status 'trialing' agora respeitado
+- **Dados:** Nenhum - subscriptions existentes funcionam corretamente
+- **Compatibilidade:** Total - subscriptions 'active' continuam funcionando; 'trialing' agora também funciona
+- **Performance:** Sem impacto - join eficiente via índice de chave estrangeira
+
+### Notas Técnicas
+- `SubscriptionStatus.TRIALING` já existia no enum desde sempre (domain layer)
+- Manager já criava trials corretamente, mas billing não reconhecia
+- Fix alinha comportamento do repository com semântica do enum
+- Join implementado segue padrão já usado em `ManagerSubscriptionService.listSubscriptions()`
+
+---

@@ -54,7 +54,7 @@ export class SubscriptionRepository implements ISubscriptionRepository {
       .selectFrom('subscriptions')
       .selectAll()
       .where('workspace_id', '=', workspaceId)
-      .where('status', '=', 'active')
+      .where('status', 'in', ['active', 'trialing'])
       .executeTakeFirst();
 
     return result ? this.mapToEntity(result) : null;

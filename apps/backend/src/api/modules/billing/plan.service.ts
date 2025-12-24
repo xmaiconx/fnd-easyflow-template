@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Plan, PlanCode, PlanFeatures } from '@fnd/domain';
-import { IPlanRepository, ISubscriptionRepository, IWorkspaceRepository } from '@fnd/database';
+import { IPlanRepository, ISubscriptionRepository, IWorkspaceRepository, Database } from '@fnd/database';
+import { Kysely } from 'kysely';
 import {
   IPlanService,
   FeatureCheckResult,
@@ -17,6 +18,8 @@ export class PlanService implements IPlanService {
     private readonly subscriptionRepository: ISubscriptionRepository,
     @Inject('IWorkspaceRepository')
     private readonly workspaceRepository: IWorkspaceRepository,
+    @Inject('DATABASE')
+    private readonly db: Kysely<Database>,
   ) {}
 
   async canUseFeature(workspaceId: string, featureName: string): Promise<boolean> {
@@ -45,20 +48,40 @@ export class PlanService implements IPlanService {
     const subscription = await this.subscriptionRepository.findActiveByWorkspaceId(workspaceId);
 
     if (subscription) {
-      // Get plan from subscription
-      // We need to join with plan_prices to get the plan_id
-      // For now, we'll get all plans and find the one that matches
-      const allPlans = await this.planRepository.findAll();
-      const freePlan = allPlans.find(p => p.code === PlanCode.FREE);
+      // Get plan from subscription via plan_price_id -> plan_id join
+      const result = await this.db
+        .selectFrom('plan_prices as pp')
+        .innerJoin('plans as p', 'p.id', 'pp.plan_id')
+        .select([
+          'p.id',
+          'p.code',
+          'p.name',
+          'p.description',
+          'p.features',
+          'p.is_active',
+          'p.stripe_product_id',
+          'p.created_at',
+          'p.updated_at',
+        ])
+        .where('pp.id', '=', subscription.planPriceId)
+        .executeTakeFirst();
 
-      if (!freePlan) {
-        throw new NotFoundException('FREE plan not found');
+      if (!result) {
+        throw new NotFoundException(`Plan not found for subscription: ${subscription.id}`);
       }
 
-      // TODO: Implement proper join to get plan from subscription
-      // For MVP, if there's a subscription, it's a paid plan
-      // We need to determine which plan based on plan_price_id
-      return freePlan; // Placeholder - needs proper implementation
+      // Map database result to Plan entity
+      return {
+        id: result.id,
+        code: result.code as PlanCode,
+        name: result.name,
+        description: result.description || '',
+        features: result.features as PlanFeatures,
+        isActive: result.is_active,
+        stripeProductId: result.stripe_product_id || null,
+        createdAt: new Date(result.created_at),
+        updatedAt: new Date(result.updated_at),
+      };
     }
 
     // No subscription = FREE plan
