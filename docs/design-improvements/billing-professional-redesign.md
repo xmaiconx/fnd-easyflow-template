@@ -795,3 +795,183 @@ Benefits:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0.0 | 2024-12-24 | Initial professional redesign specification - Tab-based architecture, 4 new components, mobile-first |
+| 1.1.0 | 2024-12-24 | Bug fixes: Added price loading from database + dynamic badges from API |
+
+---
+
+## Version 1.1.0 - Bug Fixes & Dynamic Badges (2024-12-24)
+
+### Problems Fixed
+
+**1. Preços não carregando (price: null)**
+- API retornava `price: null` para todos os planos
+- Backend tinha TODO comentário para fazer join com `plan_prices`
+- Usuários viam R$ 0,00 em todos os planos
+
+**2. Badges hardcoded**
+- Badge "Recomendado" estava hardcoded para `plan.code === "pro"`
+- Ignorava configuração `features.display.badge` do banco de dados
+- Sem flexibilidade para mudar badges via admin
+
+### Solutions Implemented
+
+#### Backend: Plan Prices Join
+
+**Files Modified:**
+- [libs/app-database/src/interfaces/IPlanRepository.ts](../../libs/app-database/src/interfaces/IPlanRepository.ts)
+- [libs/app-database/src/repositories/PlanRepository.ts](../../libs/app-database/src/repositories/PlanRepository.ts)
+- [apps/backend/src/api/modules/billing/billing.service.ts](../../apps/backend/src/api/modules/billing/billing.service.ts)
+
+**Changes:**
+1. Created `PlanWithPrice` interface extending `Plan` with optional `currentPrice`
+2. Implemented `findActiveWithCurrentPrices()` method with LEFT JOIN to `plan_prices`
+3. Updated `getAvailablePlans()` to use new repository method
+4. Prices now correctly returned:
+   - STARTER: R$ 49,00 (4900 cents)
+   - PROFESSIONAL: R$ 99,00 (9900 cents)
+   - FREE: null (no price)
+
+**Code Example:**
+```typescript
+// PlanRepository.ts
+async findActiveWithCurrentPrices(): Promise<PlanWithPrice[]> {
+  const results = await this.db
+    .selectFrom('plans')
+    .leftJoin('plan_prices', (join) =>
+      join
+        .onRef('plan_prices.plan_id', '=', 'plans.id')
+        .on('plan_prices.is_current', '=', true)
+    )
+    .select([...])
+    .execute();
+
+  return results.map((row) => ({
+    ...plan,
+    currentPrice: row.price_id ? {
+      amount: row.price_amount,
+      currency: row.price_currency,
+      // ... other fields
+    } : undefined
+  }));
+}
+```
+
+#### Frontend: Dynamic Badges
+
+**Files Modified:**
+- [apps/frontend/src/pages/billing.tsx](../../apps/frontend/src/pages/billing.tsx)
+- [apps/frontend/src/components/features/billing/plan-comparison-table.tsx](../../apps/frontend/src/components/features/billing/plan-comparison-table.tsx)
+
+**Changes:**
+
+1. **Extended DisplayPlan interface:**
+```typescript
+interface DisplayPlan {
+  // ... existing fields
+  badge?: "popular" | "new" | "best-value" | null
+  highlighted?: boolean
+  ctaText?: string
+  ctaVariant?: "default" | "outline" | "secondary"
+}
+```
+
+2. **Transform function now maps API display data:**
+```typescript
+function transformPlanToDisplay(plan: BillingPlan): DisplayPlan {
+  return {
+    // ... existing fields
+    badge: plan.features.display?.badge || null,
+    highlighted: plan.features.display?.highlighted || false,
+    ctaText: plan.features.display?.ctaText || "Selecionar Plano",
+    ctaVariant: plan.features.display?.ctaVariant || "outline",
+  }
+}
+```
+
+3. **PlanComparisonTable uses dynamic badges:**
+```typescript
+const getBadgeLabel = (badge?: "popular" | "new" | "best-value" | null) => {
+  switch (badge) {
+    case "popular": return "Mais Popular"
+    case "best-value": return "Melhor Custo-Benefício"
+    case "new": return "Novo"
+    default: return null
+  }
+}
+
+// In render:
+{badgeLabel && !isCurrent && (
+  <Badge variant="default" className="gap-1.5 bg-accent hover:bg-accent/90">
+    <Sparkles className="h-3 w-3" />
+    {badgeLabel}
+  </Badge>
+)}
+```
+
+4. **Price formatting fixed:**
+```typescript
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(price / 100) // Convert from cents to reais
+}
+```
+
+### Database Configuration
+
+Badges are configured in seed migration [20250101002_seed_default_plans.js](../../libs/app-database/migrations/20250101002_seed_default_plans.js):
+
+```javascript
+// STARTER Plan
+features: {
+  display: {
+    badge: 'popular',
+    highlighted: true,
+    ctaText: 'Começar Agora',
+    ctaVariant: 'default',
+    comparisonLabel: 'Mais Popular',
+  }
+}
+
+// PROFESSIONAL Plan
+features: {
+  display: {
+    badge: 'best-value',
+    highlighted: false,
+    ctaText: 'Escalar Negócio',
+    ctaVariant: 'default',
+    comparisonLabel: 'Melhor Custo-Benefício',
+  }
+}
+```
+
+### Results
+
+**Before:**
+- ❌ All plans showing R$ 0,00
+- ❌ "Recomendado" badge hardcoded to PRO plan
+- ❌ No flexibility to change badges via admin
+
+**After:**
+- ✅ Correct prices from database (R$ 49,00 for STARTER, R$ 99,00 for PROFESSIONAL)
+- ✅ Dynamic badges based on `features.display.badge`
+- ✅ Highlighted plans based on `features.display.highlighted`
+- ✅ Custom CTA texts per plan
+- ✅ Better conversion with strategic badge placement
+
+### Badge Labels Map
+
+| API Value | Portuguese Label | Use Case |
+|-----------|------------------|----------|
+| `popular` | "Mais Popular" | Most chosen plan |
+| `best-value` | "Melhor Custo-Benefício" | Best price/features ratio |
+| `new` | "Novo" | Recently launched plan |
+| `null` | (no badge) | Default state |
+
+### Future Enhancements
+
+- [ ] Admin panel to edit plan badges and highlights
+- [ ] A/B testing for different badge strategies
+- [ ] Conversion metrics per plan
+- [ ] Tooltip support for highlighted features

@@ -42,7 +42,7 @@ export function BillingHistory({
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(price)
+    }).format(price / 100) // Convert from cents to reais
   }
 
   const formatDate = (dateString: string) => {

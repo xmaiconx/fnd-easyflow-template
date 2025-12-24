@@ -43,7 +43,7 @@ export function PlanOverviewCard({
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(price)
+    }).format(price / 100) // Convert from cents to reais
   }
 
   const isFreePlan = plan.code === "free" || plan.price === 0

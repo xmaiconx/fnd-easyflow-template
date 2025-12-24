@@ -209,14 +209,17 @@ export class BillingService {
   }
 
   async getAvailablePlans(): Promise<PlanResponseDto[]> {
-    const plans = await this.planRepository.findActive();
+    const plans = await this.planRepository.findActiveWithCurrentPrices();
 
-    // TODO: Join with plan_prices to get current price
     return plans.map(plan => ({
       code: plan.code,
       name: plan.name,
       description: plan.description || '',
-      price: null, // Placeholder - needs proper join
+      price: plan.currentPrice ? {
+        amount: plan.currentPrice.amount,
+        currency: plan.currentPrice.currency,
+        interval: plan.currentPrice.interval,
+      } : null,
       features: plan.features,
     }));
   }

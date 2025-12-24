@@ -36,6 +36,10 @@ interface DisplayPlan {
   name: string
   price: number
   features: string[]
+  badge?: "popular" | "new" | "best-value" | null
+  highlighted?: boolean
+  ctaText?: string
+  ctaVariant?: "default" | "outline" | "secondary"
 }
 
 function transformPlanToDisplay(plan: BillingPlan): DisplayPlan {
@@ -54,6 +58,10 @@ function transformPlanToDisplay(plan: BillingPlan): DisplayPlan {
     name: plan.name,
     price: plan.price?.amount || 0,
     features,
+    badge: plan.features.display?.badge || null,
+    highlighted: plan.features.display?.highlighted || false,
+    ctaText: plan.features.display?.ctaText || "Selecionar Plano",
+    ctaVariant: plan.features.display?.ctaVariant || "outline",
   }
 }
 
@@ -147,7 +155,7 @@ export default function BillingPage() {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(price)
+    }).format(price / 100) // Convert from cents to reais
   }
 
   // Mock invoices (seria integrado com API de invoices futuramente)

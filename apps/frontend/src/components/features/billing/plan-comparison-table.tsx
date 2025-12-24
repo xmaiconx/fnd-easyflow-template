@@ -13,6 +13,10 @@ interface Plan {
   name: string
   price: number
   features: string[]
+  badge?: "popular" | "new" | "best-value" | null
+  highlighted?: boolean
+  ctaText?: string
+  ctaVariant?: "default" | "outline" | "secondary"
 }
 
 interface PlanComparisonTableProps {
@@ -34,14 +38,27 @@ export function PlanComparisonTable({
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(price)
+    }).format(price / 100) // Convert from cents to reais
+  }
+
+  const getBadgeLabel = (badge?: "popular" | "new" | "best-value" | null) => {
+    switch (badge) {
+      case "popular":
+        return "Mais Popular"
+      case "best-value":
+        return "Melhor Custo-Benefício"
+      case "new":
+        return "Novo"
+      default:
+        return null
+    }
   }
 
   return (
     <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
       {plans.map((plan) => {
         const isCurrent = plan.code === currentPlanCode
-        const isRecommended = plan.code === "pro"
+        const badgeLabel = getBadgeLabel(plan.badge)
 
         return (
           <Card
@@ -49,17 +66,17 @@ export function PlanComparisonTable({
             className={cn(
               "flex flex-col",
               isCurrent && "border-primary/50 shadow-md",
-              isRecommended && "border-accent/50"
+              plan.highlighted && "border-accent/50"
             )}
           >
             {/* Header */}
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
-                {isRecommended && (
+                {badgeLabel && !isCurrent && (
                   <Badge variant="default" className="gap-1.5 bg-accent hover:bg-accent/90">
                     <Sparkles className="h-3 w-3" />
-                    Recomendado
+                    {badgeLabel}
                   </Badge>
                 )}
                 {isCurrent && (
@@ -115,13 +132,13 @@ export function PlanComparisonTable({
                 <LoadingButton
                   loading={loading}
                   onClick={() => onSelectPlan(plan)}
-                  variant={isRecommended ? "default" : "outline"}
+                  variant={plan.ctaVariant || "outline"}
                   className={cn(
                     "w-full h-11",
-                    isRecommended && "bg-accent hover:bg-accent/90"
+                    plan.highlighted && plan.ctaVariant === "default" && "bg-accent hover:bg-accent/90"
                   )}
                 >
-                  Selecionar Plano
+                  {plan.ctaText || "Selecionar Plano"}
                 </LoadingButton>
               )}
             </CardFooter>
