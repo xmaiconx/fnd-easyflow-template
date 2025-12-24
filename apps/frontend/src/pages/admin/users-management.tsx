@@ -1,18 +1,25 @@
 import * as React from "react"
-import { Search, Users } from "lucide-react"
+import { Plus, Search, Users } from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
 import { PageHeader } from "@/components/layout/page-header"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { EmptyState } from "@/components/ui/empty-state"
 import { UserTable } from "@/components/features/account-admin/user-table"
 import { UserCard } from "@/components/features/account-admin/user-card"
 import { UserDetailsSheet } from "@/components/features/account-admin/user-details-sheet"
+import { InviteDialog } from "@/components/features/account-admin/invite-dialog"
 import { useAccountUsers } from "@/hooks/use-account-admin"
 import { useDebounce } from "@/hooks/use-debounce"
+import { useAuthStore } from "@/stores/auth-store"
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = React.useState("")
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(null)
+  const [inviteDialogOpen, setInviteDialogOpen] = React.useState(false)
+
+  const user = useAuthStore((state) => state.user)
+  const workspaceList = useAuthStore((state) => state.workspaceList)
 
   // Debounce search to reduce API calls (300ms delay)
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
@@ -27,6 +34,13 @@ export default function UsersManagementPage() {
         <PageHeader
           title="Gestão de Usuários"
           description="Gerencie usuários e permissões da conta"
+          action={
+            <Button onClick={() => setInviteDialogOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Convidar Usuário</span>
+              <span className="sm:hidden">Convidar</span>
+            </Button>
+          }
         />
 
         <div className="flex items-center gap-2">
@@ -73,6 +87,13 @@ export default function UsersManagementPage() {
           userId={selectedUserId || ''}
           open={!!selectedUserId}
           onOpenChange={(open) => !open && setSelectedUserId(null)}
+        />
+
+        <InviteDialog
+          open={inviteDialogOpen}
+          onOpenChange={setInviteDialogOpen}
+          workspaces={workspaceList}
+          currentUserRole={user?.role as any || 'member'}
         />
       </div>
     </AppShell>
