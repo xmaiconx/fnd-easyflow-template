@@ -24,6 +24,7 @@ interface PlanCardProps {
   onSelect: (plan: Plan) => void
   loading?: boolean
   className?: string
+  spotlight?: boolean
 }
 
 export function PlanCard({
@@ -33,6 +34,7 @@ export function PlanCard({
   onSelect,
   loading = false,
   className,
+  spotlight = false,
 }: PlanCardProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -60,10 +62,16 @@ export function PlanCard({
           !isCurrent && "hover:shadow-lg hover:border-primary/50 cursor-pointer",
           isCurrent && "border-primary/50 shadow-md",
           isRecommended && "border-accent/50",
+          spotlight && "max-w-lg shadow-xl border-primary/60 bg-gradient-to-br from-card to-card/80",
           className
         )}
         onClick={() => !isCurrent && !loading && onSelect(plan)}
       >
+        {/* Spotlight Glow Effect */}
+        {spotlight && (
+          <div className="absolute inset-0 bg-gradient-radial from-primary/10 to-transparent opacity-50 pointer-events-none rounded-lg" />
+        )}
+
         {/* Recommended Badge */}
         {isRecommended && (
           <div className="absolute -top-3 left-1/2 -translate-x-1/2">

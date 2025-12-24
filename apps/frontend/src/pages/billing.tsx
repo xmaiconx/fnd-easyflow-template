@@ -68,6 +68,20 @@ export default function BillingPage() {
     }
   }, [billingInfo])
 
+  const gridClasses = React.useMemo(() => {
+    const count = displayPlans.length
+
+    if (count === 1) {
+      return "flex justify-center"
+    }
+
+    if (count === 2) {
+      return "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto"
+    }
+
+    return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+  }, [displayPlans.length])
+
   const handleSelectPlan = async (plan: DisplayPlan) => {
     if (!currentWorkspace) return
     createCheckout.mutate({
@@ -117,7 +131,7 @@ export default function BillingPage() {
         {/* Available Plans */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Planos Disponíveis</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className={gridClasses}>
             {displayPlans.map((plan) => (
               <PlanCard
                 key={plan.id}
@@ -126,6 +140,7 @@ export default function BillingPage() {
                 isRecommended={plan.code === "pro"}
                 onSelect={handleSelectPlan}
                 loading={isMutating}
+                spotlight={displayPlans.length === 1}
               />
             ))}
           </div>
