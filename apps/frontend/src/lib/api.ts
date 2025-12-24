@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { toast } from 'sonner'
+import { useErrorModalStore } from '@/stores/error-modal-store'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1'
 const AUTH_STORAGE_KEY = 'fnd-metatemplate-auth-v2'
@@ -102,6 +103,13 @@ api.interceptors.response.use(
       if (error.response?.data) {
         const errorData = error.response.data
 
+        // Check if error has displayType
+        if (errorData.displayType === 'modal') {
+          // Open modal instead of toast
+          useErrorModalStore.getState().open(errorData)
+          return Promise.reject(error)
+        }
+
         // Handle validation errors (400 with array of messages)
         if (error.response.status === 400 && Array.isArray(errorData.message)) {
           error.message = errorData.message.join(', ')
@@ -112,7 +120,7 @@ api.interceptors.response.use(
         }
       }
 
-      // Show error toast for non-401 errors
+      // Show error toast for non-401 errors (when displayType is not 'modal')
       const message = error.message || 'Ocorreu um erro. Tente novamente.'
       toast.error(message)
 

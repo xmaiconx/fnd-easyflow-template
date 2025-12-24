@@ -344,3 +344,6 @@ export interface ListUsersFilters {
 export interface ListInvitesFilters {
   status?: InviteStatus
 }
+
+// Error types
+export type { DisplayType, ErrorResponse } from './errors'

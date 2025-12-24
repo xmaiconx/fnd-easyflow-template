@@ -3,6 +3,7 @@ import { useUIStore } from '@/stores/ui-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { AppRoutes } from './routes'
 import { Toaster } from 'sonner'
+import { ErrorModal } from '@/components/ui/error-modal'
 import { api } from '@/lib/api'
 import type { Workspace } from '@/types'
 
@@ -62,6 +63,7 @@ function App() {
     <>
       <AppRoutes />
       <Toaster richColors position="top-right" />
+      <ErrorModal />
     </>
   )
 }

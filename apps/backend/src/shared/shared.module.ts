@@ -4,6 +4,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ILoggerService, IConfigurationService, IQueueService, IEventPublisher } from '@fnd/backend';
 import { IEmailService } from '@fnd/backend';
 import { IEmailQueueService } from '@fnd/backend';
+import { IAuthorizationService } from '@fnd/backend';
 import {
   IUserRepository,
   IAccountRepository,
@@ -35,6 +36,7 @@ import { EmailQueueService } from './services/email-queue.service';
 import { EventBrokerService } from './services/event-broker.service';
 import { ConfigurationService } from './services/configuration.service';
 import { StartupLoggerService } from './services/startup-logger.service';
+import { AuthorizationService } from './services/authorization.service';
 import { BullMQQueueAdapter, BullMQEventPublisher } from './adapters';
 import { RedisProvider } from './providers/redis.provider';
 
@@ -60,6 +62,7 @@ const CONFIGURATION_SERVICE_TOKEN = 'IConfigurationService';
 const QUEUE_SERVICE_TOKEN = 'IQueueService';
 const EVENT_PUBLISHER_TOKEN = 'IEventPublisher';
 const REDIS_CONNECTION_TOKEN = 'REDIS_CONNECTION';
+const AUTHORIZATION_SERVICE_TOKEN = 'IAuthorizationService';
 
 @Module({
   imports: [ConfigModule, CqrsModule],
@@ -170,6 +173,10 @@ const REDIS_CONNECTION_TOKEN = 'REDIS_CONNECTION';
       provide: EVENT_PUBLISHER_TOKEN,
       useClass: BullMQEventPublisher,
     },
+    {
+      provide: AUTHORIZATION_SERVICE_TOKEN,
+      useClass: AuthorizationService,
+    },
     StartupLoggerService,
   ],
   exports: [
@@ -195,6 +202,7 @@ const REDIS_CONNECTION_TOKEN = 'REDIS_CONNECTION';
     QUEUE_SERVICE_TOKEN,
     EVENT_PUBLISHER_TOKEN,
     REDIS_CONNECTION_TOKEN,
+    AUTHORIZATION_SERVICE_TOKEN,
     StartupLoggerService,
   ],
 })

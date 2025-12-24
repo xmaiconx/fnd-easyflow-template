@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './api/app.module';
 import { IConfigurationService, ILoggerService } from '@fnd/backend';
 import { StartupLoggerService } from './shared/services/startup-logger.service';
+import { HttpExceptionFilter } from './api/filters/http-exception.filter';
 
 /**
  * Hybrid Mode Entrypoint
@@ -38,6 +39,9 @@ export async function bootstrapHybrid() {
       transform: true,
     }),
   );
+
+  // Global exception filter
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Set API prefix
   app.setGlobalPrefix('api/v1');

@@ -5,9 +5,10 @@ import {
   IWorkspaceUserRepository,
   IPlanRepository,
   ISubscriptionRepository,
+  IUserRepository,
 } from '@fnd/database';
-import { IStripeService, IConfigurationService } from '@fnd/backend';
-import { UserRole } from '@fnd/domain';
+import { IStripeService, IConfigurationService, IAuthorizationService } from '@fnd/backend';
+import { UserRole, Action, Resource } from '@fnd/domain';
 import { PlanService } from './plan.service';
 import {
   BillingInfoResponseDto,
@@ -19,6 +20,8 @@ import {
 @Injectable()
 export class BillingService {
   constructor(
+    @Inject('IUserRepository')
+    private readonly userRepository: IUserRepository,
     @Inject('IAccountRepository')
     private readonly accountRepository: IAccountRepository,
     @Inject('IWorkspaceRepository')
@@ -31,37 +34,44 @@ export class BillingService {
     private readonly subscriptionRepository: ISubscriptionRepository,
     @Inject('IStripeService')
     private readonly stripeService: IStripeService,
+    @Inject('IAuthorizationService')
+    private readonly authorizationService: IAuthorizationService,
     private readonly planService: PlanService,
     @Inject('IConfigurationService')
     private readonly configService: IConfigurationService,
   ) {}
 
   async createCheckoutSession(dto: CreateCheckoutDto, userId: string): Promise<{ checkoutUrl: string; sessionId: string }> {
-    // 1. Verify workspace exists
+    // 1. Get user and verify authorization
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // 2. Verify workspace exists
     const workspace = await this.workspaceRepository.findById(dto.workspaceId);
     if (!workspace) {
       throw new NotFoundException('Workspace not found');
     }
 
-    // 2. Verify user is owner of workspace
-    const workspaceUser = await this.workspaceUserRepository.findByWorkspaceAndUser(dto.workspaceId, userId);
-    if (!workspaceUser || workspaceUser.role !== UserRole.OWNER) {
-      throw new ForbiddenException('Apenas owners podem alterar o plano');
-    }
+    // 3. Check authorization (super-admin bypass + owner workspace check)
+    await this.authorizationService.require(user, Action.MANAGE, Resource.BILLING, {
+      workspaceId: dto.workspaceId,
+    });
 
-    // 3. Verify plan exists
+    // 4. Verify plan exists
     const plan = await this.planRepository.findByCode(dto.planCode);
     if (!plan) {
       throw new BadRequestException('Plano não encontrado');
     }
 
-    // 4. Check if workspace already has this plan
+    // 5. Check if workspace already has this plan
     const currentPlan = await this.planService.getWorkspacePlan(dto.workspaceId);
     if (currentPlan.code === dto.planCode) {
       throw new ConflictException('Workspace já possui este plano');
     }
 
-    // 5. Get or create Stripe customer
+    // 6. Get or create Stripe customer
     const account = await this.accountRepository.findById(workspace.accountId);
     if (!account) {
       throw new NotFoundException('Account not found');
@@ -85,12 +95,12 @@ export class BillingService {
       await this.accountRepository.update(workspace.accountId, { stripeCustomerId: customerId });
     }
 
-    // 6. Get price for plan
+    // 7. Get price for plan
     // TODO: Get current price from plan_prices table
     // For now, hardcoded priceId (needs to be configured from Stripe)
     const priceId = 'price_xxx'; // Placeholder
 
-    // 7. Create checkout session
+    // 8. Create checkout session
     const session = await this.stripeService.createCheckoutSession({
       customerId,
       priceId,
@@ -106,30 +116,35 @@ export class BillingService {
   }
 
   async createPortalSession(dto: CreatePortalDto, userId: string): Promise<{ portalUrl: string }> {
-    // 1. Verify workspace exists
+    // 1. Get user and verify authorization
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // 2. Verify workspace exists
     const workspace = await this.workspaceRepository.findById(dto.workspaceId);
     if (!workspace) {
       throw new NotFoundException('Workspace not found');
     }
 
-    // 2. Verify user is owner of workspace
-    const workspaceUser = await this.workspaceUserRepository.findByWorkspaceAndUser(dto.workspaceId, userId);
-    if (!workspaceUser || workspaceUser.role !== UserRole.OWNER) {
-      throw new ForbiddenException('Apenas owners podem gerenciar billing');
-    }
+    // 3. Check authorization (super-admin bypass + owner workspace check)
+    await this.authorizationService.require(user, Action.MANAGE, Resource.BILLING, {
+      workspaceId: dto.workspaceId,
+    });
 
-    // 3. Get account
+    // 4. Get account
     const account = await this.accountRepository.findById(workspace.accountId);
     if (!account) {
       throw new NotFoundException('Account not found');
     }
 
-    // 4. Verify account has Stripe customer
+    // 5. Verify account has Stripe customer
     if (!account.stripeCustomerId) {
       throw new BadRequestException('Você ainda não possui assinaturas ativas');
     }
 
-    // 5. Create portal session
+    // 6. Create portal session
     const frontendUrl = this.configService.getFrontendUrl();
     const returnUrl = `${frontendUrl}/settings/billing`;
 
@@ -141,28 +156,33 @@ export class BillingService {
   }
 
   async getWorkspaceBillingInfo(workspaceId: string, userId: string): Promise<BillingInfoResponseDto> {
-    // 1. Verify workspace exists
+    // 1. Get user and verify authorization
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // 2. Verify workspace exists
     const workspace = await this.workspaceRepository.findById(workspaceId);
     if (!workspace) {
       throw new NotFoundException('Workspace not found');
     }
 
-    // 2. Verify user has access to workspace
-    const workspaceUser = await this.workspaceUserRepository.findByWorkspaceAndUser(workspaceId, userId);
-    if (!workspaceUser) {
-      throw new ForbiddenException('Você não tem acesso a este workspace');
-    }
+    // 3. Check authorization (super-admin bypass + workspace member check)
+    await this.authorizationService.require(user, Action.READ, Resource.BILLING, {
+      workspaceId,
+    });
 
-    // 3. Get plan
+    // 4. Get plan
     const plan = await this.planService.getWorkspacePlan(workspaceId);
 
-    // 4. Get subscription (if any)
+    // 5. Get subscription (if any)
     const subscription = await this.subscriptionRepository.findActiveByWorkspaceId(workspaceId);
 
-    // 5. Get usage
+    // 6. Get usage
     const accountUsage = await this.planService.getAccountUsage(workspace.accountId);
 
-    // 6. Count users in workspace
+    // 7. Count users in workspace
     // TODO: Implement workspaceUserRepository.countByWorkspaceId
     const usersInWorkspace = 1; // Placeholder
 

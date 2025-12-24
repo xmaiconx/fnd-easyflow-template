@@ -10,13 +10,14 @@ import { UserRole } from '@fnd/domain';
 /**
  * Account Admin Guard
  *
- * Extends JwtAuthGuard to require account admin access (Owner or Admin).
+ * Extends JwtAuthGuard to require account admin access.
  *
  * Flow:
  * 1. Delegates to JwtAuthGuard for JWT validation
- * 2. Checks if authenticated user role is OWNER or ADMIN
- * 3. Rejects SUPER_ADMIN (account admins are account-scoped only)
- * 4. Throws ForbiddenException if not authorized
+ * 2. Allows SUPER_ADMIN (cross-account access)
+ * 3. Allows OWNER and ADMIN (account-scoped access)
+ * 4. Rejects MEMBER
+ * 5. Throws ForbiddenException if not authorized
  *
  * Usage: @UseGuards(AccountAdminGuard)
  */
@@ -42,11 +43,17 @@ export class AccountAdminGuard extends JwtAuthGuard implements CanActivate {
       throw new ForbiddenException('User context not found');
     }
 
-    // Only OWNER and ADMIN are allowed (reject SUPER_ADMIN and MEMBER)
-    if (user.role !== UserRole.OWNER && user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Account admin access required (Owner or Admin only)');
+    // SUPER_ADMIN has access to everything (cross-account)
+    if (user.role === UserRole.SUPER_ADMIN) {
+      return true;
     }
 
-    return true;
+    // OWNER and ADMIN have account-scoped access
+    if (user.role === UserRole.OWNER || user.role === UserRole.ADMIN) {
+      return true;
+    }
+
+    // MEMBER denied
+    throw new ForbiddenException('Você não tem permissão para acessar este recurso.');
   }
 }
