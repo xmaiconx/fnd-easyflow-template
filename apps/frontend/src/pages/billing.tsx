@@ -1,13 +1,32 @@
 "use client"
 
 import * as React from "react"
-import { Loader2 } from "lucide-react"
+import { motion } from "framer-motion"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import {
+  Loader2,
+  CreditCard,
+  Calendar,
+  CheckCircle,
+  DollarSign,
+} from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
 import { PageHeader } from "@/components/layout/page-header"
-import { CurrentPlanCard } from "@/components/features/billing/current-plan-card"
-import { PlanCard } from "@/components/features/billing/plan-card"
-import { BillingHistory, type Invoice } from "@/components/features/billing/billing-history"
-import { usePlans, useCurrentBillingInfo, useCreateCheckout, useCreatePortal } from "@/hooks/use-billing"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  StatCard,
+  PlanOverviewCard,
+  PlanComparisonTable,
+  BillingHistory,
+  type Invoice,
+} from "@/components/features/billing"
+import {
+  usePlans,
+  useCurrentBillingInfo,
+  useCreateCheckout,
+  useCreatePortal,
+} from "@/hooks/use-billing"
 import { useAuthStore } from "@/stores/auth-store"
 import type { BillingPlan } from "@/types"
 
@@ -21,12 +40,13 @@ interface DisplayPlan {
 
 function transformPlanToDisplay(plan: BillingPlan): DisplayPlan {
   const displayFeatures = plan.features.display?.displayFeatures || []
-  const features = displayFeatures.length > 0
-    ? displayFeatures.map((f) => f.text)
-    : [
-        `${plan.features.limits.workspaces === -1 ? 'Ilimitados' : plan.features.limits.workspaces} workspace${plan.features.limits.workspaces !== 1 ? 's' : ''}`,
-        `Até ${plan.features.limits.usersPerWorkspace === -1 ? 'ilimitados' : plan.features.limits.usersPerWorkspace} usuários por workspace`,
-      ]
+  const features =
+    displayFeatures.length > 0
+      ? displayFeatures.map((f) => f.text)
+      : [
+          `${plan.features.limits.workspaces === -1 ? "Ilimitados" : plan.features.limits.workspaces} workspace${plan.features.limits.workspaces !== 1 ? "s" : ""}`,
+          `Até ${plan.features.limits.usersPerWorkspace === -1 ? "ilimitados" : plan.features.limits.usersPerWorkspace} usuários por workspace`,
+        ]
 
   return {
     id: plan.code,
@@ -39,8 +59,11 @@ function transformPlanToDisplay(plan: BillingPlan): DisplayPlan {
 
 export default function BillingPage() {
   const currentWorkspace = useAuthStore((state) => state.currentWorkspace)
+  const [activeTab, setActiveTab] = React.useState("overview")
+
   const { data: plans, isLoading: plansLoading } = usePlans()
-  const { data: billingInfo, isLoading: billingLoading } = useCurrentBillingInfo()
+  const { data: billingInfo, isLoading: billingLoading } =
+    useCurrentBillingInfo()
   const createCheckout = useCreateCheckout()
   const createPortal = useCreatePortal()
 
@@ -50,37 +73,32 @@ export default function BillingPage() {
       .map(transformPlanToDisplay)
       .sort((a, b) => {
         const order = { free: 0, pro: 1, enterprise: 2 }
-        return (order[a.code as keyof typeof order] ?? 99) - (order[b.code as keyof typeof order] ?? 99)
+        return (
+          (order[a.code as keyof typeof order] ?? 99) -
+          (order[b.code as keyof typeof order] ?? 99)
+        )
       })
   }, [plans])
 
   const currentPlan = React.useMemo(() => {
     if (!billingInfo) return displayPlans[0]
-    return displayPlans.find((p) => p.code === billingInfo.plan.code) || displayPlans[0]
+    return (
+      displayPlans.find((p) => p.code === billingInfo.plan.code) ||
+      displayPlans[0]
+    )
   }, [billingInfo, displayPlans])
 
   const subscription = React.useMemo(() => {
     if (!billingInfo?.subscription) return undefined
     return {
-      id: 'current',
-      status: billingInfo.subscription.status as 'active' | 'canceled' | 'past_due',
+      id: "current",
+      status: billingInfo.subscription.status as
+        | "active"
+        | "canceled"
+        | "past_due",
       currentPeriodEnd: billingInfo.subscription.currentPeriodEnd,
     }
   }, [billingInfo])
-
-  const gridClasses = React.useMemo(() => {
-    const count = displayPlans.length
-
-    if (count === 1) {
-      return "flex justify-center"
-    }
-
-    if (count === 2) {
-      return "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto"
-    }
-
-    return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
-  }, [displayPlans.length])
 
   const handleSelectPlan = async (plan: DisplayPlan) => {
     if (!currentWorkspace) return
@@ -95,15 +113,72 @@ export default function BillingPage() {
     createPortal.mutate(currentWorkspace.id)
   }
 
+  const handleUpgrade = () => {
+    setActiveTab("plans")
+  }
+
   const isLoading = plansLoading || billingLoading
   const isMutating = createCheckout.isPending || createPortal.isPending
+
+  // Format next billing date
+  const formattedNextBilling = subscription?.currentPeriodEnd
+    ? format(new Date(subscription.currentPeriodEnd), "dd 'de' MMMM 'de' yyyy", {
+        locale: ptBR,
+      })
+    : "—"
+
+  // Status label
+  const getStatusLabel = (status?: string) => {
+    switch (status) {
+      case "active":
+        return "Ativa"
+      case "canceled":
+        return "Cancelada"
+      case "past_due":
+        return "Pagamento Pendente"
+      default:
+        return "—"
+    }
+  }
+
+  const statusLabel = subscription ? getStatusLabel(subscription.status) : "—"
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(price)
+  }
 
   // Mock invoices (seria integrado com API de invoices futuramente)
   const mockInvoices: Invoice[] = []
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 },
+    },
+  }
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
+
+  const tabContentVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+  }
+
   if (isLoading) {
     return (
-      <AppShell currentPath="/admin/billing" breadcrumb={["Administração", "Assinatura"]}>
+      <AppShell
+        currentPath="/admin/billing"
+        breadcrumb={["Administração", "Assinatura"]}
+      >
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -112,45 +187,123 @@ export default function BillingPage() {
   }
 
   return (
-    <AppShell currentPath="/admin/billing" breadcrumb={["Administração", "Assinatura"]}>
+    <AppShell
+      currentPath="/admin/billing"
+      breadcrumb={["Administração", "Assinatura"]}
+    >
       <div className="space-y-6">
         <PageHeader
           title="Assinatura e Cobrança"
           description="Gerencie seu plano e pagamentos"
         />
 
-        {/* Current Plan */}
-        {currentPlan && (
-          <CurrentPlanCard
-            plan={currentPlan}
-            subscription={subscription}
-            onManage={handleManageSubscription}
-          />
-        )}
+        <Tabs
+          defaultValue="overview"
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="plans">Planos</TabsTrigger>
+            <TabsTrigger value="history">Histórico</TabsTrigger>
+          </TabsList>
 
-        {/* Available Plans */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Planos Disponíveis</h2>
-          <div className={gridClasses}>
-            {displayPlans.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                isCurrent={plan.code === currentPlan?.code}
-                isRecommended={plan.code === "pro"}
-                onSelect={handleSelectPlan}
+          {/* TAB 1: Overview */}
+          <TabsContent value="overview" className="space-y-6">
+            <motion.div
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              {/* Stats Cards Grid */}
+              <motion.div
+                className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <motion.div variants={cardVariants}>
+                  <StatCard
+                    title="Plano Atual"
+                    value={currentPlan?.name || "—"}
+                    icon={CreditCard}
+                  />
+                </motion.div>
+                <motion.div variants={cardVariants}>
+                  <StatCard
+                    title="Próxima Cobrança"
+                    value={formattedNextBilling}
+                    icon={Calendar}
+                  />
+                </motion.div>
+                <motion.div variants={cardVariants}>
+                  <StatCard
+                    title="Status"
+                    value={statusLabel}
+                    icon={CheckCircle}
+                    variant={subscription?.status === "active" ? "success" : "default"}
+                    badge
+                  />
+                </motion.div>
+                <motion.div variants={cardVariants}>
+                  <StatCard
+                    title="Gasto Mensal"
+                    value={formatPrice(currentPlan?.price || 0)}
+                    icon={DollarSign}
+                  />
+                </motion.div>
+              </motion.div>
+
+              {/* Plan Overview Card */}
+              {currentPlan && (
+                <PlanOverviewCard
+                  plan={currentPlan}
+                  subscription={subscription}
+                  onUpgrade={handleUpgrade}
+                  onManage={handleManageSubscription}
+                  loading={isMutating}
+                />
+              )}
+            </motion.div>
+          </TabsContent>
+
+          {/* TAB 2: Plans */}
+          <TabsContent value="plans" className="space-y-6">
+            <motion.div
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.2 }}
+            >
+              <PlanComparisonTable
+                plans={displayPlans}
+                currentPlanCode={currentPlan?.code || ""}
+                onSelectPlan={handleSelectPlan}
                 loading={isMutating}
-                spotlight={displayPlans.length === 1}
               />
-            ))}
-          </div>
-        </div>
+            </motion.div>
+          </TabsContent>
 
-        {/* Billing History */}
-        <BillingHistory
-          invoices={billingInfo?.subscription ? mockInvoices : []}
-          loading={false}
-        />
+          {/* TAB 3: History */}
+          <TabsContent value="history">
+            <motion.div
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.2 }}
+            >
+              <BillingHistory
+                invoices={billingInfo?.subscription ? mockInvoices : []}
+                loading={false}
+              />
+            </motion.div>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppShell>
   )
