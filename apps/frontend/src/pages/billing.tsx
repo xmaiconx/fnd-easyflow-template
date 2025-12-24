@@ -1,14 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 import { AppShell } from "@/components/layout/app-shell"
 import { PageHeader } from "@/components/layout/page-header"
 import { CurrentPlanCard } from "@/components/features/billing/current-plan-card"
 import { PlanCard } from "@/components/features/billing/plan-card"
 import { BillingHistory, type Invoice } from "@/components/features/billing/billing-history"
+import { usePlans, useCurrentBillingInfo, useCreateCheckout, useCreatePortal } from "@/hooks/use-billing"
+import { useAuthStore } from "@/stores/auth-store"
+import type { BillingPlan } from "@/types"
 
-interface Plan {
+interface DisplayPlan {
   id: string
   code: string
   name: string
@@ -16,137 +19,82 @@ interface Plan {
   features: string[]
 }
 
-interface Subscription {
-  id: string
-  status: "active" | "canceled" | "past_due"
-  currentPeriodEnd: string
+function transformPlanToDisplay(plan: BillingPlan): DisplayPlan {
+  const displayFeatures = plan.features.display?.displayFeatures || []
+  const features = displayFeatures.length > 0
+    ? displayFeatures.map((f) => f.text)
+    : [
+        `${plan.features.limits.workspaces === -1 ? 'Ilimitados' : plan.features.limits.workspaces} workspace${plan.features.limits.workspaces !== 1 ? 's' : ''}`,
+        `Até ${plan.features.limits.usersPerWorkspace === -1 ? 'ilimitados' : plan.features.limits.usersPerWorkspace} usuários por workspace`,
+      ]
+
+  return {
+    id: plan.code,
+    code: plan.code,
+    name: plan.name,
+    price: plan.price?.amount || 0,
+    features,
+  }
 }
 
-// Mock Data
-const mockPlans: Plan[] = [
-  {
-    id: "1",
-    code: "free",
-    name: "Free",
-    price: 0,
-    features: [
-      "1 workspace",
-      "Até 5 usuários",
-      "Suporte básico por email",
-      "1 GB de armazenamento",
-    ],
-  },
-  {
-    id: "2",
-    code: "pro",
-    name: "Pro",
-    price: 29,
-    features: [
-      "5 workspaces",
-      "Até 20 usuários",
-      "Suporte prioritário",
-      "Analytics avançado",
-      "10 GB de armazenamento",
-      "Integrações premium",
-    ],
-  },
-  {
-    id: "3",
-    code: "enterprise",
-    name: "Enterprise",
-    price: 99,
-    features: [
-      "Workspaces ilimitados",
-      "Usuários ilimitados",
-      "Suporte 24/7",
-      "Integrações customizadas",
-      "SLA garantido",
-      "100 GB de armazenamento",
-      "Gerente de conta dedicado",
-      "Treinamento personalizado",
-    ],
-  },
-]
-
-const mockInvoices: Invoice[] = [
-  {
-    id: "1",
-    date: "2025-12-01T00:00:00Z",
-    amount: 29,
-    status: "paid",
-    invoiceUrl: "#",
-  },
-  {
-    id: "2",
-    date: "2025-11-01T00:00:00Z",
-    amount: 29,
-    status: "paid",
-    invoiceUrl: "#",
-  },
-  {
-    id: "3",
-    date: "2025-10-01T00:00:00Z",
-    amount: 29,
-    status: "paid",
-    invoiceUrl: "#",
-  },
-]
-
 export default function BillingPage() {
-  const [loading, setLoading] = React.useState(false)
-  const [currentPlanId, setCurrentPlanId] = React.useState("1") // Free plan by default
+  const currentWorkspace = useAuthStore((state) => state.currentWorkspace)
+  const { data: plans, isLoading: plansLoading } = usePlans()
+  const { data: billingInfo, isLoading: billingLoading } = useCurrentBillingInfo()
+  const createCheckout = useCreateCheckout()
+  const createPortal = useCreatePortal()
 
-  // Mock current subscription
-  const currentPlan = mockPlans.find((p) => p.id === currentPlanId) || mockPlans[0]
-  const subscription: Subscription | undefined =
-    currentPlanId !== "1"
-      ? {
-          id: "sub_1",
-          status: "active",
-          currentPeriodEnd: "2026-01-21T00:00:00Z",
-        }
-      : undefined
-
-  const handleSelectPlan = async (plan: Plan) => {
-    setLoading(true)
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Mock: Create checkout session or change plan
-      toast.success(`Redirecionando para checkout do plano ${plan.name}...`, {
-        description: "Você será redirecionado para o Stripe em instantes.",
+  const displayPlans: DisplayPlan[] = React.useMemo(() => {
+    if (!plans) return []
+    return plans
+      .map(transformPlanToDisplay)
+      .sort((a, b) => {
+        const order = { free: 0, pro: 1, enterprise: 2 }
+        return (order[a.code as keyof typeof order] ?? 99) - (order[b.code as keyof typeof order] ?? 99)
       })
+  }, [plans])
 
-      // In real app: window.location.href = checkoutUrl
-      setCurrentPlanId(plan.id)
-    } catch (error) {
-      toast.error("Erro ao processar solicitação", {
-        description: "Tente novamente em alguns instantes.",
-      })
-    } finally {
-      setLoading(false)
+  const currentPlan = React.useMemo(() => {
+    if (!billingInfo) return displayPlans[0]
+    return displayPlans.find((p) => p.code === billingInfo.plan.code) || displayPlans[0]
+  }, [billingInfo, displayPlans])
+
+  const subscription = React.useMemo(() => {
+    if (!billingInfo?.subscription) return undefined
+    return {
+      id: 'current',
+      status: billingInfo.subscription.status as 'active' | 'canceled' | 'past_due',
+      currentPeriodEnd: billingInfo.subscription.currentPeriodEnd,
     }
+  }, [billingInfo])
+
+  const handleSelectPlan = async (plan: DisplayPlan) => {
+    if (!currentWorkspace) return
+    createCheckout.mutate({
+      workspaceId: currentWorkspace.id,
+      planCode: plan.code,
+    })
   }
 
   const handleManageSubscription = async () => {
-    setLoading(true)
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+    if (!currentWorkspace) return
+    createPortal.mutate(currentWorkspace.id)
+  }
 
-      toast.success("Redirecionando para portal de gerenciamento...", {
-        description: "Você será redirecionado para o portal do Stripe.",
-      })
+  const isLoading = plansLoading || billingLoading
+  const isMutating = createCheckout.isPending || createPortal.isPending
 
-      // In real app: window.location.href = portalUrl
-    } catch (error) {
-      toast.error("Erro ao abrir portal", {
-        description: "Tente novamente em alguns instantes.",
-      })
-    } finally {
-      setLoading(false)
-    }
+  // Mock invoices (seria integrado com API de invoices futuramente)
+  const mockInvoices: Invoice[] = []
+
+  if (isLoading) {
+    return (
+      <AppShell currentPath="/admin/billing" breadcrumb={["Administração", "Assinatura"]}>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppShell>
+    )
   }
 
   return (
@@ -158,24 +106,26 @@ export default function BillingPage() {
         />
 
         {/* Current Plan */}
-        <CurrentPlanCard
-          plan={currentPlan}
-          subscription={subscription}
-          onManage={handleManageSubscription}
-        />
+        {currentPlan && (
+          <CurrentPlanCard
+            plan={currentPlan}
+            subscription={subscription}
+            onManage={handleManageSubscription}
+          />
+        )}
 
         {/* Available Plans */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Planos Disponíveis</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {mockPlans.map((plan) => (
+            {displayPlans.map((plan) => (
               <PlanCard
                 key={plan.id}
                 plan={plan}
-                isCurrent={plan.id === currentPlanId}
+                isCurrent={plan.code === currentPlan?.code}
                 isRecommended={plan.code === "pro"}
                 onSelect={handleSelectPlan}
-                loading={loading}
+                loading={isMutating}
               />
             ))}
           </div>
@@ -183,7 +133,7 @@ export default function BillingPage() {
 
         {/* Billing History */}
         <BillingHistory
-          invoices={currentPlanId !== "1" ? mockInvoices : []}
+          invoices={billingInfo?.subscription ? mockInvoices : []}
           loading={false}
         />
       </div>

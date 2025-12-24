@@ -17,7 +17,7 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "migrate:latest": "cd libs/app-database && npx knex migrate:latest",
+    "migrate": "cd libs/app-database && npx knex migrate:latest",
     "migrate:rollback": "cd libs/app-database && npx knex migrate:rollback",
     "seed:run": "cd libs/app-database && npx knex seed:run",
     "test:infra:start": "node .claude/scripts/start-test-infra.js",

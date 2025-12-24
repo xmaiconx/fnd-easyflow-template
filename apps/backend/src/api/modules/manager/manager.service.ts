@@ -14,6 +14,8 @@ import {
   GrowthMetricsDto,
   RetentionMetricsDto,
   AtRiskMetricsDto,
+  SearchAccountsDto,
+  AccountSearchItemDto,
 } from './dtos';
 import { ILoggerService } from '@fnd/backend';
 
@@ -159,6 +161,74 @@ export class ManagerService {
       })),
       activeSessions,
     };
+  }
+
+  /**
+   * Search accounts by name or owner email
+   * Returns accounts with owner email and subscription status
+   */
+  async searchAccounts(filters: SearchAccountsDto): Promise<AccountSearchItemDto[]> {
+    const { search, limit = 10 } = filters;
+
+    this.logger.info('Searching accounts', {
+      operation: 'manager.search_accounts',
+      module: 'ManagerService',
+      search,
+    });
+
+    // Build query to get accounts with owner email
+    let query = this.db
+      .selectFrom('accounts')
+      .innerJoin('users', (join) =>
+        join
+          .onRef('users.account_id', '=', 'accounts.id')
+      )
+      .leftJoin('subscriptions', (join) =>
+        join
+          .onRef('subscriptions.account_id', '=', 'accounts.id')
+          .on('subscriptions.status', 'in', ['active', 'trial'])
+      )
+      .select([
+        'accounts.id',
+        'accounts.name',
+        'accounts.status',
+        'accounts.created_at',
+        'users.email as ownerEmail',
+        sql<boolean>`CASE WHEN subscriptions.id IS NOT NULL THEN true ELSE false END`.as('hasActiveSubscription'),
+      ])
+      .where('accounts.status', '=', 'active')
+      .groupBy([
+        'accounts.id',
+        'accounts.name',
+        'accounts.status',
+        'accounts.created_at',
+        'users.email',
+        'subscriptions.id',
+      ]);
+
+    // Apply search filter
+    if (search && search.length >= 2) {
+      query = query.where((eb) =>
+        eb.or([
+          eb('accounts.name', 'ilike', `%${search}%`),
+          eb('users.email', 'ilike', `%${search}%`),
+        ])
+      );
+    }
+
+    const results = await query
+      .orderBy('accounts.name', 'asc')
+      .limit(limit)
+      .execute();
+
+    return results.map((row) => ({
+      id: row.id,
+      name: row.name,
+      ownerEmail: row.ownerEmail,
+      status: row.status as any,
+      hasActiveSubscription: row.hasActiveSubscription,
+      createdAt: row.created_at,
+    }));
   }
 
   /**

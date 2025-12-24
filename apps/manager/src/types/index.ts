@@ -199,3 +199,151 @@ export interface AtRiskMetrics {
   }
   accounts: AtRiskAccount[]
 }
+
+// ===== Plan & Subscription DTOs =====
+
+// Plan types
+export interface PlanDisplayFeature {
+  text: string
+  icon?: string | null
+  tooltip?: string | null
+  highlight?: boolean
+}
+
+export interface PlanDisplay {
+  badge?: 'popular' | 'new' | 'best-value' | null
+  displayOrder: number
+  highlighted: boolean
+  ctaText: string
+  ctaVariant: 'default' | 'outline' | 'secondary'
+  comparisonLabel?: string | null
+  displayFeatures: PlanDisplayFeature[]
+}
+
+export interface PlanFeatures {
+  limits: {
+    workspaces: number
+    usersPerWorkspace: number
+    storage: number
+  }
+  flags: {
+    analytics: boolean
+    customBranding: boolean
+    apiAccess: boolean
+    prioritySupport: boolean
+  }
+  display: PlanDisplay
+}
+
+export interface PlanPrice {
+  id: string
+  planId: string
+  amount: number
+  currency: string
+  interval: 'monthly' | 'yearly'
+  stripePriceId?: string | null
+  isCurrent: boolean
+  createdAt: string
+}
+
+export interface ManagerPlan {
+  id: string
+  code: string
+  name: string
+  description: string
+  features: PlanFeatures
+  isActive: boolean
+  stripeProductId?: string | null
+  prices: PlanPrice[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ManagerSubscription {
+  id: string
+  accountId: string
+  workspaceId: string
+  planPriceId: string
+  status: 'active' | 'canceled' | 'past_due' | 'trial'
+  currentPeriodStart: string
+  currentPeriodEnd: string
+  canceledAt?: string | null
+  plan: ManagerPlan
+  account?: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
+export interface StripeProduct {
+  id: string
+  name: string
+  description?: string | null
+}
+
+export interface StripePrice {
+  id: string
+  productId: string
+  amount: number
+  currency: string
+  interval: 'month' | 'year'
+}
+
+// Input types
+export interface CreatePlanInput {
+  code: string
+  name: string
+  description: string
+  features: PlanFeatures
+}
+
+export interface UpdatePlanInput {
+  name?: string
+  description?: string
+  features?: PlanFeatures
+}
+
+export interface CreatePlanPriceInput {
+  amount: number
+  currency: string
+  interval: 'monthly' | 'yearly'
+  stripePriceId?: string
+}
+
+export interface ExtendAccessInput {
+  days: number
+  reason: string
+}
+
+export interface GrantTrialInput {
+  accountId: string
+  planId: string
+  days: number
+  reason: string
+}
+
+export interface ManualUpgradeInput {
+  newPlanPriceId: string
+  reason: string
+}
+
+export interface ManualCancelInput {
+  reason: string
+}
+
+export interface ListSubscriptionsFilters {
+  status?: string
+  accountId?: string
+  planId?: string
+}
+
+// Account Search
+export interface AccountSearchItem {
+  id: string
+  name: string
+  ownerEmail: string
+  status: EntityStatus
+  hasActiveSubscription: boolean
+  createdAt: string
+}

@@ -116,6 +116,75 @@ export interface PlanPrice {
   stripeId: string
 }
 
+// Billing Plan (from API)
+export interface BillingPlanPrice {
+  amount: number
+  currency: string
+  interval: string
+}
+
+export interface PlanLimits {
+  workspaces: number
+  usersPerWorkspace: number
+}
+
+export interface PlanDisplayFeature {
+  text: string
+  icon?: string | null
+  tooltip?: string | null
+  highlight?: boolean
+}
+
+export interface PlanDisplay {
+  badge?: 'popular' | 'new' | 'best-value' | null
+  displayOrder: number
+  highlighted: boolean
+  ctaText: string
+  ctaVariant: 'default' | 'outline' | 'secondary'
+  comparisonLabel?: string | null
+  displayFeatures: PlanDisplayFeature[]
+}
+
+export interface PlanFeatures {
+  limits: PlanLimits
+  flags: Record<string, boolean>
+  display?: PlanDisplay
+}
+
+export interface BillingPlan {
+  code: string
+  name: string
+  description: string
+  price: BillingPlanPrice | null
+  features: PlanFeatures
+}
+
+// Billing Info (from workspace billing endpoint)
+export interface BillingPlanInfo {
+  code: string
+  name: string
+  features: PlanFeatures
+}
+
+export interface BillingSubscriptionInfo {
+  status: 'active' | 'canceled' | 'past_due' | 'trialing'
+  currentPeriodEnd: string
+  cancelAtPeriodEnd: boolean
+}
+
+export interface BillingUsageInfo {
+  workspacesUsed: number
+  workspacesLimit: number
+  usersInWorkspace: number
+  usersLimit: number
+}
+
+export interface BillingInfo {
+  plan: BillingPlanInfo
+  subscription: BillingSubscriptionInfo | null
+  usage: BillingUsageInfo
+}
+
 // Subscription types
 export interface Subscription {
   id: string

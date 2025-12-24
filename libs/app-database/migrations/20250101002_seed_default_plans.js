@@ -25,7 +25,20 @@ exports.up = async function(knex) {
           workspaces: 1,
           usersPerWorkspace: 1
         },
-        flags: {}
+        flags: {},
+        display: {
+          badge: null,
+          displayOrder: 1,
+          highlighted: false,
+          ctaText: 'Começar Grátis',
+          ctaVariant: 'outline',
+          comparisonLabel: null,
+          displayFeatures: [
+            { text: '1 workspace', icon: null, tooltip: null, highlight: false },
+            { text: '1 usuário', icon: null, tooltip: null, highlight: false },
+            { text: 'Recursos básicos', icon: null, tooltip: null, highlight: false }
+          ]
+        }
       })
     },
     {
@@ -40,7 +53,21 @@ exports.up = async function(knex) {
           workspaces: 3,
           usersPerWorkspace: 5
         },
-        flags: {}
+        flags: {},
+        display: {
+          badge: 'popular',
+          displayOrder: 2,
+          highlighted: true,
+          ctaText: 'Começar Agora',
+          ctaVariant: 'default',
+          comparisonLabel: 'Mais Popular',
+          displayFeatures: [
+            { text: '3 workspaces', icon: null, tooltip: null, highlight: false },
+            { text: 'Até 5 usuários por workspace', icon: null, tooltip: null, highlight: false },
+            { text: 'Suporte por email', icon: null, tooltip: null, highlight: true },
+            { text: 'Integrações básicas', icon: null, tooltip: null, highlight: false }
+          ]
+        }
       })
     },
     {
@@ -55,7 +82,22 @@ exports.up = async function(knex) {
           workspaces: 10,
           usersPerWorkspace: 20
         },
-        flags: {}
+        flags: {},
+        display: {
+          badge: 'best-value',
+          displayOrder: 3,
+          highlighted: false,
+          ctaText: 'Escalar Negócio',
+          ctaVariant: 'default',
+          comparisonLabel: 'Melhor Custo-Benefício',
+          displayFeatures: [
+            { text: '10 workspaces', icon: null, tooltip: null, highlight: false },
+            { text: 'Até 20 usuários por workspace', icon: null, tooltip: null, highlight: false },
+            { text: 'Suporte prioritário', icon: null, tooltip: null, highlight: true },
+            { text: 'Todas as integrações', icon: null, tooltip: null, highlight: true },
+            { text: 'Analytics avançado', icon: null, tooltip: null, highlight: true }
+          ]
+        }
       })
     }
   ]);

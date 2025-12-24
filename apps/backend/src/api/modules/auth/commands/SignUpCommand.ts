@@ -145,13 +145,17 @@ export class SignUpCommandHandler implements ICommandHandler<any> {
       status: EntityStatus.ACTIVE,
     });
 
-    // Add user to workspaces
-    for (const workspaceId of workspaceIds) {
-      await this.workspaceUserRepository.addUserToWorkspace({
-        workspaceId,
-        userId: user.id,
-        role: userRole,
-      });
+    // Add user to workspaces (super-admins are cross-tenant, so no workspace assignment)
+    if (userRole !== UserRole.SUPER_ADMIN) {
+      for (const workspaceId of workspaceIds) {
+        // Map account-level roles to workspace roles
+        const workspaceRole = userRole === UserRole.OWNER ? 'owner' : 'member';
+        await this.workspaceUserRepository.addUserToWorkspace({
+          workspaceId,
+          userId: user.id,
+          role: workspaceRole,
+        });
+      }
     }
 
     // If invite signup, create session and return tokens for auto-login

@@ -12,6 +12,7 @@ import { AuthModule } from '../auth/auth.module';
   controllers: [BillingController],
   providers: [
     BillingService,
+    StripeService, // Provide directly for injection
     {
       provide: 'IStripeService',
       useClass: StripeService,
@@ -23,6 +24,6 @@ import { AuthModule } from '../auth/auth.module';
     StripeWebhookService,
     PlanService, // Also provide directly for internal use
   ],
-  exports: ['IPlanService', PlanService],
+  exports: ['IStripeService', 'IPlanService', PlanService, StripeService],
 })
 export class BillingModule {}

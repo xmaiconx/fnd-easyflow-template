@@ -12,6 +12,8 @@ import { MetricsPage } from './pages/metrics'
 import { OverviewPage } from './pages/metrics/overview'
 import { FinancialPage } from './pages/metrics/financial'
 import { CustomersPage } from './pages/metrics/customers'
+import { PlansPage } from './pages/plans'
+import { SubscriptionsPage } from './pages/subscriptions'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +62,8 @@ function App() {
             <Route path="metrics/overview" element={<OverviewPage />} />
             <Route path="metrics/financial" element={<FinancialPage />} />
             <Route path="metrics/customers" element={<CustomersPage />} />
+            <Route path="plans" element={<PlansPage />} />
+            <Route path="subscriptions" element={<SubscriptionsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/users" replace />} />

@@ -30,7 +30,8 @@ export class WorkspaceService {
       onboardingStatus: OnboardingStatus.PENDING,
     });
 
-    // Add creator as owner
+    // Add creator as owner to workspace
+    // Note: role is hardcoded as 'owner' here, which is valid for workspace-level assignments
     await this.workspaceUserRepository.addUserToWorkspace({
       workspaceId: workspace.id,
       userId: createdBy,

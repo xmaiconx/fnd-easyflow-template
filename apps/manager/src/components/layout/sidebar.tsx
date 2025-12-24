@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Users, LayoutDashboard, DollarSign, UserCheck, ChevronLeft, ChevronRight, Shield } from 'lucide-react'
+import { Users, LayoutDashboard, DollarSign, UserCheck, ChevronLeft, ChevronRight, Shield, Layers, CreditCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/stores/ui-store'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,20 @@ const navItems = [
     label: 'Clientes',
     href: '/metrics/customers',
     icon: UserCheck,
+  },
+  {
+    type: 'separator',
+    label: 'Billing',
+  },
+  {
+    label: 'Planos',
+    href: '/plans',
+    icon: Layers,
+  },
+  {
+    label: 'Assinaturas',
+    href: '/subscriptions',
+    icon: CreditCard,
   },
 ]
 

@@ -80,4 +80,23 @@ export class StripeService implements IStripeService {
       throw new Error(`Webhook signature verification failed: ${err.message}`);
     }
   }
+
+  async listProducts(): Promise<any[]> {
+    const products = await this.stripe.products.list({
+      active: true,
+      limit: 100,
+    });
+
+    return products.data;
+  }
+
+  async listPrices(productId: string): Promise<any[]> {
+    const prices = await this.stripe.prices.list({
+      product: productId,
+      active: true,
+      limit: 100,
+    });
+
+    return prices.data;
+  }
 }

@@ -8,6 +8,7 @@ export interface SubscriptionTable {
   stripe_subscription_id: string;
   stripe_customer_id: string;
   status: string;
+  current_period_start: Date | null;
   current_period_end: Date | null;
   canceled_at: Date | null;
   created_at: Generated<Date>;
