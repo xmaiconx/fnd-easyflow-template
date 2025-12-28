@@ -2,7 +2,7 @@
 
 ## About
 
-Template base para alunos do **Fábrica de Negócios Digitais (FND)** iniciarem a construção de seus SaaS utilizando IA. Monorepo com NestJS + React + PostgreSQL + Supabase Auth.
+Template base para alunos do **Fábrica de Negócios Digitais (FND)** iniciarem a construção de seus SaaS utilizando IA. Monorepo com NestJS + React + PostgreSQL.
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ npm run dev                    # API + Frontend parallel
 
 > Seção otimizada para consumo por IA. Formato token-efficient.
 
-**Generated:** 2025-12-22 | **Type:** Monorepo
+**Generated:** 2025-12-28 | **Type:** Monorepo
 
 ### Stack
 {"pkg":"npm","build":"turbo","ts":"5.0+ strict"}
@@ -43,19 +43,19 @@ domain → interfaces → database → api
 {"identified":["CQRS","Repository","DI","EventDriven","CleanArchitecture","HybridExecution"]}
 {"conventions":{"files":"kebab-case","classes":"PascalCase","interfaces":"I+PascalCase","dbColumns":"snake_case","variables":"camelCase","packages":"@fnd/[name]"}}
 {"naming":{"dtos":"[Action][Entity]Dto","commands":"[Action][Subject]Command","events":"[Subject][PastAction]Event","handlers":"[Command|Event]Handler","tables":"[Entity]Table"}}
-{"diTokens":{"ILoggerService":"WinstonLoggerService","IEmailService":"ResendEmailService","IConfigurationService":"ConfigurationService","ISupabaseService":"SupabaseService","IQueueService":"BullMQQueueAdapter","IEventPublisher":"BullMQEventPublisher","DATABASE":"Kysely","REDIS_CONNECTION":"IORedis"}}
+{"diTokens":{"ILoggerService":"WinstonLoggerService","IEmailService":"ResendEmailService","IConfigurationService":"ConfigurationService","IQueueService":"BullMQQueueAdapter","IEventPublisher":"BullMQEventPublisher","DATABASE":"Kysely","REDIS_CONNECTION":"IORedis"}}
 
 ### Domain
 {"entitiesPath":"libs/domain/src/entities","entities":["Account","User","Workspace","WorkspaceUser","AuditLog","Plan","PlanPrice","Subscription","WebhookEvent","AuthToken","ImpersonateSession","LoginAttempt","Session","Invite"]}
-{"enumsPath":"libs/domain/src/enums","enums":[{"name":"EntityStatus","values":"active|inactive|deleted"},{"name":"UserRole","values":"owner|admin|member"},{"name":"OnboardingStatus","values":"pending|completed"},{"name":"PlanCode","values":"free|pro|enterprise"},{"name":"SubscriptionStatus","values":"active|canceled|past_due"},{"name":"WebhookStatus","values":"pending|processed|failed"},{"name":"WebhookType","values":"stripe|supabase"},{"name":"PaymentProvider","values":"stripe"},{"name":"InviteStatus","values":"pending|accepted|canceled|expired"}]}
+{"enumsPath":"libs/domain/src/enums","enums":[{"name":"EntityStatus","values":"active|inactive|deleted"},{"name":"UserRole","values":"owner|admin|member"},{"name":"OnboardingStatus","values":"pending|completed"},{"name":"PlanCode","values":"free|pro|enterprise"},{"name":"SubscriptionStatus","values":"active|canceled|past_due"},{"name":"WebhookStatus","values":"pending|processed|failed"},{"name":"WebhookType","values":"stripe"},{"name":"PaymentProvider","values":"stripe"},{"name":"InviteStatus","values":"pending|accepted|canceled|expired"}]}
 {"dtosPath":"apps/backend/src/api/modules/*/dtos","inputConvention":"[Action][Entity]Dto","responseConvention":"[Entity]ResponseDto"}
 
 ### Modules
 {"apiModules":"apps/backend/src/api/modules","modules":[{"name":"auth","features":"signup,signin,logout,refresh,password-recovery,email-verification,sessions"},{"name":"audit","features":"read-only logs"},{"name":"workspace","features":"multi-workspace,user-workspace relations,archive/restore"},{"name":"billing","features":"Stripe checkout,portal,plans,webhook"},{"name":"manager","features":"super-admin panel,impersonation,cross-tenant user management,plan management,subscription management,Stripe integration,business intelligence metrics"},{"name":"account-admin","features":"account admin panel,user/invite/session management"}]}
 
 ### API Routes
-{"globalPrefix":"/api/v1","prefixLocation":"apps/backend/src/main.api.ts:43"}
-{"routes":[{"module":"auth","prefix":"/auth","endpoints":["POST /signup","GET /invite/:token","POST /signin","POST /refresh","POST /logout","POST /forgot-password","POST /reset-password","POST /verify-email","POST /resend-verification","GET /me","PATCH /me","GET /sessions","DELETE /sessions/:id"]},{"module":"audit","prefix":"/audit-logs","endpoints":["GET /","GET /:id"]},{"module":"workspace","prefix":"/workspaces","endpoints":["POST /","GET /","GET /my","GET /:id","PATCH /:id","PATCH /:id/archive","PATCH /:id/restore","DELETE /:id","POST /:id/users","GET /:id/users","PATCH /:id/users/:userId/role","DELETE /:id/users/:userId"]},{"module":"billing","prefix":"/billing","endpoints":["POST /checkout","POST /portal","GET /workspace/:workspaceId","GET /plans","POST /webhook"]},{"module":"manager","prefix":"/manager","endpoints":["GET /users","GET /users/:id","PATCH /users/:id/status","POST /impersonate","DELETE /impersonate","GET /metrics","GET /metrics/overview","GET /metrics/financial/mrr-arr","GET /metrics/financial/revenue","GET /metrics/financial/churn","GET /metrics/customers/growth","GET /metrics/customers/retention","GET /metrics/customers/at-risk","GET /plans","GET /plans/:id","POST /plans","PATCH /plans/:id","PATCH /plans/:id/activate","PATCH /plans/:id/deactivate","POST /plans/:id/prices","PATCH /plans/:id/prices/:priceId","POST /plans/:id/link-stripe","GET /subscriptions","GET /subscriptions/:id","POST /subscriptions/:id/extend","POST /subscriptions/:id/upgrade","POST /subscriptions/:id/cancel","POST /subscriptions/grant-trial","GET /stripe/products","GET /stripe/products/:id/prices"]},{"module":"account-admin","prefix":"/admin","endpoints":["GET /users","GET /users/:id","PATCH /users/:id/role","PATCH /users/:id/status","GET /sessions","DELETE /sessions/:id","POST /sessions/:userId/revoke-all","GET /invites","POST /invites","PATCH /invites/:id/resend","DELETE /invites/:id","GET /audit-logs"]}]}
+{"globalPrefix":"/api/v1","prefixLocation":"apps/backend/src/api/main.ts:31"}
+{"routes":[{"module":"auth","prefix":"/auth","endpoints":["POST /signup","GET /invite/:token","POST /signin","POST /refresh","POST /logout","POST /forgot-password","POST /reset-password","POST /verify-email","POST /resend-verification","GET /me","PATCH /me","GET /sessions","DELETE /sessions/:id"]},{"module":"audit","prefix":"/audit-logs","endpoints":["GET /","GET /:id"]},{"module":"workspace","prefix":"/workspaces","endpoints":["POST /","GET /","GET /my","GET /:id","PATCH /:id","PATCH /:id/archive","PATCH /:id/restore","DELETE /:id","POST /:id/users","GET /:id/users","PATCH /:id/users/:userId/role","DELETE /:id/users/:userId"]},{"module":"billing","prefix":"/billing","endpoints":["POST /checkout","POST /portal","GET /workspace/:workspaceId","GET /plans","POST /webhook"]},{"module":"manager","prefix":"/manager","endpoints":["GET /users","GET /users/:id","GET /accounts/search","PATCH /users/:id/status","POST /impersonate","DELETE /impersonate","GET /metrics","GET /metrics/overview","GET /metrics/financial/mrr-arr","GET /metrics/financial/revenue","GET /metrics/financial/churn","GET /metrics/customers/growth","GET /metrics/customers/retention","GET /metrics/customers/at-risk","GET /plans","GET /plans/:id","POST /plans","PATCH /plans/:id","PATCH /plans/:id/activate","PATCH /plans/:id/deactivate","POST /plans/:id/prices","PATCH /plans/:id/prices/:priceId","POST /plans/:id/link-stripe","GET /subscriptions","GET /subscriptions/:id","POST /subscriptions/:id/extend","POST /subscriptions/:id/upgrade","POST /subscriptions/:id/cancel","POST /subscriptions/grant-trial","GET /stripe/products","GET /stripe/products/:id/prices"]},{"module":"account-admin","prefix":"/admin","endpoints":["GET /users","GET /users/:id","PATCH /users/:id/role","PATCH /users/:id/status","GET /sessions","DELETE /sessions/:id","POST /sessions/:userId/revoke-all","GET /invites","POST /invites","PATCH /invites/:id/resend","DELETE /invites/:id","GET /audit-logs"]}]}
 
 ### Config
 {"envAccess":"IConfigurationService (NUNCA process.env)","configFile":"apps/backend/src/shared/services/configuration.service.ts","envExample":".env.example"}
@@ -66,7 +66,7 @@ domain → interfaces → database → api
 {"auth":{"provider":"JWT+Passport","strategy":"JWT com accountId claim","guards":"apps/backend/src/api/guards","superAdmin":"SUPER_ADMIN_EMAIL cross-tenant","accountAdmin":"Owner/Admin role per account"}}
 
 ### Critical Files
-{"backendCore":["apps/backend/src/main.ts - Dispatcher NODE_MODE","apps/backend/src/main.api.ts - API entrypoint","apps/backend/src/main.hybrid.ts - Default entrypoint","apps/backend/src/local.ts - Dev server","apps/backend/src/shared/shared.module.ts - DI central"]}
+{"backendCore":["apps/backend/src/main.ts - Dispatcher NODE_MODE","apps/backend/src/api/main.ts - API entrypoint","apps/backend/src/main.hybrid.ts - Default entrypoint","apps/backend/src/local.ts - Dev server","apps/backend/src/shared/shared.module.ts - DI central"]}
 {"services":["apps/backend/src/shared/services/configuration.service.ts - Env access","apps/backend/src/shared/services/resend-email.service.ts - Email","apps/backend/src/shared/services/email-queue.service.ts - Email queue","apps/backend/src/shared/services/winston-logger.service.ts - Logging"]}
 {"workers":["apps/backend/src/workers/email.worker.ts - Email queue processor","apps/backend/src/workers/audit.worker.ts - Audit logs processor","apps/backend/src/workers/stripe-webhook.worker.ts - Stripe events"]}
 {"adapters":["apps/backend/src/shared/adapters/bullmq-queue.adapter.ts - IQueueService","apps/backend/src/shared/adapters/bullmq-event-publisher.adapter.ts - IEventPublisher"]}

@@ -31,25 +31,6 @@ if [ -z "$ENCRYPTION_KEY" ]; then
 fi
 echo "✓ ENCRYPTION_KEY configured"
 
-# Supabase Auth
-if [ -z "$SUPABASE_URL" ]; then
-  echo "ERROR: SUPABASE_URL is required"
-  exit 1
-fi
-echo "✓ SUPABASE_URL configured"
-
-if [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
-  echo "ERROR: SUPABASE_PUBLISHABLE_KEY is required"
-  exit 1
-fi
-echo "✓ SUPABASE_PUBLISHABLE_KEY configured"
-
-if [ -z "$SUPABASE_SECRET_KEY" ]; then
-  echo "ERROR: SUPABASE_SECRET_KEY is required"
-  exit 1
-fi
-echo "✓ SUPABASE_SECRET_KEY configured"
-
 echo ""
 echo "======================================"
 echo "Mode: ${NODE_MODE:-hybrid}"

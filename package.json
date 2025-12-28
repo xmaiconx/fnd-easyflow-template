@@ -30,7 +30,6 @@
     "@types/passport-local": "^1.0.38",
     "httpyac": "^6.16.7",
     "rimraf": "^5.0.0",
-    "supabase": "^2.66.0",
     "turbo": "^2.0.0",
     "typescript": "^5.0.0"
   },

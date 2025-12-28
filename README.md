@@ -11,7 +11,7 @@ O **FND MetaTemplate** é um template pronto para produção que permite aos alu
 Este template inclui:
 - ✅ Arquitetura limpa (Clean Architecture + CQRS)
 - ✅ Multi-tenancy completo (workspaces)
-- ✅ Autenticação via Supabase
+- ✅ Autenticação própria (JWT + Passport.js)
 - ✅ Sistema de billing com Stripe
 - ✅ Processamento assíncrono com BullMQ + Redis
 - ✅ Webhooks para integrações externas
@@ -24,9 +24,8 @@ Este template inclui:
 
 - Node.js 18+ e npm 9+
 - Docker & Docker Compose (para ambiente local)
-- PostgreSQL 15+ (ou Supabase)
+- PostgreSQL 15+
 - Redis 7+ (incluído no docker-compose)
-- Conta Supabase (para autenticação)
 - Conta Stripe (para billing)
 - Conta Resend (para emails)
 
@@ -65,20 +64,19 @@ cp apps/backend/.env.example apps/backend/.env
 
 Variáveis principais:
 ```bash
-# Database (Docker local ou Supabase)
+# Database
 DATABASE_URL=postgresql://fnd_user:fnd_pass@localhost:5432/fnd_easyflow
 
-# Redis (Docker local ou Railway)
+# Redis
 REDIS_URL=redis://localhost:6379
 
 # Node Mode
 NODE_MODE=hybrid  # api | workers | hybrid
 
-# Supabase Auth
-SUPABASE_URL=https://[project-ref].supabase.co
-SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-SUPABASE_SECRET_KEY=sb_secret_...
-SUPABASE_WEBHOOK_SECRET=your-webhook-secret
+# JWT Auth
+JWT_SECRET=your-jwt-secret-key
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
 
 # Stripe
 STRIPE_SECRET_KEY=sk_test_xxx
@@ -124,10 +122,10 @@ cd apps/frontend && npm run dev  # Frontend apenas
 
 ### Backend
 - **NestJS 10** - Framework Node.js com dependency injection
-- **PostgreSQL 15** - Banco de dados relacional (Supabase)
+- **PostgreSQL 15** - Banco de dados relacional
 - **Kysely** - Query builder type-safe
 - **BullMQ + Redis 7** - Job queue e cache para async jobs
-- **Supabase** - Autenticação e gerenciamento de usuários
+- **Passport.js + JWT** - Autenticação própria com refresh token rotation
 - **Stripe** - Pagamentos e assinaturas
 - **Winston** - Logging estruturado
 - **Railway** - Deploy Docker (backend)
@@ -201,7 +199,7 @@ Para detalhes técnicos completos sobre arquitetura, padrões e convenções, co
 
 1. **Customize o projeto:**
    - Altere o nome do projeto nos `package.json`
-   - Configure suas credenciais de serviços (Supabase, Stripe, Resend)
+   - Configure suas credenciais de serviços (Stripe, Resend)
    - Adapte o esquema do banco para seu domínio
 
 2. **Desenvolva novas features:**
@@ -218,7 +216,7 @@ Para detalhes técnicos completos sobre arquitetura, padrões e convenções, co
 
 - **Backend**: Railway (Docker container com API + Workers)
 - **Frontend**: Cloudflare Pages (static hosting)
-- **Database**: Supabase PostgreSQL
+- **Database**: PostgreSQL (Railway addon ou externo)
 - **Queue**: Redis (Railway addon ou externo)
 
 ### Railway (Backend)
@@ -242,13 +240,12 @@ O backend roda em modo `hybrid` por padrão (API + Workers BullMQ no mesmo conta
 ### Variáveis de Ambiente
 
 **Backend (Railway):**
-- `DATABASE_URL` - Supabase PostgreSQL
+- `DATABASE_URL` - PostgreSQL connection string
 - `REDIS_URL` - Redis connection string
 - `NODE_MODE` - `hybrid` (padrão) | `api` | `workers`
-- `SUPABASE_URL` - Supabase API
-- `SUPABASE_PUBLISHABLE_KEY`
-- `SUPABASE_SECRET_KEY`
-- `SUPABASE_WEBHOOK_SECRET`
+- `JWT_SECRET` - Secret para JWT tokens
+- `JWT_EXPIRES_IN` - Tempo de expiração do access token (ex: 15m)
+- `REFRESH_TOKEN_EXPIRES_IN` - Tempo de expiração do refresh token (ex: 7d)
 - `RESEND_API_KEY` - Resend
 - `STRIPE_SECRET_KEY` - Stripe
 - `STRIPE_WEBHOOK_SECRET`
@@ -259,8 +256,6 @@ O backend roda em modo `hybrid` por padrão (API + Workers BullMQ no mesmo conta
 - `LOG_LEVEL` - Log level (error, warn, info, debug)
 
 **Frontend (Cloudflare Pages):**
-- `VITE_SUPABASE_URL` - Supabase API
-- `VITE_SUPABASE_PUBLISHABLE_KEY` - Supabase publishable key
 - `VITE_API_URL` - URL da API em produção
 
 ## 🤝 Suporte

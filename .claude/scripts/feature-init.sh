@@ -240,7 +240,7 @@ if [ -f "package.json" ]; then
     grep -q "typeorm" package.json 2>/dev/null && echo "ORM: TypeORM"
 
     # Auth
-    grep -q "supabase" package.json 2>/dev/null && echo "AUTH: Supabase"
+    grep -q "passport" package.json 2>/dev/null && echo "AUTH: JWT+Passport"
 
     # Queue
     grep -q "bullmq" package.json 2>/dev/null && echo "QUEUE: BullMQ"
