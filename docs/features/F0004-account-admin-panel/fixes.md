@@ -170,7 +170,7 @@ Faltava:
 
 ### Template Implementado
 O template `getUserInviteTemplate()` inclui:
-- Subject: "Você foi convidado para participar de uma conta - Rugido Digital"
+- Subject: "Você foi convidado para participar de uma conta - FND Template"
 - HTML com botão de call-to-action para aceitar convite
 - Exibição da role traduzida (admin → Administrador, member → Membro, owner → Owner)
 - Data de expiração formatada em pt-BR (ex: "21 de dezembro de 2025, 10:30")

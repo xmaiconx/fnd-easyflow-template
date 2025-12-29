@@ -34,7 +34,7 @@ export async function api() {
   const port = configService.getApiPort();
 
   await app.listen(port);
-  console.log(`Rugido Digital API running on http://localhost:${port}/api/v1`);
+  console.log(`FND Template API running on http://localhost:${port}/api/v1`);
 
   // Log startup information including super-admin status
   const startupLogger = app.get(StartupLoggerService);

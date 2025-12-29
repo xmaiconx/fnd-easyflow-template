@@ -20,7 +20,7 @@ export class ConfigurationService implements IConfigurationService {
   }
 
   getResendFromEmail(): string {
-    return this.configService.get<string>('RESEND_FROM_EMAIL') || 'noreply@rugidodigital.com.br';
+    return this.configService.get<string>('RESEND_FROM_EMAIL') || 'noreply@example.com';
   }
 
   getApiPort(): number {

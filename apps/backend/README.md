@@ -1,6 +1,6 @@
-# Rugido Digital Backend
+# FND Template Backend
 
-Backend da aplicação Rugido Digital - Sistema de gestão para profissionais de saúde.
+Backend da aplicação FND Template - Sistema de gestão para profissionais de saúde.
 
 ## Estrutura
 
