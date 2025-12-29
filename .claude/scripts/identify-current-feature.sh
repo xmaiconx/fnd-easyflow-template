@@ -46,19 +46,35 @@ if [ -n "$FEATURE_ID" ] && [ -d "$FEATURE_DIR" ]; then
 
     # Core documents (order matters - represents workflow stages)
     echo ""
-    echo "# Core Documents"
-    [ -f "$FEATURE_DIR/about.md" ] && echo "HAS_ABOUT=true" || echo "HAS_ABOUT=false"
-    [ -f "$FEATURE_DIR/discovery.md" ] && echo "HAS_DISCOVERY=true" || echo "HAS_DISCOVERY=false"
-    [ -f "$FEATURE_DIR/design.md" ] && echo "HAS_DESIGN=true" || echo "HAS_DESIGN=false"
-    [ -f "$FEATURE_DIR/plan.md" ] && echo "HAS_PLAN=true" || echo "HAS_PLAN=false"
-    [ -f "$FEATURE_DIR/implementation.md" ] && echo "HAS_IMPLEMENTATION=true" || echo "HAS_IMPLEMENTATION=false"
-    [ -f "$FEATURE_DIR/review.md" ] && echo "HAS_REVIEW=true" || echo "HAS_REVIEW=false"
+    echo "# Core Documents (read these for context)"
+    [ -f "$FEATURE_DIR/about.md" ] && echo "ABOUT=$FEATURE_DIR/about.md"
+    [ -f "$FEATURE_DIR/discovery.md" ] && echo "DISCOVERY=$FEATURE_DIR/discovery.md"
+    [ -f "$FEATURE_DIR/design.md" ] && echo "DESIGN=$FEATURE_DIR/design.md"
+    [ -f "$FEATURE_DIR/plan.md" ] && echo "PLAN=$FEATURE_DIR/plan.md"
+    [ -f "$FEATURE_DIR/implementation.md" ] && echo "IMPLEMENTATION=$FEATURE_DIR/implementation.md"
+    [ -f "$FEATURE_DIR/review.md" ] && echo "REVIEW=$FEATURE_DIR/review.md"
 
     # Support documents
     echo ""
     echo "# Support Documents"
-    [ -f "$FEATURE_DIR/fixes.md" ] && echo "HAS_FIXES=true" || echo "HAS_FIXES=false"
-    [ -f "$FEATURE_DIR/git-pr.md" ] && echo "HAS_PR=true" || echo "HAS_PR=false"
+    [ -f "$FEATURE_DIR/fixes.md" ] && echo "FIXES=$FEATURE_DIR/fixes.md"
+    [ -f "$FEATURE_DIR/git-pr.md" ] && echo "PR=$FEATURE_DIR/git-pr.md"
+
+    # Planning documents by area (plan-[area].md)
+    echo ""
+    echo "# Planning Documents (read previous plans before continuing)"
+    PLAN_FILES=$(find "$FEATURE_DIR" -maxdepth 1 -type f -name "plan-*.md" 2>/dev/null | sort)
+    if [ -n "$PLAN_FILES" ]; then
+        echo "HAS_AREA_PLANS=true"
+        echo "AREA_PLANS=["
+        echo "$PLAN_FILES" | while read -r file; do
+            area_name=$(basename "$file" .md | sed 's/^plan-//')
+            echo "  {\"area\":\"$area_name\",\"path\":\"$file\"}"
+        done
+        echo "]"
+    else
+        echo "HAS_AREA_PLANS=false"
+    fi
 
     # Determine current phase
     echo ""
@@ -77,17 +93,6 @@ if [ -n "$FEATURE_ID" ] && [ -d "$FEATURE_DIR" ]; then
         PHASE="created"
     fi
     echo "CURRENT_PHASE=$PHASE"
-
-    # All files in feature directory (recursive)
-    echo ""
-    echo "# All Files"
-    echo "FILES=["
-    find "$FEATURE_DIR" -type f 2>/dev/null | sort | while read -r file; do
-        # Get relative path from feature dir
-        relative="${file#$FEATURE_DIR/}"
-        echo "  \"$relative\""
-    done
-    echo "]"
 
     # Test files specifically
     echo ""
@@ -150,16 +155,24 @@ echo "PROJECT_CONTEXT"
 echo "========================================"
 
 # Founder profile
-[ -f "docs/founder_profile.md" ] && echo "HAS_FOUNDER_PROFILE=true" || echo "HAS_FOUNDER_PROFILE=false"
+if [ -f "docs/founder_profile.md" ]; then
+    echo "FOUNDER_PROFILE_PATH=docs/founder_profile.md"
+else
+    echo "HAS_FOUNDER_PROFILE=false"
+fi
 
 # Product blueprint
-[ -f "docs/product.md" ] && echo "HAS_PRODUCT=true" || echo "HAS_PRODUCT=false"
+if [ -f "docs/product.md" ]; then
+    echo "PRODUCT_PATH=docs/product.md"
+else
+    echo "HAS_PRODUCT=false"
+fi
 
 # Architecture reference
 if [ -f "CLAUDE.md" ]; then
-    echo "ARCHITECTURE_REF=CLAUDE.md"
+    echo "ARCHITECTURE_PATH=CLAUDE.md"
 else
-    echo "ARCHITECTURE_REF=none"
+    echo "HAS_ARCHITECTURE=false"
 fi
 
 # =============================================================================
@@ -244,17 +257,18 @@ echo "TOTAL_CHANGES=$TOTAL"
 [ "$MODIFIED_COUNT" -gt 0 ] || [ "$STAGED_COUNT" -gt 0 ] && echo "HAS_UNCOMMITTED=true" || echo "HAS_UNCOMMITTED=false"
 
 # =============================================================================
-# ALL FEATURES (for context)
+# ALL FEATURES (for context) - Last 5 only
 # =============================================================================
 
 echo ""
 echo "========================================"
-echo "ALL_FEATURES"
+echo "LAST_5_FEATURES"
 echo "========================================"
 
 if [ -d "docs/features" ]; then
     echo "FEATURES=["
-    find "docs/features" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | while read -r dir; do
+    # Sort by feature number descending, take last 5
+    find "docs/features" -mindepth 1 -maxdepth 1 -type d -name "F*" 2>/dev/null | sort -r | head -5 | while read -r dir; do
         feature_name=$(basename "$dir")
         # Determine phase for each feature
         if [ -f "$dir/implementation.md" ]; then
@@ -272,7 +286,7 @@ if [ -d "docs/features" ]; then
     done
     echo "]"
 
-    # Count
+    # Count (total, not limited)
     FEATURE_COUNT=$(find "docs/features" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
     echo "FEATURE_COUNT=$FEATURE_COUNT"
 
@@ -289,6 +303,66 @@ else
     echo "FEATURES=[]"
     echo "FEATURE_COUNT=0"
     echo "NEXT_FEATURE_NUMBER=F0001"
+fi
+
+# =============================================================================
+# PACKAGES (Dynamic detection from package.json)
+# =============================================================================
+
+echo ""
+echo "========================================"
+echo "PACKAGES"
+echo "========================================"
+
+# Find all package.json in common monorepo directories
+for pkg_json in $(find apps libs packages src -maxdepth 2 -name "package.json" 2>/dev/null | sort); do
+    echo ""
+    echo "# $pkg_json"
+
+    # Extract name
+    pkg_name=$(grep -m1 '"name"' "$pkg_json" 2>/dev/null | sed 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+    echo "NAME=$pkg_name"
+    echo "PATH=$(dirname "$pkg_json")"
+
+    # Extract scripts node using awk (more reliable)
+    scripts_json=$(awk '
+        /"scripts"/ { found=1; braces=0 }
+        found {
+            for(i=1; i<=length($0); i++) {
+                c = substr($0, i, 1)
+                if(c == "{") braces++
+                if(c == "}") braces--
+                if(braces == 0 && c == "}") { found=0; print; exit }
+            }
+            print
+        }
+    ' "$pkg_json" 2>/dev/null | tr -d '\n' | sed 's/[[:space:]]\+/ /g' | sed 's/.*"scripts"[[:space:]]*:[[:space:]]*//')
+    if [ -n "$scripts_json" ]; then
+        echo "SCRIPTS=$scripts_json"
+    fi
+done
+
+# Root package.json
+if [ -f "package.json" ]; then
+    echo ""
+    echo "# ./package.json (root)"
+    echo "NAME=$(grep -m1 '"name"' package.json 2>/dev/null | sed 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')"
+    echo "PATH=."
+    scripts_json=$(awk '
+        /"scripts"/ { found=1; braces=0 }
+        found {
+            for(i=1; i<=length($0); i++) {
+                c = substr($0, i, 1)
+                if(c == "{") braces++
+                if(c == "}") braces--
+                if(braces == 0 && c == "}") { found=0; print; exit }
+            }
+            print
+        }
+    ' package.json 2>/dev/null | tr -d '\n' | sed 's/[[:space:]]\+/ /g' | sed 's/.*"scripts"[[:space:]]*:[[:space:]]*//')
+    if [ -n "$scripts_json" ]; then
+        echo "SCRIPTS=$scripts_json"
+    fi
 fi
 
 echo ""

@@ -138,84 +138,35 @@ Iniciando execução autônoma...
 ```
 description: "Plan feature ${FEATURE_ID}"
 prompt: |
-  You are executing the PLANNING phase for feature ${FEATURE_ID}.
+  You are the PLANNING agent for feature ${FEATURE_ID}.
 
-  ## MANDATORY: Check for Existing Planning Files FIRST
-  Before starting, check if any planning files already exist:
-  1. Execute: ls docs/features/${FEATURE_ID}/*.md
-  2. If plan-database.md exists: Read it (database planning already done)
-  3. If plan-backend.md exists: Read it (backend planning already done)
-  4. If plan-frontend.md exists: Read it (frontend planning already done)
+  ## CONTEXT (EXECUTE FIRST)
+  bash .claude/scripts/identify-current-feature.sh
+  Read ALL docs listed in output (ABOUT, DISCOVERY, DESIGN paths)
 
-  **NOTE:** Planning files are named WITHOUT dot prefix: plan-database.md, plan-backend.md, plan-frontend.md
+  ## COMMAND (SOURCE OF TRUTH)
+  Follow: .claude/commands/plan.md
+  This command contains ALL planning instructions and structure.
 
-  ## Instructions
-  Follow ALL instructions from: .claude/commands/plan.md
+  ## SKILLS (FOR EACH AREA IN SCOPE)
+  If Database scope: Read .claude/skills/database-development/SKILL.md
+  If Backend scope: Read .claude/skills/backend-development/SKILL.md
+  If Frontend scope: Read .claude/skills/frontend-development/SKILL.md + .claude/skills/ux-design/SKILL.md
 
-  ## PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
-  Execute BEFORE starting to write plan.md:
-  1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
-  2. Execute: cat .claude/skills/documentation-style/SKILL.md
-  3. Apply hybrid structure (human-readable + token-efficient) to plan.md
-  4. TodoWrite: Mark item as completed AFTER writing plan.md
+  ## AUTOPILOT RULES
+  - NO questions - choose RECOMMENDED options (⭐) automatically
+  - NO confirmations - proceed autonomously
+  - NO commits - just create plan.md
+  - KISS principle for all decisions
 
-  ## DESIGN SPECIFICATION (CRITICAL FOR FRONTEND)
-  Check if design.md exists:
-  ```bash
-  ls "docs/features/${FEATURE_ID}/design.md" 2>/dev/null
-  ```
-
-  **If design.md EXISTS:**
-  1. Read: docs/features/${FEATURE_ID}/design.md
-  2. Use design specs as SOURCE OF TRUTH for:
-     - Page/screen structure
-     - Component specifications (new vs existing)
-     - Mobile-first layout requirements
-     - States (loading, empty, error)
-  3. Reference design.md in plan.md for dev agents
-
-  **If design.md DOES NOT EXIST (frontend features):**
-  1. Load UX skill: .claude/skills/ux-design/SKILL.md
-  2. Use skill patterns as fallback
-  3. Note in plan: "Design specs: Using ux-design skill (no design.md)"
-
-  ## AUTOPILOT OVERRIDES (CRITICAL)
-  These rules OVERRIDE any conflicting instructions in plan.md:
-
-  1. **NO QUESTIONS:** Skip Phase 2 (Clarification Questions) entirely
-     - DO NOT present questions to the user
-     - For ALL decisions, automatically choose the RECOMMENDED option (⭐)
-     - Document your autonomous decisions in the plan
-
-  2. **NO CONFIRMATIONS:** Do not ask "Continue planning for feature X?"
-     - Just proceed automatically
-
-  3. **NO COMMITS:** Skip Phase 6 commit steps
-     - Do NOT run git add, git commit, git push
-     - Just create the plan.md file
-
-  4. **DECISION MAKING:** When you need to make a decision:
-     - Always choose the simplest option (KISS)
-     - Follow existing patterns in the codebase
-     - Use recommended options marked with ⭐
-     - Document your decision with brief justification
-
-  ## Context
-  - Feature ID: ${FEATURE_ID}
-  - Feature docs: docs/features/${FEATURE_ID}/
-  - Design specs: docs/features/${FEATURE_ID}/design.md (if exists)
-  - Architecture: CLAUDE.md
-
-  ## Output
+  ## OUTPUT
   Create: docs/features/${FEATURE_ID}/plan.md
-  Following the exact structure defined in .claude/commands/plan.md
 
-  ## Report Back
-  - Summary of the plan created
-  - Key technical decisions made autonomously
-  - Components identified for development
-  - Development phases defined
-  - Design reference used (design.md or ux-design skill)
+  ## REPORT
+  - Plan summary
+  - Technical decisions made
+  - Components identified per area
+  - Development phases and order
 ```
 
 ### Wait and Verify
@@ -241,126 +192,118 @@ Iniciando desenvolvimento...
 
 ## Phase 3: Development Subagents
 
-### Analyze Plan for Strategy
-
-Read `plan.md` and extract:
-1. Components to develop (Backend API, Workers, Frontend, Database)
-2. Development phases and order
-3. Dependencies between components
-
-### Parallelization Strategy
+### Strategy
 
 ```
-Dependency Order:
-Database → Backend API → [parallel: Workers, Frontend]
+Dependency Order: Database → Backend API → [parallel: Workers, Frontend]
 ```
 
-### Dispatch Development Subagents
+**CRITICAL:** Dispatch independent subagents in a SINGLE message (parallel execution).
 
-**Use Task tool with `subagent_type: "general-purpose"`**
-
-**CRITICAL:** When components are independent, dispatch ALL subagents in a SINGLE message (parallel execution).
+### Database Subagent
 
 ```
-description: "Develop ${AREA} for ${FEATURE_ID}"
+description: "Develop Database for ${FEATURE_ID}"
 prompt: |
-  You are executing the DEVELOPMENT phase for feature ${FEATURE_ID}.
-  Your scope: ${AREA}
+  You are the DATABASE developer for feature ${FEATURE_ID}.
 
-  ## MANDATORY: Read Planning Documentation FIRST
-  Before doing ANYTHING else, you MUST read these files:
-  1. Execute: ls docs/features/${FEATURE_ID}/*.md
-  2. Read docs/features/${FEATURE_ID}/plan.md (SOURCE OF TRUTH)
-  3. Read docs/features/${FEATURE_ID}/about.md
-  4. Read docs/features/${FEATURE_ID}/discovery.md
-  5. If your area is Backend: Check if plan-database.md exists and read it
-  6. If your area is Frontend: Check if plan-backend.md exists and read it for API contracts
+  ## CONTEXT (EXECUTE FIRST)
+  bash .claude/scripts/identify-current-feature.sh
+  Read docs: ABOUT, DISCOVERY, PLAN (from script output)
 
-  **DO NOT skip this step. These files contain ALL context needed for implementation.**
+  ## SKILL (MANDATORY)
+  Read: .claude/skills/database-development/SKILL.md
+  Follow: Entities, Kysely Types, Migrations, Repository patterns
+  Verify against: Checklist at end of skill
 
-  ## Instructions
-  Follow ALL instructions from: .claude/commands/dev.md
-  (The command includes PRE-DOCUMENTATION CHECKPOINT - follow it)
+  ## COMMAND
+  Follow: .claude/commands/dev.md
 
-  ## AUTOPILOT OVERRIDES (CRITICAL)
-  These rules OVERRIDE any conflicting instructions in dev.md:
+  ## TASK
+  Implement database layer from plan.md specs.
+  Use PACKAGES section from script to find build command.
 
-  1. **NO QUESTIONS:** Do not ask any questions
-     - Proceed with implementation based on plan.md
+  ## RULES
+  - 100% of plan.md database specs
+  - NO deferrals
+  - Build MUST pass
 
-  2. **NO CONFIRMATIONS:** Do not ask for scope confirmation
-     - Your scope is: ${AREA}
-     - Just implement it
-
-  3. **FOCUS ON YOUR SCOPE ONLY:**
-     - Only implement: ${AREA}
-     - Do NOT implement other areas
-     - Other subagents handle other areas
-
-  4. **BUILD MUST PASS:**
-     - Run the appropriate build command for your area
-     - Fix ALL errors before reporting back
-
-  ## UX Design Specification (FRONTEND ONLY - MANDATORY)
-  If your area is Frontend:
-
-  **STEP 1: Check for design.md (PRIMARY SOURCE)**
-  ```bash
-  ls "docs/features/${FEATURE_ID}/design.md" 2>/dev/null
-  ```
-
-  **If design.md EXISTS (PREFERRED):**
-  1. Read: docs/features/${FEATURE_ID}/design.md
-  2. Use design specs as SOURCE OF TRUTH for:
-     - Page/screen layouts
-     - Component structure (new vs existing)
-     - Mobile-first breakpoints
-     - States (loading, empty, error)
-     - Component locations and naming
-  3. Load skill for implementation details: .claude/skills/ux-design/SKILL.md
-
-  **If design.md DOES NOT EXIST (FALLBACK):**
-  1. FIRST, load the UX design skill: Read .claude/skills/ux-design/SKILL.md
-  2. Follow ALL patterns from the skill (mobile-first, shadcn, Tailwind v3, Motion, etc.)
-  3. Read: docs/design-system/foundations.md (if exists)
-
-  **STEP 2: Consult skill documentation as needed:**
-  - For shadcn components: Grep pattern="[component]" path=".claude/skills/ux-design/shadcn-docs.md"
-  - For Tailwind utilities: Grep pattern="[utility]" path=".claude/skills/ux-design/tailwind-v3-docs.md"
-  - For animations: Grep pattern="[pattern]" path=".claude/skills/ux-design/motion-dev-docs.md"
-  - For charts: Grep pattern="[chart]" path=".claude/skills/ux-design/recharts-docs.md"
-  - For tables: Grep pattern="[pattern]" path=".claude/skills/ux-design/tanstack-table-docs.md"
-
-  ## MANDATORY: Load Development Skills
-  Based on your area, read the corresponding skills BEFORE writing any code:
-
-  | Area | Skill | Key Patterns |
-  |------|-------|--------------|
-  | Backend API | `.claude/skills/backend-development/SKILL.md` | RESTful, IoC/DI, DTOs, CQRS |
-  | Database | `.claude/skills/database-development/SKILL.md` | Entities, Migrations, Kysely |
-  | Frontend | `.claude/skills/frontend-development/SKILL.md` | Hooks, State, Types, Forms |
-  | Frontend UI | `.claude/skills/ux-design/SKILL.md` | Mobile-first, shadcn, Tailwind v3 |
-
-  **Skills contain ALL standards** - do not implement without reading them first.
-
-  ## Context
-  - Feature ID: ${FEATURE_ID}
-  - Plan: docs/features/${FEATURE_ID}/plan.md (SOURCE OF TRUTH)
-  - Design: docs/features/${FEATURE_ID}/design.md (if exists - UX specs)
-  - Architecture: CLAUDE.md
-  - Your area: ${AREA}
-
-  ## Build Commands by Area
-  - Database: npm run build -w @fnd/database -w @fnd/domain
-  - Backend API: npm run build -w @fnd/api
-  - Workers: npm run build -w @fnd/api
-  - Frontend: npm run build -w @fnd/frontend
-
-  ## Report Back
+  ## REPORT
   - Files created/modified
-  - Implementation summary
-  - Build status (MUST be passing)
-  - Skills used and patterns followed
+  - Verification checklist (✅/❌ per spec item)
+  - Build status
+```
+
+### Backend Subagent
+
+```
+description: "Develop Backend for ${FEATURE_ID}"
+prompt: |
+  You are the BACKEND developer for feature ${FEATURE_ID}.
+
+  ## CONTEXT (EXECUTE FIRST)
+  bash .claude/scripts/identify-current-feature.sh
+  Read docs: ABOUT, DISCOVERY, PLAN (from script output)
+
+  ## SKILL (MANDATORY)
+  Read: .claude/skills/backend-development/SKILL.md
+  Follow: Clean Arch, RESTful, IoC/DI, DTOs, CQRS patterns
+  Verify against: Checklist at end of skill
+
+  ## COMMAND
+  Follow: .claude/commands/dev.md
+
+  ## TASK
+  Implement backend API from plan.md specs.
+  Use PACKAGES section from script to find build command.
+
+  ## RULES
+  - 100% of plan.md backend specs
+  - NO deferrals
+  - Build MUST pass
+
+  ## REPORT
+  - Files created/modified
+  - Verification checklist (✅/❌ per spec item)
+  - Build status
+```
+
+### Frontend Subagent
+
+```
+description: "Develop Frontend for ${FEATURE_ID}"
+prompt: |
+  You are the FRONTEND developer for feature ${FEATURE_ID}.
+
+  ## CONTEXT (EXECUTE FIRST)
+  bash .claude/scripts/identify-current-feature.sh
+  Read docs: ABOUT, DISCOVERY, PLAN, DESIGN (from script output)
+  DESIGN is MANDATORY - contains component specs
+
+  ## SKILLS (MANDATORY - BOTH)
+  1. Read: .claude/skills/frontend-development/SKILL.md
+     Follow: Types, Hooks, State, Forms, Pages, Routing
+  2. Read: .claude/skills/ux-design/SKILL.md
+     Follow: Mobile-first, shadcn, Tailwind v3, Motion
+
+  ## COMMAND
+  Follow: .claude/commands/dev.md
+
+  ## TASK
+  Implement frontend from plan.md + design.md specs.
+  design.md = COMPLETE SPEC (every component listed MUST be implemented)
+  Use PACKAGES section from script to find build command.
+
+  ## RULES
+  - 100% of design.md components (every single one)
+  - 100% of plan.md frontend specs
+  - NO deferrals - complexity is NOT an excuse
+  - Build MUST pass
+
+  ## REPORT
+  - Files created/modified
+  - Verification checklist (✅/❌ per component from design.md)
+  - Build status
 ```
 
 ### Wait for All Development Subagents
@@ -419,77 +362,44 @@ Iniciando code review...
 ```
 description: "Review feature ${FEATURE_ID}"
 prompt: |
-  You are executing the REVIEW phase for feature ${FEATURE_ID}.
+  You are the CODE REVIEWER for feature ${FEATURE_ID}.
 
-  ## STEP 1: IDENTIFY ALL CHANGED FILES (MANDATORY)
+  ## CONTEXT (EXECUTE FIRST)
+  bash .claude/scripts/identify-current-feature.sh
+  Read ALL docs listed in output (ABOUT, DISCOVERY, PLAN, DESIGN, IMPLEMENTATION)
 
-  **FIRST**, run the detection script to get ALL files modified in the branch:
-
-  ```bash
+  ## FILES TO REVIEW
   bash .claude/scripts/detect-project-state.sh --branch-changes
-  ```
+  Review ALL files in FILES_TO_REVIEW output
 
-  This returns:
-  - COMMITTED_FILES - Files already committed on the branch
-  - STAGED_FILES - Files ready to commit
-  - UNSTAGED_FILES - Modified but not staged
-  - UNTRACKED_FILES - New files not tracked
-  - FILES_TO_REVIEW - Consolidated list of ALL files to review
-  - CHANGES_BY_AREA - Statistics by directory
+  ## SKILLS (MANDATORY)
+  Read: .claude/skills/code-review/SKILL.md
+  Read: .claude/skills/documentation-style/SKILL.md (for review.md format)
 
-  **CRITICAL:** Review ALL files in FILES_TO_REVIEW, not just implementation.md mentions.
+  ## COMMAND
+  Follow: .claude/commands/review.md
 
-  ## STEP 2: PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
-  Execute BEFORE running code-review:
-  1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
-  2. Execute: cat .claude/skills/documentation-style/SKILL.md
-  3. Apply hybrid structure (human-readable + token-efficient) to review.md
-  4. TodoWrite: Mark item as completed AFTER writing review.md
+  ## VERIFICATION (CRITICAL)
+  Create checklist from plan.md + design.md:
+  - List ALL components/endpoints/entities specified
+  - Mark ✅ if implemented, ❌ if missing
+  - ❌ items = CRITICAL contract violation
 
-  ## STEP 3: Load Code Review Skill and Execute
+  ## RULES
+  - NO questions - proceed automatically
+  - AUTO-FIX all issues found
+  - Missing components = CRITICAL
+  - Build MUST pass after fixes
 
-  **MANDATORY:** Load skill BEFORE reviewing:
-  ```bash
-  cat .claude/skills/code-review/SKILL.md
-  ```
-
-  Then execute ALL phases from: .claude/commands/review.md
-
-  The code-review skill references:
-  - `.claude/skills/backend-development/SKILL.md` - RESTful, IoC, CQRS patterns
-  - `.claude/skills/database-development/SKILL.md` - Kysely, Migrations patterns
-  - `.claude/skills/security-audit/SKILL.md` - OWASP, Multi-tenancy patterns
-
-  ## AUTOPILOT OVERRIDES (CRITICAL)
-
-  1. **NO QUESTIONS:** Do not ask any questions
-     - Proceed with review automatically
-
-  2. **AUTO-FIX ALL ISSUES:**
-     - Fix ALL violations automatically
-     - Contract violations are CRITICAL
-     - Runtime errors are CRITICAL
-
-  3. **BUILD MUST PASS:**
-     - After fixes, verify build passes
-     - If not, fix remaining issues
-
-  ## Context
-  - Feature ID: ${FEATURE_ID}
-  - Plan: docs/features/${FEATURE_ID}/plan.md
-  - Architecture: CLAUDE.md
-  - Files to Review: Output from detect-project-state.sh --branch-changes
-
-  ## Output
+  ## OUTPUT
   Create: docs/features/${FEATURE_ID}/review.md
-  Following the exact structure from .claude/commands/review.md
 
-  ## Report Back
-  - Total files reviewed (from script output)
-  - Issues found and fixed (count by category)
-  - Skills validated (backend, database, frontend)
+  ## REPORT
+  - Files reviewed count
+  - Issues found/fixed by category
+  - Verification checklist (✅/❌)
   - Final score
-  - Build status (MUST be passing)
+  - Build status
 ```
 
 ### Wait and Verify
@@ -528,73 +438,48 @@ Gerando documentação...
 ```
 description: "Document feature ${FEATURE_ID}"
 prompt: |
-  You are a **Documentation Specialist** creating implementation documentation for feature ${FEATURE_ID}.
+  You are the DOCUMENTATION agent for feature ${FEATURE_ID}.
 
-  ## PRE-DOCUMENTATION CHECKPOINT (MANDATORY)
-  Execute BEFORE starting to write implementation.md:
-  1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
-  2. Execute: cat .claude/skills/documentation-style/SKILL.md
-  3. Apply hybrid structure (human-readable + token-efficient) to implementation.md
-  4. TodoWrite: Mark item as completed AFTER writing implementation.md
+  ## CONTEXT (EXECUTE FIRST)
+  bash .claude/scripts/identify-current-feature.sh
+  Read ALL docs listed in output (ABOUT, DISCOVERY, PLAN, DESIGN, REVIEW)
 
-  ## Instructions
-  Follow the documentation format from: .claude/commands/dev.md (Phase 5: Documentation section)
-
-  ## CRITICAL: LEAN DOCUMENTATION
-  Create CONCISE documentation. NO verbose descriptions.
-
-  ## Context to Gather
-  1. Read docs/features/${FEATURE_ID}/plan.md - What was planned
-  2. Read docs/features/${FEATURE_ID}/review.md - What was reviewed/fixed
-  3. Use git diff to identify ALL files created/modified/deleted
-
-  ## Commands to Run
-  ```bash
-  # Get all changed files
+  ## FILES CHANGED
   git status --porcelain
-
-  # Get diff summary
   git diff --stat
-  ```
 
-  ## Output Format
+  ## SKILL (MANDATORY)
+  Read: .claude/skills/documentation-style/SKILL.md
+  Apply hybrid format (human-readable + token-efficient)
+
+  ## OUTPUT
   Create: docs/features/${FEATURE_ID}/implementation.md
 
-  Follow this EXACT structure (from dev.md):
-
-  ```markdown
+  ## FORMAT
   # Implementation: [Feature Name]
-
-  **Date:** [current date]
-  **Developer:** Claude Code
+  **Date:** [date] | **Developer:** Claude Code
 
   ## Files Created
-  - `[path]` - [~20 word description]
+  - `[path]` - [~20 words]
 
   ## Files Modified
-  - `[path]` - [~20 word description]
-
-  ## Files Deleted
-  - `[path]` - [~20 word reason]
+  - `[path]` - [~20 words]
 
   ## Build Status
-  - [x] Backend compiles successfully
-  - [x] Frontend compiles successfully
+  - [x] Backend/Frontend compiles
 
   ## Notes
-  [Important notes, deviations from plan, decisions made - keep brief]
-  ```
+  [Brief deviations/decisions]
 
-  ## Rules
-  - ~20 words MAX per file description
+  ## RULES
+  - ~20 words MAX per file
   - NO verbose explanations
   - NO code snippets
-  - Focus on WHAT was done, not HOW
-  - List ALL files changed (use git status)
+  - WHAT was done, not HOW
 
-  ## Report Back
+  ## REPORT
   - implementation.md created
-  - Total files: created/modified/deleted counts
+  - Files: created/modified/deleted counts
 ```
 
 ### Verify Documentation Created
