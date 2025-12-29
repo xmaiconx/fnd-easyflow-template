@@ -9,6 +9,8 @@ Execute plan by dispatching fresh subagent per task, with code review after each
 
 **Core principle:** Fresh subagent per task + review between tasks = high quality, fast iteration
 
+**NEW (v2):** Uses Prompt Builder pattern - coordinator processes context and delivers digested information to subagents.
+
 ## Overview
 
 **vs. Executing Plans (parallel session):**
@@ -27,163 +29,382 @@ Execute plan by dispatching fresh subagent per task, with code review after each
 - Tasks are tightly coupled (manual execution better)
 - Plan needs revision (brainstorm first)
 
+---
+
+## The Prompt Builder Pattern
+
+**CRITICAL:** All subagent prompts MUST follow this structure:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    SUBAGENT PROMPT TEMPLATE                     │
+├─────────────────────────────────────────────────────────────────┤
+│  ## ROLE                                                        │
+│  You are the [AREA] [agent type] for task [N].                  │
+│                                                                 │
+│  ## CONTEXT DIGEST (pre-processed by coordinator)               │
+│  [Compact summary - NO file reading needed]                     │
+│                                                                 │
+│  ## DECISION LOG (from previous tasks)                          │
+│  [Accumulated decisions from earlier subagents]                 │
+│                                                                 │
+│  ## SKILLS                                                      │
+│  MANDATORY: [always for this area]                              │
+│  ADDITIONAL: [detected from context]                            │
+│                                                                 │
+│  ## REFERENCE FILES (pre-identified)                            │
+│  [Table with exact paths and lines]                             │
+│                                                                 │
+│  ## COORDINATOR NOTES                                           │
+│  [Decisions, warnings, patterns to follow/avoid]                │
+│                                                                 │
+│  ## TASK                                                        │
+│  [Specific deliverables for this subagent]                      │
+│                                                                 │
+│  ## REPORT FORMAT                                               │
+│  [What to return to coordinator]                                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## The Process
 
-### 1. Load Plan
+### 1. Load Plan + Initialize Decision Log
 
-Read plan file, create TodoWrite with all tasks.
+Read plan file, create TodoWrite with all tasks, initialize decision log:
 
-### 2. Execute Task with Subagent
+```markdown
+### DECISION LOG
+<!-- Coordinator maintains, updates after each task -->
 
-For each task:
+#### Session Start
+- Plan: [plan-file location]
+- Tasks: [count]
+- Working directory: [path]
+```
 
-**Dispatch fresh subagent:**
+### 2. Pre-Process Context (Coordinator's Job)
+
+Before dispatching ANY subagent, the coordinator MUST:
+
+1. **Create Context Digest** - Summary of plan/requirements (~30-50 lines)
+2. **Identify References** - Find similar files in codebase
+3. **Compose Skills** - Determine mandatory + additional skills
+4. **Write Coordinator Notes** - Specific guidance for this task
+
+```bash
+# Use reference discovery script
+bash .claude/scripts/discover-references.sh --scope backend,frontend
+```
+
+### 3. Execute Task with Subagent
+
+For each task, dispatch with PROCESSED context:
+
 ```
 Task tool (general-purpose):
   description: "Implement Task N: [task name]"
   prompt: |
+    ## ROLE
     You are implementing Task N from [plan-file].
 
-    Read that task carefully. Your job is to:
-    1. Implement exactly what the task specifies
-    2. Write tests (following TDD if task says to)
-    3. Verify implementation works
-    4. Commit your work
-    5. Report back
+    ## CONTEXT DIGEST (DO NOT re-read files)
+    [Pre-processed summary created by coordinator]
 
-    Work from: [directory]
+    ## DECISION LOG (from previous tasks)
+    [Accumulated decisions - what was already done]
 
-    Report: What you implemented, what you tested, test results, files changed, any issues
+    ## SKILLS
+    MANDATORY:
+    - [skill for this area]
+
+    ADDITIONAL (detected):
+    - [extra skills if needed]
+
+    ## REFERENCE FILES
+    | Pattern | Path | Notes |
+    |---------|------|-------|
+    | [type] | [path] | [why useful] |
+
+    ## COORDINATOR NOTES
+    - [Specific guidance]
+    - [Warnings/patterns to avoid]
+    - [Dependencies from previous tasks]
+
+    ## TASK
+    [Specific deliverables from plan]
+
+    ## REPORT FORMAT
+    Return:
+    1. FILES_CREATED: [list]
+    2. FILES_MODIFIED: [list]
+    3. BUILD_STATUS: [pass/fail]
+    4. DECISIONS_MADE: [list]
+    5. ISSUES_ENCOUNTERED: [if any]
 ```
 
-**Subagent reports back** with summary of work.
+### 4. Update Decision Log
 
-### 3. Review Subagent's Work
+**After subagent returns**, update the decision log:
 
-**Dispatch code-reviewer subagent:**
-```
-Task tool (superpowers:code-reviewer):
-  Use template at requesting-code-review/code-reviewer.md
-
-  WHAT_WAS_IMPLEMENTED: [from subagent's report]
-  PLAN_OR_REQUIREMENTS: Task N from [plan-file]
-  BASE_SHA: [commit before task]
-  HEAD_SHA: [current commit]
-  DESCRIPTION: [task summary]
+```markdown
+#### Task N: [task name]
+- FILES_CREATED: [list]
+- FILES_MODIFIED: [list]
+- DECISIONS_MADE: [from subagent report]
+- STATUS: completed
 ```
 
-**Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment
+### 5. Review Subagent's Work
 
-### 4. Apply Review Feedback
+**Dispatch code-reviewer subagent with accumulated context:**
+
+```
+Task tool (general-purpose):
+  description: "Review Task N: [task name]"
+  prompt: |
+    ## ROLE
+    You are reviewing Task N implementation.
+
+    ## DECISION LOG (full)
+    [All decisions up to this point]
+
+    ## FILES TO REVIEW
+    [From task N report - FILES_CREATED + FILES_MODIFIED]
+
+    ## SKILLS
+    - .claude/skills/code-review/SKILL.md
+
+    ## COORDINATOR NOTES
+    - Verify implementation matches plan specifications
+    - Check for IoC registration (providers, exports)
+    - Validate multi-tenancy patterns
+
+    ## TASK
+    1. Read all changed files
+    2. Validate against plan
+    3. Check skill patterns
+    4. AUTO-FIX issues found
+    5. Report findings
+
+    ## REPORT FORMAT
+    Return:
+    1. ISSUES_FOUND: [list with severity]
+    2. ISSUES_FIXED: [list]
+    3. BUILD_STATUS: [pass/fail]
+    4. SCORE: [X/10]
+```
+
+### 6. Apply Review Feedback
 
 **If issues found:**
-- Fix Critical issues immediately
+- Fix Critical issues immediately (dispatch fix subagent)
 - Fix Important issues before next task
-- Note Minor issues
+- Note Minor issues in decision log
 
-**Dispatch follow-up subagent if needed:**
+**Fix subagent prompt includes:**
 ```
-"Fix issues from code review: [list issues]"
+## DECISION LOG
+[Full log including review findings]
+
+## ISSUES TO FIX
+[From review report]
+
+## COORDINATOR NOTES
+- Review found [N] issues
+- Priority: [Critical first]
 ```
 
-### 5. Mark Complete, Next Task
+### 7. Mark Complete, Next Task
 
 - Mark task as completed in TodoWrite
+- Update Decision Log with final status
 - Move to next task
-- Repeat steps 2-5
+- Repeat steps 3-6
 
-### 6. Final Review
+### 8. Final Review
 
-After all tasks complete, dispatch final code-reviewer:
-- Reviews entire implementation
-- Checks all plan requirements met
-- Validates overall architecture
+After all tasks complete, dispatch final code-reviewer with COMPLETE decision log:
 
-### 7. Complete Development
+```
+## FULL DECISION LOG
+[All tasks, all decisions, all files]
 
-After final review passes:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+## VERIFICATION CHECKLIST
+[From plan - what should exist]
+
+## TASK
+- Review entire implementation
+- Verify all plan requirements met
+- Check overall architecture
+- Final build verification
+```
+
+---
 
 ## Example Workflow
 
 ```
-You: I'm using Subagent-Driven Development to execute this plan.
+You: I'm using Subagent-Driven Development with Prompt Builder pattern.
 
-[Load plan, create TodoWrite]
+[Load plan, create TodoWrite, initialize Decision Log]
 
-Task 1: Hook installation script
+=== Task 1: Hook installation script ===
 
-[Dispatch implementation subagent]
-Subagent: Implemented install-hook with tests, 5/5 passing
+[Pre-process: create context digest, find references]
 
-[Get git SHAs, dispatch code-reviewer]
-Reviewer: Strengths: Good test coverage. Issues: None. Ready.
+[Dispatch subagent with processed context]
+Subagent:
+  FILES_CREATED: [scripts/install-hook.sh]
+  DECISIONS_MADE: [Used POSIX sh for compatibility]
+  BUILD_STATUS: pass
+
+[Update Decision Log with Task 1 results]
+
+[Dispatch review subagent with full decision log]
+Reviewer: Strengths: Good coverage. Issues: None. Score: 9/10
 
 [Mark Task 1 complete]
 
-Task 2: Recovery modes
+=== Task 2: Recovery modes ===
 
-[Dispatch implementation subagent]
-Subagent: Added verify/repair, 8/8 tests passing
+[Pre-process with updated decision log]
 
-[Dispatch code-reviewer]
-Reviewer: Strengths: Solid. Issues (Important): Missing progress reporting
+[Dispatch subagent - receives Task 1 decisions]
+Subagent:
+  FILES_CREATED: [src/recovery.ts]
+  DECISIONS_MADE: [Added verify/repair modes]
+  BUILD_STATUS: pass
 
-[Dispatch fix subagent]
-Fix subagent: Added progress every 100 conversations
+[Dispatch review subagent]
+Reviewer: Issues (Important): Missing progress reporting
 
-[Verify fix, mark Task 2 complete]
+[Dispatch fix subagent with review findings]
+Fix subagent: Added progress every 100 items
+
+[Update Decision Log, mark Task 2 complete]
 
 ...
 
-[After all tasks]
-[Dispatch final code-reviewer]
+[After all tasks - Final review with complete decision log]
 Final reviewer: All requirements met, ready to merge
 
 Done!
 ```
 
+---
+
+## Context Digest Template
+
+When creating context digest for subagents:
+
+```markdown
+### CONTEXT DIGEST
+
+#### Plan Summary
+- Feature: [name/ID]
+- Goal: [2-3 sentences]
+- Total Tasks: [N]
+- Current Task: [N of M]
+
+#### Task Details
+[Relevant section from plan for this specific task]
+
+#### Dependencies
+- Requires: [what must exist before this task]
+- Provides: [what this task creates for later tasks]
+
+#### Technical Constraints
+- [From plan/architecture]
+```
+
+---
+
+## Decision Log Structure
+
+Maintain throughout session:
+
+```markdown
+### DECISION LOG
+
+#### Session Info
+- Plan: [location]
+- Started: [timestamp]
+- Working Directory: [path]
+
+#### Task 1: [name]
+- Status: completed
+- Files Created: [list]
+- Files Modified: [list]
+- Decisions: [list]
+- Review Score: [X/10]
+
+#### Task 2: [name]
+- Status: in_progress
+- Depends On: Task 1 (entities created)
+- ...
+
+#### Accumulated Decisions
+- [Decision 1 from Task 1]
+- [Decision 2 from Task 2]
+- ...
+```
+
+---
+
 ## Advantages
 
 **vs. Manual execution:**
-- Subagents follow TDD naturally
-- Fresh context per task (no confusion)
-- Parallel-safe (subagents don't interfere)
+- Subagents receive processed context (no re-discovery)
+- Decision log propagates knowledge
+- Reference files pre-identified
+- Coordinator notes provide intelligent guidance
 
-**vs. Executing Plans:**
-- Same session (no handoff)
-- Continuous progress (no waiting)
-- Review checkpoints automatic
+**vs. Old Pattern (file paths):**
+- Subagents don't waste time reading docs
+- Coordinator can inject specific warnings
+- Better skill composition (detects what's needed)
+- References are exact (not "find similar")
 
 **Cost:**
-- More subagent invocations
-- But catches issues early (cheaper than debugging later)
+- Coordinator does more upfront work
+- But subagents are faster and more accurate
+
+---
 
 ## Red Flags
 
 **Never:**
+- Skip pre-processing context
+- Pass file paths instead of content digest
+- Forget to update decision log
 - Skip code review between tasks
 - Proceed with unfixed Critical issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
-- Implement without reading plan task
 
 **If subagent fails task:**
-- Dispatch fix subagent with specific instructions
+- Add failure to decision log
+- Dispatch fix subagent with full context
 - Don't try to fix manually (context pollution)
+
+---
 
 ## Integration
 
-**Required workflow skills:**
-- **writing-plans** - REQUIRED: Creates the plan that this skill executes
-- **requesting-code-review** - REQUIRED: Review after each task (see Step 3)
-- **finishing-a-development-branch** - REQUIRED: Complete development after all tasks (see Step 7)
+**Required patterns:**
+- **Prompt Builder** - All prompts use modular structure
+- **Decision Log** - Maintained throughout session
+- **Context Digest** - Pre-processed for every subagent
 
-**Subagents must use:**
-- **test-driven-development** - Subagents follow TDD for each task
+**Reference scripts:**
+- `bash .claude/scripts/discover-references.sh` - Find similar files
+- `bash .claude/scripts/identify-current-feature.sh` - Get feature context
 
-**Alternative workflow:**
-- **executing-plans** - Use for parallel session instead of same-session execution
+**Skills to compose:**
+- Backend: `.claude/skills/backend-development/SKILL.md`
+- Database: `.claude/skills/database-development/SKILL.md`
+- Frontend: `.claude/skills/frontend-development/SKILL.md` + `.claude/skills/ux-design/SKILL.md`
+- Review: `.claude/skills/code-review/SKILL.md`
 
-See code-reviewer template: requesting-code-review/code-reviewer.md
+See also: `.claude/commands/autopilot.md` for full autonomous workflow
