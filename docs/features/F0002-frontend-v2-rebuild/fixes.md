@@ -55,25 +55,24 @@ Histórico de correções de bugs da feature F0002. Cada fix documenta causa rai
 
 ---
 
-## Fix 004 - Renomeação do Projeto: FND EasyFlow → FND MetaTemplate
+## Fix 004 - Renomeação do Projeto: FND EasyFlow → FND QuickLaunch
 
 **Date:** 2025-12-21 | **Fixed By:** Claude Code
 
 ### Bug
-{"expected":"Nome do projeto como FND MetaTemplate em todo o codebase","actual":"Nome antigo 'FND EasyFlow' aparecia em 60+ arquivos (docs, configs, código, UI)","impact":"Branding inconsistente"}
+{"expected":"Nome do projeto como FND QuickLaunch em todo o codebase","actual":"Nome antigo 'FND EasyFlow' e 'FND MetaTemplate' apareciam em 60+ arquivos (docs, configs, código, UI)","impact":"Branding inconsistente"}
 
 ### Root Cause
-{"reason":"Projeto foi iniciado com nome FND EasyFlow e nunca foi renomeado para o novo branding"}
+{"reason":"Projeto foi iniciado com nome FND EasyFlow, renomeado para MetaTemplate, e finalmente para QuickLaunch"}
 
 ### Fix Applied
-{"categories":[{"name":"Documentação","files":["CLAUDE.md","README.md","docs/design-system/foundations.md","docs/setup/supabase-auth-setup.md","infra/README.md","apps/frontend/README.md","apps/frontend_v2/README.md"]},{"name":"Configuração","files":["package.json (root)","apps/frontend/package.json","apps/backend/package.json","apps/manager/package.json","infra/docker-compose.yml","infra/docker-compose.test.yml","apps/backend/.env.example","supabase/config.toml"]},{"name":"Backend Code","files":["apps/backend/src/main.ts","apps/backend/src/api/modules/auth/services/token.service.ts","apps/backend/src/api/modules/auth/strategies/jwt.strategy.ts","apps/backend/docker-entrypoint.sh"]},{"name":"Frontend Code","files":["apps/frontend/index.html","apps/frontend/src/lib/constants.ts","apps/frontend/src/stores/auth-store.ts"]},{"name":"Frontend V2 Code","files":["apps/frontend_v2/index.html","apps/frontend_v2/src/stores/auth-store.ts","apps/frontend_v2/src/stores/ui-store.ts","apps/frontend_v2/src/lib/api.ts","apps/frontend_v2/src/components/layout/sidebar.tsx","apps/frontend_v2/src/components/layout/mobile-header.tsx","apps/frontend_v2/src/components/layout/auth-layout.tsx"]}],"changes":[{"from":"FND EasyFlow","to":"FND MetaTemplate"},{"from":"fnd-easyflow","to":"fnd-metatemplate"},{"from":"fnd_easyflow","to":"fnd_metatemplate"}]}
+{"categories":[{"name":"Documentação","files":["CLAUDE.md","README.md","docs/design-system/foundations.md","infra/README.md","apps/frontend/README.md"]},{"name":"Configuração","files":["package.json (root)","apps/backend/package.json","infra/docker-compose.test.yml","apps/backend/.env.example"]},{"name":"Backend Code","files":["apps/backend/src/main.ts","apps/backend/src/api/modules/auth/services/token.service.ts","apps/backend/src/api/modules/auth/strategies/jwt.strategy.ts","apps/backend/docker-entrypoint.sh"]},{"name":"Frontend Code","files":["apps/frontend/index.html","apps/frontend/src/stores/auth-store.ts","apps/frontend/src/stores/ui-store.ts","apps/frontend/src/lib/api.ts","apps/frontend/src/components/layout/sidebar.tsx","apps/frontend/src/components/layout/mobile-header.tsx","apps/frontend/src/components/layout/auth-layout.tsx"]}],"changes":[{"from":"FND MetaTemplate","to":"FND QuickLaunch"},{"from":"fnd-metatemplate","to":"fnd-quicklaunch"},{"from":"fnd_metatemplate","to":"fnd_quicklaunch"}]}
 
 ### Verification
-{"build":"✓ PASS 11.67s (7 packages)","errors":0,"warnings":"1 (chunk size, não relacionado)"}
+{"build":"✓ PASS","errors":0}
 
 ### Status
 - [x] Bug resolved
-- [x] Build passes 100%
 - [x] Todas as referências atualizadas
 - [x] JWT issuer/audience atualizados
 - [x] LocalStorage keys atualizados

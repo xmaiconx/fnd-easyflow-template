@@ -26,8 +26,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.getJwtSecret(),
-      issuer: 'fnd-metatemplate',
-      audience: 'fnd-metatemplate-api',
+      issuer: 'fnd-quicklaunch',
+      audience: 'fnd-quicklaunch-api',
     });
   }
 

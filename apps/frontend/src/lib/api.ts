@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { useErrorModalStore } from '@/stores/error-modal-store'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1'
-const AUTH_STORAGE_KEY = 'fnd-metatemplate-auth-v2'
+const AUTH_STORAGE_KEY = 'fnd-quicklaunch-auth-v2'
 
 // Create axios instance for regular API calls
 export const api = axios.create({

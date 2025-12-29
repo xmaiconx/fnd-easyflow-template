@@ -1,7 +1,7 @@
 {
   "name": "@fnd/api",
   "version": "1.0.0",
-  "description": "Backend API para FND MetaTemplate",
+  "description": "Backend API para FND QuickLaunch",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc --build",

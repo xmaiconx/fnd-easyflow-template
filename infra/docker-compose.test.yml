@@ -16,7 +16,7 @@ services:
     image: postgres:15-alpine
     container_name: fnd-postgres-test
     environment:
-      POSTGRES_DB: fnd_metatemplate_test
+      POSTGRES_DB: fnd_quicklaunch_test
       POSTGRES_USER: fnd_test
       POSTGRES_PASSWORD: fnd_test_pass
     ports:
@@ -24,7 +24,7 @@ services:
     networks:
       - fnd-test
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U fnd_test -d fnd_metatemplate_test']
+      test: ['CMD-SHELL', 'pg_isready -U fnd_test -d fnd_quicklaunch_test']
       interval: 2s
       timeout: 5s
       retries: 10

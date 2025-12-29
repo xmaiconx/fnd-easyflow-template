@@ -59,7 +59,7 @@ export const useUIStore = create<UIState>()(
         }),
     }),
     {
-      name: 'fnd-metatemplate-ui-v2',
+      name: 'fnd-quicklaunch-ui-v2',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         theme: state.theme,
@@ -71,7 +71,7 @@ export const useUIStore = create<UIState>()(
 
 // Initialize theme on module load
 const initTheme = () => {
-  const store = localStorage.getItem('fnd-metatemplate-ui-v2')
+  const store = localStorage.getItem('fnd-quicklaunch-ui-v2')
   if (store) {
     try {
       const parsed = JSON.parse(store)
@@ -99,7 +99,7 @@ if (typeof window !== 'undefined') {
   initTheme()
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    const store = localStorage.getItem('fnd-metatemplate-ui-v2')
+    const store = localStorage.getItem('fnd-quicklaunch-ui-v2')
     if (store) {
       try {
         const parsed = JSON.parse(store)

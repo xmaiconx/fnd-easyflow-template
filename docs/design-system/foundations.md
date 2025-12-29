@@ -1,4 +1,4 @@
-# FND MetaTemplate - Design System Foundations
+# FND QuickLaunch - Design System Foundations
 
 Design System para aplicações SaaS modernas. Mobile-first como princípio central: todo design começa em 320px e escala para cima. Inspirado nos templates premium do Envato (Metronic, Vuexy, Trezo) com foco em dark mode como experiência primária, microinteractions sutis e interfaces data-driven.
 

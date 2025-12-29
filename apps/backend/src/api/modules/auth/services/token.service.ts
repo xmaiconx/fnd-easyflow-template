@@ -35,8 +35,8 @@ export class TokenService {
 
     return jwt.sign(payload, this.configService.getJwtSecret(), {
       expiresIn: '15m',
-      issuer: 'fnd-metatemplate',
-      audience: 'fnd-metatemplate-api',
+      issuer: 'fnd-quicklaunch',
+      audience: 'fnd-quicklaunch-api',
     });
   }
 
@@ -56,8 +56,8 @@ export class TokenService {
   verifyAccessToken(token: string): JwtPayload | null {
     try {
       const decoded = jwt.verify(token, this.configService.getJwtSecret(), {
-        issuer: 'fnd-easyflow',
-        audience: 'fnd-easyflow-api',
+        issuer: 'fnd-quicklaunch',
+        audience: 'fnd-quicklaunch-api',
       }) as JwtPayload;
 
       return decoded;

@@ -2,7 +2,7 @@
 set -e
 
 echo "======================================"
-echo "FND MetaTemplate - Docker Entrypoint"
+echo "FND QuickLaunch - Docker Entrypoint"
 echo "======================================"
 
 # ========================================

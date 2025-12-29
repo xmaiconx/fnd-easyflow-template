@@ -1,7 +1,7 @@
 {
-  "name": "fnd-metatemplate",
+  "name": "fnd-quicklaunch",
   "version": "1.0.0",
-  "description": "Template base para alunos FND construírem SaaS com IA",
+  "description": "FND QuickLaunch - Template para alunos FND lançarem SaaS rapidamente",
   "private": true,
   "packageManager": "npm@9.0.0",
   "workspaces": [

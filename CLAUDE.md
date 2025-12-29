@@ -1,4 +1,4 @@
-# FND MetaTemplate - Development Guide
+# FND QuickLaunch - Development Guide
 
 ## About
 

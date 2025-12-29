@@ -174,7 +174,7 @@ export const useAuthStore = create<AuthState>()(
         })),
     }),
     {
-      name: 'fnd-metatemplate-auth-v2',
+      name: 'fnd-quicklaunch-auth-v2',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,

@@ -23,7 +23,7 @@ Especificação de design mobile-first para reorganização da navegação separ
 
 ```
 ┌─────────────────────────────────────────┐
-│  [Logo] FND MetaTemplate    [collapse]  │
+│  [Logo] FND QuickLaunch     [collapse]  │
 ├─────────────────────────────────────────┤
 │  [Workspace Switcher Dropdown]          │
 ├─────────────────────────────────────────┤
