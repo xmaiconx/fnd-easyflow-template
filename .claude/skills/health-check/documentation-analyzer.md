@@ -14,10 +14,9 @@
 
 Você é um subagente especializado em análise de documentação. Seu trabalho é verificar:
 1. Existência de CLAUDE.md
-2. Existência de technical-spec.md
-3. Conformidade com padrões de documentação
-4. Paths mencionados existem no projeto
-5. Documentação reflete estado atual (não aspiracional)
+2. Conformidade com padrões de documentação
+3. Paths mencionados existem no projeto
+4. Documentação reflete estado atual (não aspiracional)
 
 ---
 
@@ -28,7 +27,6 @@ Você é um subagente especializado em análise de documentação. Seu trabalho 
 ```bash
 # Documentação obrigatória
 ls CLAUDE.md 2>/dev/null
-ls docs/architecture/technical-spec.md 2>/dev/null
 
 # Documentação de features
 ls docs/features/ 2>/dev/null
@@ -43,7 +41,6 @@ ls .claude/skills/updating-claude-documentation/SKILL.md 2>/dev/null
 | Documento | Status | Criticidade |
 |-----------|--------|-------------|
 | CLAUDE.md | Existe/Não existe | 🔴 Crítico |
-| technical-spec.md | Existe/Não existe | 🔴 Crítico |
 | docs/features/* | Existe/Não existe | 🟡 Médio |
 
 ---
@@ -65,7 +62,6 @@ cat CLAUDE.md
 - [ ] Multi-Tenancy (se aplicável)
 - [ ] Database/Schema
 - [ ] Boas Práticas
-- [ ] Referência ao technical-spec.md
 
 **Verificar conformidade com skill:**
 ```bash
@@ -103,30 +99,7 @@ grep -oP '`[^`]+/`' CLAUDE.md 2>/dev/null | sort -u
 
 ---
 
-## Análise 4: Technical-Spec.md
-
-### Se Existe
-
-```bash
-cat docs/architecture/technical-spec.md
-```
-
-**Verificar:**
-- [ ] Detalhamento maior que CLAUDE.md
-- [ ] Stack com versões completas
-- [ ] Padrões arquiteturais detalhados
-- [ ] Convenções de código
-- [ ] Estrutura de pastas
-
-### Se NÃO Existe
-
-**Issue 🔴 Crítico:** technical-spec.md não existe
-
-**Recomendação:** Executar comando `/architecture` para gerar.
-
----
-
-## Análise 5: Documentação de Features
+## Análise 4: Documentação de Features
 
 ### Verificações
 
@@ -148,7 +121,7 @@ done
 
 ---
 
-## Análise 6: Consistência com Código
+## Análise 5: Consistência com Código
 
 ### Verificar se Documentação Reflete Realidade
 
@@ -195,7 +168,6 @@ ls libs/domain/src/entities/ 2>/dev/null
 | Documento | Status | Conformidade |
 |-----------|--------|--------------|
 | CLAUDE.md | ✅/❌ | [X%] |
-| technical-spec.md | ✅/❌ | [X%] |
 | docs/features/* | ✅/❌ | [X features documentadas] |
 
 ---
@@ -210,13 +182,7 @@ ls libs/domain/src/entities/ 2>/dev/null
 
 ---
 
-#### [DOC-002] technical-spec.md não existe
-**Impacto:** Detalhes técnicos não documentados, onboarding difícil
-**Correção:** Executar `/architecture` para gerar documento
-
----
-
-#### [DOC-003] Path inválido no CLAUDE.md
+#### [DOC-002] Path inválido no CLAUDE.md
 **Arquivo:** CLAUDE.md:45
 **Path mencionado:** `libs/shared/src/services/`
 **Problema:** Diretório não existe
@@ -229,7 +195,7 @@ ls libs/domain/src/entities/ 2>/dev/null
 #### [DOC-004] CLAUDE.md com mais de 500 palavras
 **Contagem atual:** [X] palavras
 **Impacto:** Documento muito extenso, difícil manutenção
-**Correção:** Mover detalhes para technical-spec.md
+**Correção:** Simplificar CLAUDE.md mantendo apenas informações essenciais
 
 ---
 
@@ -266,14 +232,7 @@ ls libs/domain/src/entities/ 2>/dev/null
 - [ ] Sem blocos de código extensos
 - [ ] Paths verificáveis
 - [ ] Versões incluídas
-- [ ] Referencia technical-spec.md
 - [ ] Idioma PT-BR
-
-### technical-spec.md
-- [ ] Existe
-- [ ] Detalhamento completo
-- [ ] Stack com versões
-- [ ] Padrões documentados
 
 ### Features
 - [ ] Pasta docs/features/ existe
@@ -297,8 +256,7 @@ ls libs/domain/src/entities/ 2>/dev/null
 ## Scoring
 
 **Cálculo do score:**
-- CLAUDE.md não existe: -4 pontos
-- technical-spec.md não existe: -3 pontos
+- CLAUDE.md não existe: -5 pontos
 - Cada path inválido: -1 ponto
 - CLAUDE.md > 500 palavras: -0.5 pontos
 - Módulo não documentado: -0.5 pontos

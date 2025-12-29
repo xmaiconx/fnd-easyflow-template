@@ -55,20 +55,10 @@ ls -la "docs/features/${FEATURE_ID}/"
 **⚠️ CRÍTICO:** Carregar especificação técnica do projeto.
 
 ```bash
-# Verificar se existe technical-spec.md (fonte primária)
-ls docs/architecture/technical-spec.md 2>/dev/null
-
-# Se não existir, usar CLAUDE.md como fallback
-ls CLAUDE.md
+cat CLAUDE.md
 ```
 
-**Hierarquia de referência:**
-1. **`docs/architecture/technical-spec.md`** (preferencial - detalhes completos)
-2. **`CLAUDE.md`** (fallback - resumo executivo)
-
-**Se technical-spec.md NÃO existir:**
-- Informar: "⚠️ Recomendo executar `/architecture` para gerar especificação técnica completa."
-- Continuar usando CLAUDE.md como referência
+**Architecture reference:** `CLAUDE.md` (source of truth for project patterns)
 
 **Extrair da especificação:**
 - Padrões de configuração (como acessar env vars, configs)

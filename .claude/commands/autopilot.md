@@ -104,20 +104,7 @@ grep -iE "(frontend|ui|tela|página|componente|interface)" "docs/features/${FEAT
 
 ### Step 3: Load Project Architecture Reference
 
-**Verificar se existe technical-spec.md:**
-
-```bash
-# Verificar se existe technical-spec.md (fonte primária)
-ls docs/architecture/technical-spec.md 2>/dev/null
-```
-
-**Hierarquia de referência:**
-1. **`docs/architecture/technical-spec.md`** (preferencial - detalhes completos)
-2. **`CLAUDE.md`** (fallback - resumo executivo)
-
-**Se technical-spec.md NÃO existir:**
-- Informar: "⚠️ **RECOMENDAÇÃO:** Execute `/architecture` para gerar especificação técnica completa do projeto."
-- Continuar usando CLAUDE.md como referência
+**Architecture reference:** `CLAUDE.md` (source of truth for project patterns)
 
 ### Step 4: Load Feature Context
 
@@ -135,7 +122,7 @@ Read ALL feature context files in parallel:
 - about.md: ✅
 - discovery.md: ✅
 - design.md: ✅ OU ⚠️ (não encontrado - usando skill ux-design como fallback)
-- Architecture ref: ✅ (technical-spec.md) OU ⚠️ (CLAUDE.md - recomendado executar /architecture)
+- Architecture ref: ✅ CLAUDE.md
 
 Iniciando execução autônoma...
 ```
@@ -490,7 +477,7 @@ prompt: |
   ## Context
   - Feature ID: ${FEATURE_ID}
   - Plan: docs/features/${FEATURE_ID}/plan.md
-  - Architecture: technical-spec.md or CLAUDE.md
+  - Architecture: CLAUDE.md
   - Files to Review: Output from detect-project-state.sh --branch-changes
 
   ## Output

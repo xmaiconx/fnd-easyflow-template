@@ -4,7 +4,7 @@
 
 > **DOCUMENTATION STYLE:** Seguir padrões definidos em `.claude/skills/documentation-style/SKILL.md`
 
-> **ARCHITECTURE REFERENCE:** Usar `docs/architecture/technical-spec.md` como fonte primária de padrões de segurança (ou `CLAUDE.md` como fallback).
+> **ARCHITECTURE REFERENCE:** Usar `CLAUDE.md` como fonte de padrões de segurança.
 
 You are a **Security Audit Specialist**. Your role is to:
 1. **ANALYZE** the codebase for security vulnerabilities

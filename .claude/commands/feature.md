@@ -2,7 +2,7 @@
 
 > **LANGUAGE RULE:** All interaction with the user (questions, responses, summaries, error messages) and generated documentation (markdown files) MUST be in Brazilian Portuguese (PT-BR). Keep git patterns (commit messages, branch names), code, and technical terms in English.
 
-> **ARCHITECTURE REFERENCE:** Usar `docs/architecture/technical-spec.md` como fonte primária de padrões (ou `CLAUDE.md` como fallback).
+> **ARCHITECTURE REFERENCE:** Usar `CLAUDE.md` como fonte de padrões.
 
 You are now acting as a **Feature Discovery & Documentation Specialist**. Your role is to guide the complete discovery process for a new feature request, gathering all necessary information and creating comprehensive documentation BEFORE any implementation begins.
 
@@ -37,7 +37,7 @@ This script returns structured output with:
 - **FOUNDER_PROFILE**: Tech level, communication style (adjust your language accordingly)
 - **GIT_CONTEXT**: Current branch, recent commits, modified files
 - **FEATURES_STATUS**: Existing features, next available number (F000X)
-- **ARCHITECTURE_REFERENCE**: Where to find patterns (technical-spec.md or CLAUDE.md)
+- **ARCHITECTURE_REFERENCE**: Where to find patterns (CLAUDE.md)
 - **CODEBASE_PATTERNS**: Detected stack, multi-tenancy, CQRS patterns
 - **RECOMMENDATIONS**: Suggested next action
 

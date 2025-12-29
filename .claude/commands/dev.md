@@ -34,7 +34,7 @@ This script provides ALL context needed:
 - **FEATURE_DOCS**: Which docs exist (HAS_PLAN, HAS_DESIGN, HAS_IMPLEMENTATION)
 - **DESIGN_SYSTEM**: HAS_FOUNDATIONS, FOUNDATIONS_PATH
 - **FRONTEND**: Path, component counts, folder structure
-- **PROJECT_CONTEXT**: ARCHITECTURE_REF (technical-spec.md or CLAUDE.md)
+- **PROJECT_CONTEXT**: ARCHITECTURE_REF (CLAUDE.md)
 - **ALL_FEATURES**: FEATURE_COUNT, list if need to choose
 
 ### Step 2: Parse Key Variables

@@ -17,7 +17,7 @@ Este comando executa uma análise técnica completa do projeto, identificando pr
     │
     ├── FASE 1 - DESCOBERTA (paralelo)
     │   ├── context-discovery      → Arquitetura, multi-tenancy, funcionalidades
-    │   ├── documentation-analyzer → CLAUDE.md, technical-spec, padrões
+    │   ├── documentation-analyzer → CLAUDE.md, padrões
     │   └── infrastructure-check   → MCP Supabase, env vars
     │
     ├── FASE 2 - ANÁLISE (paralelo, depende da Fase 1)

@@ -156,9 +156,7 @@ echo "========================================"
 [ -f "docs/product.md" ] && echo "HAS_PRODUCT=true" || echo "HAS_PRODUCT=false"
 
 # Architecture reference
-if [ -f "docs/architecture/technical-spec.md" ]; then
-    echo "ARCHITECTURE_REF=docs/architecture/technical-spec.md"
-elif [ -f "CLAUDE.md" ]; then
+if [ -f "CLAUDE.md" ]; then
     echo "ARCHITECTURE_REF=CLAUDE.md"
 else
     echo "ARCHITECTURE_REF=none"

@@ -197,15 +197,11 @@ echo "========================================"
 echo "ARCHITECTURE_REFERENCE"
 echo "========================================"
 
-TECH_SPEC="docs/architecture/technical-spec.md"
 CLAUDE_MD="CLAUDE.md"
 
-if [ -f "$TECH_SPEC" ]; then
-    echo "PRIMARY_SOURCE: $TECH_SPEC"
-    echo "STATUS: EXISTS"
-elif [ -f "$CLAUDE_MD" ]; then
+if [ -f "$CLAUDE_MD" ]; then
     echo "PRIMARY_SOURCE: $CLAUDE_MD"
-    echo "STATUS: EXISTS (fallback)"
+    echo "STATUS: EXISTS"
 else
     echo "PRIMARY_SOURCE: NONE"
     echo "STATUS: No architecture reference found"
