@@ -162,6 +162,14 @@ fnd-easyflow-template/
 │   └── docker-compose.yml  # Ambiente local (PostgreSQL, Redis, etc.)
 ├── docs/              # Documentação do projeto
 └── .claude/           # Skills e comandos para Claude Code
+└── .fnd/              # Informações sobre o projeto FND
+
+.fnd\about.json
+{
+    "version": "1.0.0",
+    "name": "FND QuickLaunch",
+    "type": "quicklaunch"
+}
 ```
 
 ## 🛠️ Comandos Principais

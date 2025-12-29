@@ -1,4 +1,5 @@
 {
     "version": "1.0.0",
-    "name": "FND Launch Engine"
+    "name": "FND QuickLaunch",
+    "type": "quicklaunch"
 }
