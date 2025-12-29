@@ -270,70 +270,89 @@ Analisei seu pedido e inferi as respostas abaixo.
 4. TodoWrite: Mark item as completed after writing
 ```
 
-Once you have gathered all information through strategic questioning, FILL IN the templated documents that were auto-generated in Phase 1. The files already exist with complete structure - you just need to replace placeholders with actual content:
+Once you have gathered all information through strategic questioning, FILL IN the templated documents that were auto-generated in Phase 1.
 
-### Document 1: about.md (Fill Template)
+**⚠️ SEPARAÇÃO CLARA DOS PROPÓSITOS:**
+- **about.md** = Especificação da FEATURE (o que queremos construir)
+- **discovery.md** = Análise do CODEBASE (o que já existe tecnicamente)
 
-**Path:** `docs/features/F[XXXX]-[branch-name]/about.md` (already created by script)
+---
 
-**Task:** Open the file and fill in all sections marked with placeholders `[...]`:
+### Document 1: about.md (Feature Specification)
 
-**Key sections to complete:**
-- **Task Name**: Replace `[Task Name]` with descriptive name
-- **Objective**: 2-3 paragraphs explaining what and why
-- **Business Context**: Why needed, problem solved, stakeholders
-- **Scope**: Explicitly list what IS and what is NOT included
-- **Business Rules**: Detail validations and all flows (happy path, alternatives, errors)
-- **Integrations**: Document external APIs and internal services
-- **Edge Cases**: List identified edge cases with handling strategy
-- **Acceptance Criteria**: Measurable, testable criteria (checkboxes)
-- **Next Steps**: Guidance for Planning Agent
+**Path:** `docs/features/F[XXXX]-[branch-name]/about.md`
 
-**Important:** This is the FINAL SPECIFICATION - focus on WHAT needs to be done, not HOW.
-
-### Document 2: discovery.md (Fill Template)
-
-**Path:** `docs/features/F[XXXX]-[branch-name]/discovery.md` (already created by script)
-
-**Task:** Fill in all sections with actual discovery data:
+**Purpose:** Documento de ESPECIFICAÇÃO DA FEATURE. Foco no negócio, requisitos e decisões.
 
 **Key sections to complete:**
-- **Initial Analysis**:
-  - **Commit History**: Paste `git log` output in code block, then analyze patterns
-  - **Modified Files**: Paste `git diff --name-only` output, explain what each file change was for
-  - **Related Functionalities**: Search codebase for similar features, document locations and patterns
-- **Strategic Questionnaire**:
-  - Document ALL questions asked (by category)
-  - Document ALL user answers
-  - Include follow-up Q&A
-- **Decisions and Clarifications**:
-  - Every decision made during discovery
-  - Context, rationale, and impact of each decision
-- **Assumptions & Premises**:
-  - List all assumptions with justification
-  - Note impact if assumptions prove wrong
-- **Edge Cases**: Document all identified edge cases
-- **Out of Scope**: Explicitly list what's excluded and why
-- **References**: All files, docs, and features consulted
-- **Summary for Planning**: Executive summary for next phase
+- **Task Name**: Nome descritivo da feature
+- **Objective**: 2-3 parágrafos explicando O QUE e POR QUE
+- **Business Context**: Necessidade de negócio, problema resolvido, stakeholders
+- **Scope**: O que ESTÁ e o que NÃO ESTÁ incluído
+- **Business Rules**: Validações, fluxos (happy path, alternativos, erros)
+- **Strategic Questionnaire**: TODAS as perguntas e respostas do discovery
+- **Decisions**: Decisões tomadas com contexto e rationale
+- **Edge Cases**: Casos identificados com estratégia de tratamento
+- **Acceptance Criteria**: Critérios mensuráveis e testáveis
+- **Spec (Token-Efficient)**: Resumo técnico em formato JSON
 
-**Important:** This is the DISCOVERY RECORD - captures the entire discovery process for traceability.
+**Important:** Este documento responde: "O QUE vamos construir e POR QUE?"
+
+---
+
+### Document 2: discovery.md (Codebase Analysis)
+
+**Path:** `docs/features/F[XXXX]-[branch-name]/discovery.md`
+
+**Purpose:** Documento de ANÁLISE TÉCNICA DO CODEBASE. Foco no que já existe.
+
+**Key sections to complete:**
+- **Codebase Analysis**:
+  - **Commit History**: `git log` + análise de padrões recentes
+  - **Related Files**: Arquivos relacionados à feature
+  - **Similar Features**: Funcionalidades similares existentes
+  - **Patterns Identified**: Padrões de implementação encontrados
+- **Technical Context**:
+  - **Infrastructure Available**: Redis, queues, etc. já configurados
+  - **Dependencies**: Bibliotecas e serviços disponíveis
+  - **Integration Points**: Onde a feature se conecta ao sistema
+- **Files Mapping**:
+  - **Files to Create**: Novos arquivos necessários
+  - **Files to Modify**: Arquivos existentes a modificar
+- **Technical Assumptions**: Premissas técnicas e impacto se incorretas
+- **References**: Arquivos e docs consultados
+- **Summary for Planning**: Resumo executivo para fase de planejamento
+
+**Important:** Este documento responde: "O QUE JÁ EXISTE no código que podemos usar?"
 
 ## Phase 4: Final Checklist (MANDATORY)
 
 Before completing discovery, verify ALL items:
 
-- [ ] Executed `bash .claude/scripts/feature-init.sh` (gathered all context)
-- [ ] Executed `bash .claude/scripts/create-feature-docs.sh [type] [name]` (created structure)
-- [ ] Asked ALL strategic question categories (or validated inferences)
-- [ ] Received answers/validation for ALL questions
+**Setup:**
+- [ ] Executed `bash .claude/scripts/feature-init.sh`
+- [ ] Executed `bash .claude/scripts/create-feature-docs.sh [type] [name]`
 - [ ] Read documentation-style skill
-- [ ] Filled `about.md` with complete specification
-- [ ] Filled `discovery.md` with complete discovery record
-- [ ] Documented ALL decisions and their rationale
+
+**about.md (Feature Specification):**
+- [ ] Asked/validated ALL strategic question categories
+- [ ] Documented ALL questions and answers
+- [ ] Documented ALL decisions with rationale
 - [ ] Identified and documented edge cases
 - [ ] Defined measurable acceptance criteria
-- [ ] NO implementation code written (discovery focuses on REQUIREMENTS, not SOLUTIONS)
+- [ ] Filled Spec section (token-efficient)
+
+**discovery.md (Codebase Analysis):**
+- [ ] Analyzed commit history
+- [ ] Identified related files and similar features
+- [ ] Documented patterns found in codebase
+- [ ] Mapped infrastructure available (Redis, queues, etc.)
+- [ ] Listed files to create and modify
+- [ ] Documented technical assumptions
+- [ ] Wrote summary for planning
+
+**Quality:**
+- [ ] NO implementation code written (discovery = REQUIREMENTS, not SOLUTIONS)
 
 ## Critical Rules
 
@@ -363,8 +382,8 @@ When ALL phases are complete and documentation is filled, inform the user based 
 **✅ Feature Discovery Complete!**
 
 📄 Documentação criada em `docs/features/F[XXXX]-[branch-name]/`:
-- ✓ `about.md` - Especificação da feature
-- ✓ `discovery.md` - Registro do processo
+- ✓ `about.md` - Especificação da feature (requisitos, regras, decisões)
+- ✓ `discovery.md` - Análise do codebase (padrões, arquivos, infraestrutura)
 
 ---
 
@@ -395,8 +414,8 @@ Execute `/autopilot` - implementação 100% autônoma sem interrupções.
 **✅ Feature Discovery Complete!**
 
 📄 Documentação criada em `docs/features/F[XXXX]-[branch-name]/`:
-- ✓ `about.md` - Especificação da feature
-- ✓ `discovery.md` - Registro do processo
+- ✓ `about.md` - Especificação da feature (requisitos, regras, decisões)
+- ✓ `discovery.md` - Análise do codebase (padrões, arquivos, infraestrutura)
 
 🌿 **Worktree:** `.worktrees/F[XXXX]-[branch-name]/`
 

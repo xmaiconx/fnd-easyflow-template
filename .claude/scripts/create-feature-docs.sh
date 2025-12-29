@@ -146,99 +146,170 @@ cat > "${FEATURE_PATH}/about.md" << 'EOF'
 
 ## Objective
 
-[Clear description of main objective - 2-3 paragraphs explaining what this feature does and why it exists]
+[2-3 parágrafos explicando O QUE esta feature faz e POR QUE existe. Foco no valor entregue ao usuário.]
+
+---
 
 ## Business Context
 
-**Why this functionality is needed:**
-[Explain the business need or opportunity]
+**Why:** [Necessidade de negócio ou oportunidade]
 
-**What problem it solves:**
-[Describe the specific problem or pain point]
+**Problem:** [Problema específico ou dor do usuário]
 
-**Who are the stakeholders:**
-[List stakeholders: end users, internal teams, external partners, etc.]
+**Stakeholders:** [Usuários finais, times internos, parceiros externos]
+
+---
 
 ## Scope
 
-### What IS included
-- [Item 1: Specific functionality that will be implemented]
-- [Item 2: Another included feature]
-- [Item 3: etc.]
+### Included
+- [Funcionalidade 1]
+- [Funcionalidade 2]
 
-### What is NOT included (out of scope)
-- [Item 1: Functionality explicitly excluded]
-- [Item 2: Features postponed to future iterations]
-- [Item 3: etc.]
+### Not Included (out of scope)
+- [Funcionalidade explicitamente excluída + motivo breve]
+- [Feature adiada para futuras iterações]
+
+---
 
 ## Business Rules
 
 ### Validations
-1. **[Validation Name]**: [Detailed description of validation rule]
-2. **[Validation Name]**: [Detailed description of validation rule]
+1. **[Nome]**: [Descrição da regra]
+2. **[Nome]**: [Descrição da regra]
 
 ### Flows
 
-#### 1. Main Flow (Happy Path)
-- Step 1: [User/System action]
-- Step 2: [System response]
-- Step 3: [Next action]
-- Step 4: [Final outcome]
+#### Main Flow (Happy Path)
+1. [Ação usuário/sistema]
+2. [Resposta do sistema]
+3. [Próxima ação]
+4. [Resultado final]
 
-#### 2. Alternative Flows
+#### Alternative Flows
 
-**Scenario A: [Name]**
-- [Description of alternative scenario]
-- [How system should behave]
+**Scenario A: [Nome]**
+[Descrição + comportamento esperado]
 
-**Scenario B: [Name]**
-- [Description of alternative scenario]
-- [How system should behave]
+**Scenario B: [Nome]**
+[Descrição + comportamento esperado]
 
-#### 3. Error Flows
+#### Error Flows
 
-**Error Type 1: [Name]**
-- Trigger: [What causes this error]
-- Handling: [How to handle it]
-- User feedback: [What user sees]
+**Error: [Nome]**
+- Trigger: [O que causa]
+- Handling: [Como tratar]
+- User feedback: [O que usuário vê]
 
-**Error Type 2: [Name]**
-- Trigger: [What causes this error]
-- Handling: [How to handle it]
-- User feedback: [What user sees]
+---
 
-## Integrations
+## Strategic Questionnaire
 
-### External APIs
-- **[API Name]**:
-  - Purpose: [Why we need this API]
-  - Endpoints: [Relevant endpoints]
-  - Authentication: [How we authenticate]
+### Scope & Objective
 
-### Internal Services
-- **[Service Name]**:
-  - Purpose: [How this service will be used]
-  - Dependencies: [What this service depends on]
+**Q:** Objetivo principal?
+**A:** [Resposta]
 
-## Edge Cases Identified
+**Q:** Usuários/sistemas que interagem?
+**A:** [Resposta]
 
-1. **[Edge Case Name]**:
-   - Description: [What is the edge case]
-   - Handling: [How we handle it]
+**Q:** Problema sendo resolvido?
+**A:** [Resposta]
 
-2. **[Edge Case Name]**:
-   - Description: [What is the edge case]
-   - Handling: [How we handle it]
+### Business Rules
+
+**Q:** Validações específicas?
+**A:** [Resposta]
+
+**Q:** Tratamento de erros?
+**A:** [Resposta]
+
+**Q:** Dependências de outras funcionalidades?
+**A:** [Resposta]
+
+**Q:** Limites/quotas?
+**A:** [Resposta]
+
+### Data & Integration
+
+**Q:** Dados a persistir?
+**A:** [Resposta]
+
+**Q:** Integrações externas?
+**A:** [Resposta]
+
+**Q:** Processamento assíncrono necessário?
+**A:** [Resposta]
+
+### Edge Cases & Failures
+
+**Q:** Cenários de falha?
+**A:** [Resposta]
+
+**Q:** Dados legados/migração?
+**A:** [Resposta]
+
+**Q:** Considerações de performance?
+**A:** [Resposta]
+
+**Q:** Segurança?
+**A:** [Resposta]
+
+### UI/UX (if applicable)
+
+**Q:** Tipo de interface?
+**A:** [Resposta]
+
+**Q:** Estados de loading/erro?
+**A:** [Resposta]
+
+---
+
+## Decisions
+
+### Decision 1: [Tópico]
+**Context:** [Por que surgiu]
+**Decision:** [O que foi decidido]
+**Rationale:** [Por que faz sentido]
+
+### Decision 2: [Tópico]
+**Context:** [Por que surgiu]
+**Decision:** [O que foi decidido]
+**Rationale:** [Por que faz sentido]
+
+---
+
+## Edge Cases
+
+1. **[Nome]**: [Descrição] → [Estratégia de tratamento]
+2. **[Nome]**: [Descrição] → [Estratégia de tratamento]
+
+---
 
 ## Acceptance Criteria
 
-1. [ ] [Criterion 1 - must be measurable and testable]
-2. [ ] [Criterion 2 - must be measurable and testable]
-3. [ ] [Criterion 3 - must be measurable and testable]
+1. [ ] [Critério mensurável e testável]
+2. [ ] [Critério mensurável e testável]
+3. [ ] [Critério mensurável e testável]
+
+---
+
+## Spec (Token-Efficient)
+
+### Architecture
+{"component":"[nome]","pattern":"[padrão]","dependencies":["dep1","dep2"]}
+
+### Data Model
+{"entities":["Entity1","Entity2"],"newFields":{"Entity":"field:type"}}
+
+### API (if applicable)
+{"endpoints":[{"method":"POST","path":"/api/v1/...","auth":"JWT"}]}
+
+---
 
 ## Next Steps
 
-[Provide guidance for the Planning Agent about what needs to be designed/implemented]
+[Orientação para o Planning Agent sobre o que precisa ser projetado/implementado]
 EOF
 
 # Create discovery.md template
@@ -248,172 +319,131 @@ cat > "${FEATURE_PATH}/discovery.md" << 'EOF'
 **Branch:** BRANCH_NAME
 **Date:** CURRENT_DATE
 
-## Initial Analysis
+Análise técnica do codebase para identificar o que já existe e pode ser reutilizado.
+
+---
+
+## Codebase Analysis
 
 ### Commit History
 
-**Recent commits analyzed:**
 ```
-[Paste git log output here]
-```
-
-**Key observations:**
-- [Observation 1 about recent work]
-- [Observation 2 about patterns in commits]
-
-### Modified Files
-
-**Files already modified in this branch:**
-```
-[Paste git diff --name-only output here]
+[git log --oneline -10]
 ```
 
-**Analysis:**
-- [File 1]: [What was changed and why]
-- [File 2]: [What was changed and why]
+**Observations:** [Padrões recentes, contexto do desenvolvimento]
 
-### Related Functionalities
+### Related Files
 
-**Similar features in codebase:**
-- [Feature 1]: [Location and how it's similar]
-- [Feature 2]: [Location and how it's similar]
+| Arquivo | Relevância |
+|---------|------------|
+| [path/to/file.ts] | [Por que é relevante] |
+| [path/to/file.ts] | [Por que é relevante] |
 
-**Patterns identified:**
-- [Pattern 1: How similar features are implemented]
-- [Pattern 2: Common architectural approach]
+### Similar Features
 
-## Strategic Questionnaire
+| Feature | Localização | Padrão Utilizado |
+|---------|-------------|------------------|
+| [Nome] | [path/] | [Padrão identificado] |
+| [Nome] | [path/] | [Padrão identificado] |
 
-### Category 1: Scope & Objective
+### Patterns Identified
 
-**Q:** What is the main goal of this functionality?
-**A:** [User response]
+- **[Padrão 1]**: [Como é implementado no codebase]
+- **[Padrão 2]**: [Como é implementado no codebase]
 
-**Q:** Who are the users/systems that will interact with it?
-**A:** [User response]
+---
 
-**Q:** What specific problem are we solving?
-**A:** [User response]
+## Technical Context
 
-### Category 2: Business Rules
+### Infrastructure Available
 
-**Q:** Are there specific validations or restrictions?
-**A:** [User response]
+| Recurso | Status | Localização |
+|---------|--------|-------------|
+| Redis | [Configurado/Não] | [path/to/provider.ts] |
+| Queue (BullMQ) | [Configurado/Não] | [path/to/adapter.ts] |
+| [Outro] | [Status] | [path/] |
 
-**Q:** How should error cases be handled?
-**A:** [User response]
+### Dependencies
 
-**Q:** Are there dependencies on other functionalities?
-**A:** [User response]
+**Already installed:**
+- [package@version] - [uso atual]
 
-**Q:** Are there limits, quotas, or throttling to consider?
-**A:** [User response]
+**To install:**
+- [package@version] - [motivo]
 
-### Category 3: Data & Integration
+### Integration Points
 
-**Q:** What data needs to be persisted?
-**A:** [User response]
+| Componente | Arquivo | Tipo de Integração |
+|------------|---------|-------------------|
+| [Componente] | [path/to/file.ts:line] | [Como conectar] |
+| [Componente] | [path/to/file.ts:line] | [Como conectar] |
 
-**Q:** Are there external integrations (APIs, services)?
-**A:** [User response]
+---
 
-**Q:** Are asynchronous processes necessary?
-**A:** [User response]
+## Files Mapping
 
-### Category 4: Edge Cases & Failure Scenarios
+### To Create
 
-**Q:** What happens in failure scenarios?
-**A:** [User response]
+| Arquivo | Propósito |
+|---------|-----------|
+| [path/to/new-file.ts] | [O que faz] |
+| [path/to/new-file.ts] | [O que faz] |
 
-**Q:** How to handle legacy data or migrations?
-**A:** [User response]
+### To Modify
 
-**Q:** Are there performance or scalability concerns?
-**A:** [User response]
+| Arquivo | Modificação |
+|---------|-------------|
+| [path/to/existing.ts:line] | [O que mudar] |
+| [path/to/existing.ts:line] | [O que mudar] |
 
-**Q:** Are there specific security considerations?
-**A:** [User response]
+---
 
-### Category 5: UI/UX (if applicable)
+## Technical Assumptions
 
-**Q:** How should the user experience be?
-**A:** [User response]
+1. **[Premissa]**: [Descrição]
+   - Impact if wrong: [Consequência]
 
-**Q:** Are there specific loading/error states?
-**A:** [User response]
+2. **[Premissa]**: [Descrição]
+   - Impact if wrong: [Consequência]
 
-**Q:** Are there responsiveness requirements?
-**A:** [User response]
-
-## Decisions and Clarifications
-
-### Decision 1: [Topic]
-**Context:** [Why this question/doubt arose during discovery]
-**Decision:** [What was decided and by whom]
-**Impact:** [Which areas/components are affected by this decision]
-**Rationale:** [Why this decision makes sense]
-
-### Decision 2: [Topic]
-**Context:** [Why this question/doubt arose]
-**Decision:** [What was decided]
-**Impact:** [Affected areas]
-**Rationale:** [Why this decision makes sense]
-
-## Assumptions & Premises
-
-1. **[Assumption 1]**: [Description and justification]
-   - Impact if wrong: [What happens if this assumption is incorrect]
-
-2. **[Assumption 2]**: [Description and justification]
-   - Impact if wrong: [What happens if this assumption is incorrect]
-
-## Edge Cases Identified
-
-1. **[Edge Case Name]**:
-   - Description: [Detailed description of the edge case]
-   - Likelihood: [High/Medium/Low]
-   - Handling Strategy: [How we plan to handle it]
-
-2. **[Edge Case Name]**:
-   - Description: [Detailed description]
-   - Likelihood: [High/Medium/Low]
-   - Handling Strategy: [How we plan to handle it]
-
-## Out of Scope Items
-
-1. **[Item Name]** - [Detailed explanation of why it's out of scope]
-2. **[Item Name]** - [Detailed explanation of why it's out of scope]
+---
 
 ## References
 
-### Codebase Files Consulted
-- [File path 1]: [What was learned from it]
-- [File path 2]: [What was learned from it]
+### Files Consulted
 
-### Documentation Consulted
-- [Document name/path]: [Key insights]
-- [Document name/path]: [Key insights]
+| Arquivo | Insight |
+|---------|---------|
+| [path/to/file.ts] | [O que aprendemos] |
+| [path/to/file.ts] | [O que aprendemos] |
 
-### Related Functionalities
-- [Feature name]: [Location and relevance]
-- [Feature name]: [Location and relevance]
+### Documentation
+
+- [doc/path.md] - [Insight relevante]
+- [CLAUDE.md section] - [Insight relevante]
+
+### Related Features
+
+- [F000X-feature-name] - [Relevância]
+
+---
 
 ## Summary for Planning
 
 **Executive Summary:**
-[2-3 paragraphs summarizing the entire discovery process, key decisions, and what the Planning Agent needs to focus on]
+[2-3 parágrafos resumindo o que foi descoberto no codebase, padrões a seguir, e pontos de integração]
 
-**Critical Requirements:**
-- [Requirement 1]
-- [Requirement 2]
-- [Requirement 3]
+**Key Technical Decisions:**
+- [Decisão 1 baseada na análise do código]
+- [Decisão 2 baseada na análise do código]
 
-**Technical Constraints:**
-- [Constraint 1]
-- [Constraint 2]
+**Critical Files:**
+- [Arquivo mais importante a modificar]
+- [Arquivo mais importante a criar]
 
 **Next Phase Focus:**
-[What the Planning Agent should prioritize in the technical design]
+[O que o Planning Agent deve priorizar com base nesta análise]
 EOF
 
 # Replace placeholders with actual values (using | as delimiter to avoid conflicts with / in branch names)

@@ -153,6 +153,15 @@ description: "Plan feature ${FEATURE_ID}"
 prompt: |
   You are executing the PLANNING phase for feature ${FEATURE_ID}.
 
+  ## MANDATORY: Check for Existing Planning Files FIRST
+  Before starting, check if any planning files already exist:
+  1. Execute: ls docs/features/${FEATURE_ID}/*.md
+  2. If plan-database.md exists: Read it (database planning already done)
+  3. If plan-backend.md exists: Read it (backend planning already done)
+  4. If plan-frontend.md exists: Read it (frontend planning already done)
+
+  **NOTE:** Planning files are named WITHOUT dot prefix: plan-database.md, plan-backend.md, plan-frontend.md
+
   ## Instructions
   Follow ALL instructions from: .claude/commands/plan.md
 
@@ -270,6 +279,17 @@ description: "Develop ${AREA} for ${FEATURE_ID}"
 prompt: |
   You are executing the DEVELOPMENT phase for feature ${FEATURE_ID}.
   Your scope: ${AREA}
+
+  ## MANDATORY: Read Planning Documentation FIRST
+  Before doing ANYTHING else, you MUST read these files:
+  1. Execute: ls docs/features/${FEATURE_ID}/*.md
+  2. Read docs/features/${FEATURE_ID}/plan.md (SOURCE OF TRUTH)
+  3. Read docs/features/${FEATURE_ID}/about.md
+  4. Read docs/features/${FEATURE_ID}/discovery.md
+  5. If your area is Backend: Check if plan-database.md exists and read it
+  6. If your area is Frontend: Check if plan-backend.md exists and read it for API contracts
+
+  **DO NOT skip this step. These files contain ALL context needed for implementation.**
 
   ## Instructions
   Follow ALL instructions from: .claude/commands/dev.md

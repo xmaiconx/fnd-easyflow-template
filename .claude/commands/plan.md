@@ -131,7 +131,7 @@ For each required subagent, dispatch using the Task tool with `subagent_type: "g
 
 Each subagent writes to a temporary file:
 ```
-docs/features/${FEATURE_ID}/.plan-[area].md
+docs/features/${FEATURE_ID}/plan-[area].md
 ```
 
 ---
@@ -154,7 +154,7 @@ Read these files:
 Create the database planning section. Search the codebase for similar entities and repositories to use as references.
 
 ## Output Format
-Write to: docs/features/${FEATURE_ID}/.plan-database.md
+Write to: docs/features/${FEATURE_ID}/plan-database.md
 
 Use this EXACT format:
 
@@ -192,12 +192,17 @@ Reference: `libs/app-database/src/repositories/[SimilarRepository].ts`
 ```
 You are the BACKEND SPECIALIST planning for feature ${FEATURE_ID}.
 
+## MANDATORY: Read Previous Planning Files FIRST
+Before doing ANYTHING else, check and read these planning files if they exist:
+1. Execute: ls docs/features/${FEATURE_ID}/plan-*.md 2>/dev/null
+2. If plan-database.md exists: Read it COMPLETELY to understand database context
+
 ## Context
-Read these files:
-- docs/features/${FEATURE_ID}/about.md
-- docs/features/${FEATURE_ID}/discovery.md
-- docs/features/${FEATURE_ID}/.plan-database.md (if exists)
-- CLAUDE.md (backend section)
+Read these files IN ORDER:
+1. docs/features/${FEATURE_ID}/plan-database.md (if exists - CRITICAL: contains entity/table definitions)
+2. docs/features/${FEATURE_ID}/about.md
+3. docs/features/${FEATURE_ID}/discovery.md
+4. CLAUDE.md (backend section)
 
 ## Your Task
 Create the backend planning section covering: API, Commands, Events, Workers (if needed).
@@ -214,7 +219,7 @@ This skill contains ALL standards for:
 - Multi-tenancy rules
 
 ## Output Format
-Write to: docs/features/${FEATURE_ID}/.plan-backend.md
+Write to: docs/features/${FEATURE_ID}/plan-backend.md
 
 Use this EXACT format:
 
@@ -276,14 +281,21 @@ Reference: `apps/backend/src/api/modules/[similar module]/`
 ```
 You are the FRONTEND SPECIALIST planning for feature ${FEATURE_ID}.
 
+## MANDATORY: Read Previous Planning Files FIRST
+Before doing ANYTHING else, check and read these planning files if they exist:
+1. Execute: ls docs/features/${FEATURE_ID}/plan-*.md 2>/dev/null
+2. If plan-database.md exists: Read it to understand entity structure
+3. If plan-backend.md exists: Read it COMPLETELY to understand API contracts
+
 ## Context
-Read these files:
-- docs/features/${FEATURE_ID}/about.md
-- docs/features/${FEATURE_ID}/discovery.md
-- docs/features/${FEATURE_ID}/design.md (if exists - USE THIS AS PRIMARY SOURCE)
-- docs/design-system/foundations.md (if exists - design tokens and conventions)
-- docs/features/${FEATURE_ID}/.plan-backend.md (if exists, for API contracts)
-- CLAUDE.md (frontend section)
+Read these files IN ORDER:
+1. docs/features/${FEATURE_ID}/plan-database.md (if exists - entity structure)
+2. docs/features/${FEATURE_ID}/plan-backend.md (if exists - CRITICAL: API contracts & DTOs)
+3. docs/features/${FEATURE_ID}/design.md (if exists - USE THIS AS PRIMARY SOURCE for UI)
+4. docs/features/${FEATURE_ID}/about.md
+5. docs/features/${FEATURE_ID}/discovery.md
+6. docs/design-system/foundations.md (if exists - design tokens and conventions)
+7. CLAUDE.md (frontend section)
 
 ## Your Task
 Create the frontend planning section.
@@ -291,7 +303,7 @@ Create the frontend planning section.
 **If not:** Search the codebase for similar pages/components to use as references.
 
 ## Output Format
-Write to: docs/features/${FEATURE_ID}/.plan-frontend.md
+Write to: docs/features/${FEATURE_ID}/plan-frontend.md
 
 Use this EXACT format:
 
@@ -362,12 +374,12 @@ echo "" >> plan.md
 echo "---" >> plan.md
 
 # Append each section if exists
-[ -f .plan-database.md ] && cat .plan-database.md >> plan.md && echo "" >> plan.md && echo "---" >> plan.md
-[ -f .plan-backend.md ] && cat .plan-backend.md >> plan.md && echo "" >> plan.md && echo "---" >> plan.md
-[ -f .plan-frontend.md ] && cat .plan-frontend.md >> plan.md && echo "" >> plan.md && echo "---" >> plan.md
+[ -f plan-database.md ] && cat plan-database.md >> plan.md && echo "" >> plan.md && echo "---" >> plan.md
+[ -f plan-backend.md ] && cat plan-backend.md >> plan.md && echo "" >> plan.md && echo "---" >> plan.md
+[ -f plan-frontend.md ] && cat plan-frontend.md >> plan.md && echo "" >> plan.md && echo "---" >> plan.md
 
 # Clean up temporary files
-rm -f .plan-*.md
+rm -f plan-database.md plan-backend.md plan-frontend.md
 ```
 
 ### Step 3: Add Footer Sections
@@ -446,7 +458,7 @@ git push
 - Reference similar files, don't write code
 - Only create subagents the feature needs
 - Execute subagents sequentially
-- Delete temporary .plan-*.md files after consolidation
+- Delete temporary plan-*.md files after consolidation
 - Load skill files before planning each area
 
 **DO NOT:**
