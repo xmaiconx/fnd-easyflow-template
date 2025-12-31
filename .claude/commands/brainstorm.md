@@ -295,9 +295,13 @@ O documento pode ser usado como input para `/feature` se decidir implementar alg
 
 **PRE-DOCUMENTATION CHECKPOINT (MANDATORY):**
 ```
-1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
-2. Execute: cat .claude/skills/documentation-style/SKILL.md
-3. Apply hybrid structure to brainstorm document
+1. TodoWrite: Add item "Ler skill de documentação Business Style" (in_progress)
+2. Execute: cat .claude/skills/documentation-style/business.md
+3. Apply Business Style format (seção "brainstorm/"):
+   - Foco em necessidades do USUÁRIO
+   - Linguagem simples, sem jargão técnico
+   - Decisões em tabela
+   - Dúvidas como checklist
 4. TodoWrite: Mark item as completed after writing
 ```
 
@@ -339,93 +343,90 @@ docs/brainstorm/
 ---
 
 **IMPORTANTE:** O documento deve ser 100% focado em NEGÓCIO e USUÁRIO, sem jargões técnicos.
-- Descrever necessidades, problemas e desejos do usuário
-- Usar linguagem que qualquer pessoa entenda
-- Focar no "o quê" e "por quê", nunca no "como implementar"
+
+**FORMAT:** Usar Business Style (`.claude/skills/documentation-style/business.md` - seção brainstorm/)
 
 ```markdown
-# Brainstorm: [Título do Tópico]
+# Brainstorm: [Tópico]
 
-**Data:** [current date]
-**Participantes:** Founder + Claude
+**Data:** [YYYY-MM-DD]
+**Participantes:** [quem participou]
 
 ---
 
-## Problema ou Necessidade
+## Contexto
 
-[Descrever o problema real que o usuário enfrenta ou a necessidade que surgiu]
-
-**Quem é afetado:** [Tipo de usuário - ex: administradores, clientes finais, etc.]
-
-**Situação atual:** [Como o usuário resolve isso hoje, se resolve]
+[Problema ou oportunidade que motivou a discussão - 3-5 linhas]
 
 ---
 
 ## O que o Usuário Quer
 
-[Descrever em linguagem simples o que o usuário espera que aconteça]
+### Necessidade Principal
+[Descrição do ponto de vista do usuário, sem jargão técnico]
 
-### Cenário Ideal
-[Descrever como seria a experiência perfeita do ponto de vista do usuário]
-
-### Exemplos de Uso
-- **Exemplo 1:** [Situação prática do dia-a-dia]
-- **Exemplo 2:** [Outra situação prática]
+### Cenários de Uso
+- **[Cenário 1]:** [situação prática]
+- **[Cenário 2]:** [situação prática]
 
 ---
 
-## Discovery Inicial
+## Descobertas
 
-### O que já existe no sistema
-- [Funcionalidade existente 1 - em linguagem simples]
-- [Funcionalidade existente 2 - em linguagem simples]
+### O que já existe
+- [Funcionalidade existente] - [como ajuda]
 
-### O que precisaria ser criado
-- [Necessidade 1 - descrição do ponto de vista do usuário]
-- [Necessidade 2 - descrição do ponto de vista do usuário]
-
-### Perguntas respondidas
-- **Pergunta:** [Dúvida que surgiu]
-  **Resposta:** [O que descobrimos]
+### O que falta
+- [Gap identificado] - [impacto]
 
 ---
 
-## Decisões e Preferências
+## Ideias Discutidas
 
-| O que decidimos | Por quê |
-|-----------------|---------|
-| [Decisão 1] | [Motivo em linguagem simples] |
-| [Decisão 2] | [Motivo em linguagem simples] |
+### [Ideia A]
+- **Proposta:** [descrição]
+- **Prós:** [vantagens]
+- **Contras:** [desvantagens]
 
----
-
-## Dúvidas que Ficaram
-
-- [ ] [Pergunta que ainda precisa ser respondida]
-- [ ] [Outra dúvida pendente]
+### [Ideia B]
+- **Proposta:** [descrição]
+- **Prós:** [vantagens]
+- **Contras:** [desvantagens]
 
 ---
 
-## Próximo Passo
+## Decisões Preliminares
 
-**Se quiser transformar isso em feature:**
-Execute `/feature` e use este documento como base para a conversa inicial.
-
-**Descrição sugerida para o `/feature`:**
-> [Uma frase clara descrevendo o que o usuário quer, sem termos técnicos]
+| Decisão | Razão |
+|---------|-------|
+| [Escolha] | [Justificativa] |
 
 ---
 
-## Arquivos Relacionados (Referência)
+## Dúvidas em Aberto
+
+- [ ] [Pergunta que precisa resposta]
+- [ ] [Pergunta que precisa resposta]
+
+---
+
+## Próximos Passos
+
+- [ ] [Ação] - [responsável se definido]
+
+---
+
+## Para `/feature`
+
+> [Frase descrevendo a feature para iniciar discovery formal]
+
+---
+
+## Arquivos Relacionados
 
 | Arquivo | O que faz |
 |---------|-----------|
-| `[caminho/arquivo]` | [máximo 10 palavras descrevendo] |
-| `[caminho/arquivo]` | [máximo 10 palavras descrevendo] |
-
----
-
-*Documento de brainstorm - pode ser usado como input para `/feature`*
+| `[path]` | [máx 10 palavras] |
 ```
 
 ### After Document Generation

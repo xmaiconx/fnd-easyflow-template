@@ -264,9 +264,13 @@ Analisei seu pedido e inferi as respostas abaixo.
 
 **PRE-DOCUMENTATION CHECKPOINT (MANDATORY):**
 ```
-1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
-2. Execute: cat .claude/skills/documentation-style/SKILL.md
-3. Apply hybrid structure to ALL documentation below
+1. TodoWrite: Add item "Ler skill de documentação Business Style" (in_progress)
+2. Execute: cat .claude/skills/documentation-style/business.md
+3. Apply Business Style format:
+   - Bullets estruturados com **[ID]:** formato
+   - Regras: [condição] → [resultado]
+   - Decisões em tabela com alternativa descartada
+   - Critérios verificáveis e testáveis
 4. TodoWrite: Mark item as completed after writing
 ```
 
@@ -276,6 +280,8 @@ Once you have gathered all information through strategic questioning, FILL IN th
 - **about.md** = Especificação da FEATURE (o que queremos construir)
 - **discovery.md** = Análise do CODEBASE (o que já existe tecnicamente)
 
+**FORMAT:** Usar Business Style (`.claude/skills/documentation-style/business.md`)
+
 ---
 
 ### Document 1: about.md (Feature Specification)
@@ -284,17 +290,77 @@ Once you have gathered all information through strategic questioning, FILL IN th
 
 **Purpose:** Documento de ESPECIFICAÇÃO DA FEATURE. Foco no negócio, requisitos e decisões.
 
-**Key sections to complete:**
-- **Task Name**: Nome descritivo da feature
-- **Objective**: 2-3 parágrafos explicando O QUE e POR QUE
-- **Business Context**: Necessidade de negócio, problema resolvido, stakeholders
-- **Scope**: O que ESTÁ e o que NÃO ESTÁ incluído
-- **Business Rules**: Validações, fluxos (happy path, alternativos, erros)
-- **Strategic Questionnaire**: TODAS as perguntas e respostas do discovery
-- **Decisions**: Decisões tomadas com contexto e rationale
-- **Edge Cases**: Casos identificados com estratégia de tratamento
-- **Acceptance Criteria**: Critérios mensuráveis e testáveis
-- **Spec (Token-Efficient)**: Resumo técnico em formato JSON
+**Template (Business Style):**
+```markdown
+# Feature: [Nome]
+
+[O QUE: descrição da funcionalidade]
+[POR QUE: problema resolvido]
+[PARA QUEM: usuários impactados]
+
+---
+
+## Objetivo
+
+**Problema:** [descrição do problema atual]
+**Solução:** [como a feature resolve]
+**Valor:** [benefício mensurável]
+
+---
+
+## Requisitos
+
+### Funcionais
+- **[RF01]:** [descrição ~15 palavras]
+- **[RF02]:** [descrição ~15 palavras]
+
+### Não-Funcionais
+- **[RNF01]:** [performance/segurança/etc]
+
+---
+
+## Regras de Negócio
+
+- **[RN01]:** [condição] → [resultado]
+- **[RN02]:** [condição] → [resultado]
+
+---
+
+## Escopo
+
+### Incluído
+- [Item que FAZ parte]
+
+### Excluído
+- [Item que NÃO faz parte] - [motivo breve]
+
+---
+
+## Decisões
+
+| Decisão | Razão | Alternativa descartada |
+|---------|-------|------------------------|
+| [Escolha A] | [Por que A] | [B - por que não] |
+
+---
+
+## Edge Cases
+
+- **[Caso]:** [tratamento definido]
+
+---
+
+## Critérios de Aceite
+
+- [ ] [Critério verificável e testável]
+- [ ] [Critério verificável e testável]
+
+---
+
+## Spec
+
+{"feature":"[id]","type":"[new/enhancement/fix]","priority":"[high/medium/low]","users":["tipo1","tipo2"],"deps":["feature/sistema"]}
+```
 
 **Important:** Este documento responde: "O QUE vamos construir e POR QUE?"
 
@@ -306,22 +372,72 @@ Once you have gathered all information through strategic questioning, FILL IN th
 
 **Purpose:** Documento de ANÁLISE TÉCNICA DO CODEBASE. Foco no que já existe.
 
-**Key sections to complete:**
-- **Codebase Analysis**:
-  - **Commit History**: `git log` + análise de padrões recentes
-  - **Related Files**: Arquivos relacionados à feature
-  - **Similar Features**: Funcionalidades similares existentes
-  - **Patterns Identified**: Padrões de implementação encontrados
-- **Technical Context**:
-  - **Infrastructure Available**: Redis, queues, etc. já configurados
-  - **Dependencies**: Bibliotecas e serviços disponíveis
-  - **Integration Points**: Onde a feature se conecta ao sistema
-- **Files Mapping**:
-  - **Files to Create**: Novos arquivos necessários
-  - **Files to Modify**: Arquivos existentes a modificar
-- **Technical Assumptions**: Premissas técnicas e impacto se incorretas
-- **References**: Arquivos e docs consultados
-- **Summary for Planning**: Resumo executivo para fase de planejamento
+**Template (Business Style):**
+```markdown
+# Discovery: [Feature]
+
+Análise técnica do codebase para implementação de [feature].
+
+---
+
+## Contexto Técnico
+
+### Stack Relevante
+- **Backend:** [tecnologias específicas para esta feature]
+- **Frontend:** [tecnologias específicas]
+- **Infra:** [Redis/queues/etc se aplicável]
+
+### Padrões Identificados
+- **[Padrão]:** usado em [local] - [como aplicar aqui]
+
+---
+
+## Análise do Codebase
+
+### Arquivos Relacionados
+- `path/file.ts` - [propósito, ~10 palavras]
+
+### Features Similares
+- **[Feature X]:** [o que reutilizar] - `path/`
+
+---
+
+## Mapeamento de Arquivos
+
+### Criar
+- `path/new-file.ts` - [propósito]
+
+### Modificar
+- `path/existing.ts` - [o que muda]
+
+---
+
+## Dependências
+
+### Internas
+- `@fnd/domain` - [entities/enums necessários]
+
+### Externas
+- `package@version` - [propósito]
+
+---
+
+## Premissas Técnicas
+
+- **[Premissa]:** [impacto se incorreta]
+
+---
+
+## Riscos Identificados
+
+- **[Risco]:** [mitigação]
+
+---
+
+## Resumo para Planejamento
+
+[3-5 linhas: complexidade, pontos de atenção, dependências críticas]
+```
 
 **Important:** Este documento responde: "O QUE JÁ EXISTE no código que podemos usar?"
 
@@ -332,27 +448,29 @@ Before completing discovery, verify ALL items:
 **Setup:**
 - [ ] Executed `bash .claude/scripts/feature-init.sh`
 - [ ] Executed `bash .claude/scripts/create-feature-docs.sh [type] [name]`
-- [ ] Read documentation-style skill
+- [ ] Read Business Style: `cat .claude/skills/documentation-style/business.md`
 
-**about.md (Feature Specification):**
-- [ ] Asked/validated ALL strategic question categories
-- [ ] Documented ALL questions and answers
-- [ ] Documented ALL decisions with rationale
-- [ ] Identified and documented edge cases
-- [ ] Defined measurable acceptance criteria
-- [ ] Filled Spec section (token-efficient)
+**about.md (Feature Specification - Business Style):**
+- [ ] Requisitos com IDs: **[RF01]**, **[RNF01]**
+- [ ] Regras de negócio: **[RN01]:** [condição] → [resultado]
+- [ ] Escopo: incluído E excluído
+- [ ] Decisões em tabela com alternativa descartada
+- [ ] Edge cases com tratamento definido
+- [ ] Critérios de aceite verificáveis
+- [ ] Spec JSON no final
 
-**discovery.md (Codebase Analysis):**
-- [ ] Analyzed commit history
-- [ ] Identified related files and similar features
-- [ ] Documented patterns found in codebase
-- [ ] Mapped infrastructure available (Redis, queues, etc.)
-- [ ] Listed files to create and modify
-- [ ] Documented technical assumptions
-- [ ] Wrote summary for planning
+**discovery.md (Codebase Analysis - Business Style):**
+- [ ] Arquivos relacionados com paths
+- [ ] Features similares identificadas
+- [ ] Mapeamento criar/modificar
+- [ ] Dependências internas e externas
+- [ ] Premissas com impacto se incorretas
+- [ ] Riscos com mitigação
+- [ ] Resumo para planejamento (3-5 linhas)
 
 **Quality:**
 - [ ] NO implementation code written (discovery = REQUIREMENTS, not SOLUTIONS)
+- [ ] Formato Business Style aplicado corretamente
 
 ## Critical Rules
 

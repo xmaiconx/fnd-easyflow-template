@@ -546,11 +546,15 @@ Card showing workspace name, member count, and created date. Dropdown menu with 
 
 **PRE-DOCUMENTATION CHECKPOINT (MANDATORY):**
 ```
-1. TodoWrite: Add item "Ler skill de documentação e aplicar formato híbrido" (in_progress)
-2. Execute: cat .claude/skills/documentation-style/SKILL.md
-3. Apply hybrid structure to ALL documentation below:
-   - Part 1 (top): Human-readable context (~100 words/paragraph)
-   - Part 2 (rest): Token-efficient JSON for specs
+1. TodoWrite: Add item "Ler skill de documentação Design Style" (in_progress)
+2. Execute: cat .claude/skills/documentation-style/design.md
+3. Apply Design Style format:
+   - ASCII layouts para cada tela/componente
+   - Breakpoints inline (→md: ... | →lg: ...)
+   - Components: existing vs new separados
+   - Props notation compacta: props:{a*,b,c=default}
+   - States inline: loading→Skeleton | empty→EmptyState | error→Toast
+   - Flows: trigger → action → feedback → result
 4. TodoWrite: Mark item as completed after writing
 ```
 
@@ -579,51 +583,82 @@ Card showing workspace name, member count, and created date. Dropdown menu with 
 
 **IMPORTANT:** This document is written in the FEATURE directory, NOT in docs/design-system/.
 
+**FORMAT:** Usar Design Style (`.claude/skills/documentation-style/design.md`)
+
 ```markdown
-# Design Specification: [Feature Name]
+# Design: [Feature Name]
 
-**Feature:** [FEATURE_ID] | **Date:** [current date]
+Especificação mobile-first para [feature]. [1-2 sentences sobre objetivo UX].
 
-Especificação de design mobile-first para [feature]. Baseado na análise do frontend realizada em [date]. [2-3 sentences describing UX goals and approach for this feature].
+**Mobile-first:** touch 44px, inputs 16px+
 
-**Princípios aplicados:** Mobile-first (320px base), touch-friendly (44px targets), progressive enhancement.
-
-**Skill Reference:** .claude/skills/ux-design/SKILL.md
+**Skill Ref:** .claude/skills/ux-design/SKILL.md
 
 ---
 
-## Spec (Token-Efficient)
+## Layouts
 
-### Context
-{"stack":"[detected]","conventions":{"naming":"[detected]","propsType":"interface|type","exports":"barrel|direct","fileCase":"[detected]"},"analysisDate":"[date]","skillRef":".claude/skills/ux-design/SKILL.md"}
+### [PageName] (mobile default)
+┌─────────────────┐
+│ Header          │
+├─────────────────┤
+│ Content         │
+│ [components]    │
+├─────────────────┤
+│ BottomNav       │
+└─────────────────┘
+→md: [mudanças tablet]
+→lg: [mudanças desktop]
 
-### Existing Components (Reusable)
-[{"name":"Button","location":"components/ui/button.tsx","purpose":"[one line]"},{"name":"Card","location":"components/ui/card.tsx","purpose":"[one line]"}]
+[Repetir para cada página/tela]
 
-**CRITICAL:** Dev agents MUST check this list before creating new components.
+---
 
-### Pages
-[For each page, use JSON format:]
-{"page":"[PageName]","route":"[/path]","purpose":"[one line]","mobile":{"structure":"header→content→bottomBar","components":[{"name":"X","status":"exists|new","location":"path"}]},"states":{"empty":"[component or pattern]","loading":"[skeleton component or pattern]","error":"[error component or pattern]"},"responsive":{"md":"[ONLY differences from mobile]","lg":"[ONLY differences from mobile]"}}
+## Components
 
-### New Components
-[For each NEW component - ONLY if not exists:]
-{"component":"[Name]","location":"[path following project convention]","purpose":"[one line]","props":[{"name":"x","type":"string","required":true,"default":"value if applicable"}],"composition":["[ExistingComponent1]","[ExistingComponent2]"],"mobileFirst":{"touchTarget":"44px minimum","fontSize":"16px+ for inputs","specific":"[any other mobile consideration]"},"implementation":"[Concise textual description for dev agent - focus on WHAT not HOW]"}
+### Existing (reuse)
+- Button: components/ui/button.tsx | ações primárias/secundárias
+- Card: components/ui/card.tsx | container com sombra
+[Listar todos os componentes existentes reutilizáveis]
 
-**CRITICAL:** Include ALL props with types. Missing props = broken implementation.
+### New
+- [ComponentName]: [propósito] | props:{a*,b,c=default} | uses:[X,Y]
+- [ComponentName]: [propósito] | props:{d*,e} | uses:[Z]
 
-### State Patterns Detected
-{"loading":"[component/pattern]","empty":"[component/pattern]","error":"[component/pattern]","skeleton":"[if exists, location]"}
+[Para cada novo componente, incluir:]
+#### [ComponentName]
+**Location:** components/[feature]/[name].tsx
+**Mobile:** touch 44px, [considerações específicas]
+**Implementation:** [descrição concisa do comportamento - WHAT not HOW]
 
-**CRITICAL:** Dev agents MUST use these patterns for consistency.
+---
 
-### Navigation/Routing
-{"pattern":"[react-router-dom v6/etc]","imports":"[detected import pattern]","guards":"[auth guards location if applicable]"}
+## States
 
-**CRITICAL:** Affects imports and route organization.
+loading→Skeleton | empty→EmptyState | error→Toast
 
-### Dev Agent Instructions
-{"mobileFirst":["touch targets 44px minimum","input font 16px+ (prevents zoom)","bottom nav for primary actions","test on 320px viewport"],"implementationOrder":["[component1 - foundational]","[component2 - depends on component1]","[component3]"],"skillRequired":".claude/skills/ux-design/SKILL.md","conventions":{"follow":"Use project patterns exactly","reuse":"Check existing components FIRST","mobile":"Design mobile, enhance up"}}
+### [ComponentName] States
+- loading: [visual description]
+- empty: [visual description]
+- error: [visual description]
+
+---
+
+## Flows
+
+### [FlowName]
+[trigger] → [action] → [feedback] → [result]
+
+### [FlowName]
+[trigger] → [action] → [feedback] → [result]
+
+---
+
+## Dev Instructions
+
+**Order:** [component1] → [component2] → [component3]
+**Skill:** .claude/skills/ux-design/SKILL.md (MUST load)
+**Conventions:** Use project patterns exactly, check existing components FIRST
 ```
 
 ### 6.2 DO NOT Auto-Create foundations.md

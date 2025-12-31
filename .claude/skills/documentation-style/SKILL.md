@@ -1,70 +1,69 @@
 ---
 name: documentation-style
 description: |
-  Guia de estilo para criação de documentação. SEMPRE seguir ao criar/atualizar qualquer documento do projeto.
+  Hub de estilos de documentação. Roteia para o estilo correto baseado no tipo de documento.
 ---
 
-# Guia de Estilo - Documentação
+# Documentation Style Guide
 
-Toda documentação criada pelo agente DEVE seguir este padrão híbrido.
+Hub central para estilos de documentação. Cada tipo de documento segue um estilo otimizado.
 
-## Princípio
+## Roteamento de Estilos
 
-Documentação é código. Docs desatualizados enganam. Seja breve, específico e verificável.
+| Documento | Estilo | Arquivo |
+|-----------|--------|---------|
+| plan.md, implementation.md, architecture | **Technical** | ./technical.md |
+| design.md, UI specs | **Design** | ./design.md |
+| about.md, discovery.md, brainstorm/ | **Business** | ./business.md |
 
----
-
-## Regras Gerais
-
-**Idioma:** PT-BR para texto | EN para código/git
-
-**Brevidade:** ~100 palavras/parágrafo | ~20 palavras/item
-
-**Especificidade:** Paths concretos | Versões explícitas | Zero termos vagos
-
-**Proibido:** Emojis em headers | Código >10 linhas | Aspiracional | Duplicação
+**IMPORTANTE:** Carregar o arquivo de estilo correto ANTES de escrever documentação.
 
 ---
 
-## Estrutura Híbrida (OBRIGATÓRIA)
+## Regras Universais
 
-Todo documento DEVE ter duas partes:
+Aplicam-se a TODOS os estilos:
 
-### Parte 1: Human-Readable (topo)
-- Título e propósito (~2-3 linhas)
-- Contexto essencial para humanos
-- Regras fundamentais em texto corrido
-- Separador `---` antes da próxima seção
+### Idioma
+- **PT-BR:** Texto, explicações, documentação
+- **EN:** Código, git (commits, branches), termos técnicos
 
-### Parte 2: Token-Efficient (restante)
-- JSON minificado em uma linha
-- Arrays para listas de itens
-- Zero redundância
-- Máximo 10 palavras por descrição
+### Proibições
+- Emojis em headers
+- Código >10 linhas (linkar arquivo)
+- Conteúdo aspiracional ("futuramente", "idealmente")
+- Duplicação de informação entre documentos
+- TODOs sem owner/deadline
+
+### Obrigações
+- Paths concretos e verificáveis
+- Versões explícitas quando relevante
+- Máximo ~20 palavras por item de lista
+- Máximo ~100 palavras por parágrafo
 
 ---
 
-## Spec (Token-Efficient)
+## Quick Reference
 
-> Formato para a Parte 2 dos documentos.
+### Quando usar cada estilo
 
-### Padrões JSON
 ```
-Objeto: {"key":"value","nested":{"a":"b"}}
-Array: [{"name":"X","desc":"10 palavras"}]
-Lista: - [item] - [máx 10 palavras]
-Fluxo: step1 → step2 → step3
+Technical → "COMO implementar" (estrutura, código, configs)
+Design    → "COMO se parece" (layouts, fluxos, componentes UI)
+Business  → "O QUE e POR QUE" (requisitos, decisões, contexto)
 ```
 
-### Quando Usar Cada Formato
-{"tokenEfficient":["specs técnicas","context files","skills","commands"]}
-{"humanReadable":["README","about.md","brainstorms","onboarding"]}
+### Checklist Pré-Documentação
 
-### Checklist Pré-Finalização
-{"validar":["paths existem","versões corretas","sem duplicação","estrutura híbrida","brevidade"]}
+1. Identificar tipo de documento
+2. Carregar estilo correto: `cat .claude/skills/documentation-style/[estilo].md`
+3. Aplicar formato do estilo
+4. Validar contra regras universais
 
-### Anti-Patterns
-[{"errado":"vários arquivos","correto":"listar paths explícitos"}]
-[{"errado":"configurado no ambiente","correto":"nomear variáveis + arquivo"}]
-[{"errado":"parágrafo extenso","correto":"dividir em subseções"}]
-[{"errado":"TODO: documentar","correto":"documentar agora ou omitir"}]
+---
+
+## Arquivos de Estilo
+
+- [./technical.md](./technical.md) - Specs técnicas, planos de implementação
+- [./design.md](./design.md) - UX specs, layouts, componentes visuais
+- [./business.md](./business.md) - Features, requisitos, brainstorms
