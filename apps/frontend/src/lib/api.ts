@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useErrorModalStore } from '@/stores/error-modal-store'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1'
@@ -121,8 +121,8 @@ api.interceptors.response.use(
       }
 
       // Show error toast for non-401 errors (when displayType is not 'modal')
-      const message = error.message || 'Ocorreu um erro. Tente novamente.'
-      toast.error(message)
+      // Pass the full error to the smart toast for user-friendly message resolution
+      toast.error(error)
 
       return Promise.reject(error)
     }

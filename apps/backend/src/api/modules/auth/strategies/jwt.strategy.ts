@@ -31,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<User> {
+  async validate(payload: JwtPayload): Promise<User & { sessionId?: string }> {
     // Verify session exists and is not revoked
     if (payload.sessionId) {
       const session = await this.sessionRepository.findById(payload.sessionId);
@@ -53,6 +53,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException('User account is inactive');
     }
 
-    return user;
+    // Attach sessionId to user object for use in controllers
+    return {
+      ...user,
+      sessionId: payload.sessionId,
+    };
   }
 }

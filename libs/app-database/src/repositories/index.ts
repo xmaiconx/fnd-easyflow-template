@@ -11,3 +11,4 @@ export { LoginAttemptRepository } from './LoginAttemptRepository';
 export { AuthTokenRepository } from './AuthTokenRepository';
 export { ImpersonateSessionRepository } from './ImpersonateSessionRepository';
 export { InviteRepository } from './InviteRepository';
+export { EmailChangeRequestRepository } from './EmailChangeRequestRepository';

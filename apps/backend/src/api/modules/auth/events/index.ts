@@ -5,5 +5,6 @@ export { PasswordResetRequestedEvent } from './PasswordResetRequestedEvent';
 export { PasswordChangedEvent } from './PasswordChangedEvent';
 export { SessionRevokedEvent } from './SessionRevokedEvent';
 export { VerificationEmailResentEvent } from './VerificationEmailResentEvent';
+export { EmailChangeRequestedEvent } from './EmailChangeRequestedEvent';
 
 export * from './handlers';

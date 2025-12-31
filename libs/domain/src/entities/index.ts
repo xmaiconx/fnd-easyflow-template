@@ -12,3 +12,4 @@ export { LoginAttempt } from './LoginAttempt';
 export { AuthToken } from './AuthToken';
 export { ImpersonateSession } from './ImpersonateSession';
 export { Invite } from './Invite';
+export { EmailChangeRequest } from './EmailChangeRequest';

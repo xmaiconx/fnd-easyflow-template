@@ -7,3 +7,5 @@ export { ResetPasswordCommand } from './ResetPasswordCommand';
 export { VerifyEmailCommand } from './VerifyEmailCommand';
 export { ResendVerificationCommand } from './ResendVerificationCommand';
 export { UpdateProfileCommand } from './UpdateProfileCommand';
+export { RequestEmailChangeCommand } from './RequestEmailChangeCommand';
+export { ConfirmEmailChangeCommand } from './ConfirmEmailChangeCommand';

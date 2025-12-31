@@ -13,6 +13,7 @@ const STATUS_TO_DISPLAY_TYPE: Record<number, DisplayType> = {
   401: 'page',
   403: 'modal',
   404: 'inline',
+  429: 'toast',
   500: 'toast'
 };
 
@@ -86,7 +87,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       403: 'FORBIDDEN',
       404: 'NOT_FOUND',
       409: 'CONFLICT',
-      500: 'INTERNAL_SERVER_ERROR'
+      422: 'UNPROCESSABLE_ENTITY',
+      429: 'RATE_LIMIT_EXCEEDED',
+      500: 'INTERNAL_SERVER_ERROR',
+      502: 'BAD_GATEWAY',
+      503: 'SERVICE_UNAVAILABLE',
+      504: 'GATEWAY_TIMEOUT'
     };
 
     return errorCodes[status] || 'UNKNOWN_ERROR';

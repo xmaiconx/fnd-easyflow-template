@@ -2,7 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth-store'
 import type { BillingPlan, BillingInfo } from '@/types'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 export function usePlans() {
   return useQuery({

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
-import { toast } from "sonner"
+import { toast } from "@/lib/toast"
 import { Mail } from "lucide-react"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { api } from "@/lib/api"

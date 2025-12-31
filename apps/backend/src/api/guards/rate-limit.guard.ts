@@ -53,7 +53,15 @@ export class RateLimitGuard implements CanActivate {
     );
 
     if (!allowed) {
-      throw new HttpException('Too many requests', HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.TOO_MANY_REQUESTS,
+          message: 'Muitas tentativas. Por favor, aguarde um momento.',
+          errorCode: 'RATE_LIMIT_EXCEEDED',
+          displayType: 'toast',
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     return true;

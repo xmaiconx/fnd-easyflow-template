@@ -27,6 +27,8 @@ import {
   VerifyEmailDto,
   ResendVerificationDto,
   UpdateProfileDto,
+  RequestEmailChangeDto,
+  ConfirmEmailChangeDto,
 } from './dtos';
 import {
   SignUpCommand,
@@ -37,6 +39,8 @@ import {
   VerifyEmailCommand,
   ResendVerificationCommand,
   UpdateProfileCommand,
+  RequestEmailChangeCommand,
+  ConfirmEmailChangeCommand,
 } from './commands';
 import { SessionRepository, InviteRepository, UserRepository } from '@fnd/database';
 import { Inject, BadRequestException } from '@nestjs/common';
@@ -227,5 +231,24 @@ export class AuthController {
 
     await this.sessionRepository.revokeById(sessionId);
     return { message: 'Session revoked successfully' };
+  }
+
+  @Post('request-email-change')
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
+  @RateLimit({ limit: 3, windowSeconds: 3600 })
+  @HttpCode(HttpStatus.OK)
+  async requestEmailChange(@Req() req: any, @Body() dto: RequestEmailChangeDto) {
+    await this.commandBus.execute(
+      new RequestEmailChangeCommand(req.user.id, dto.newEmail, dto.currentPassword)
+    );
+    return { message: 'Link de verificação enviado para o novo endereço de e-mail.' };
+  }
+
+  @Post('confirm-email-change')
+  @HttpCode(HttpStatus.OK)
+  async confirmEmailChange(@Body() dto: ConfirmEmailChangeDto, @Req() req?: any) {
+    const sessionId = req?.user?.sessionId || null;
+    await this.commandBus.execute(new ConfirmEmailChangeCommand(dto.token, sessionId));
+    return { message: 'E-mail atualizado com sucesso.' };
   }
 }

@@ -62,7 +62,16 @@ function App() {
   return (
     <>
       <AppRoutes />
-      <Toaster richColors position="top-right" />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          unstyled: true,
+          classNames: {
+            toast: 'w-full max-w-[380px]',
+          },
+        }}
+        gap={12}
+      />
       <ErrorModal />
     </>
   )

@@ -6,6 +6,8 @@ export { ResetPasswordDto } from './ResetPasswordDto';
 export { VerifyEmailDto } from './VerifyEmailDto';
 export { ResendVerificationDto } from './ResendVerificationDto';
 export { UpdateProfileDto } from './UpdateProfileDto';
+export { RequestEmailChangeDto } from './RequestEmailChangeDto';
+export { ConfirmEmailChangeDto } from './ConfirmEmailChangeDto';
 export { AuthResponseDto } from './AuthResponseDto';
 export { UserProfileResponseDto } from './UserProfileResponseDto';
 export { SessionResponseDto } from './SessionResponseDto';

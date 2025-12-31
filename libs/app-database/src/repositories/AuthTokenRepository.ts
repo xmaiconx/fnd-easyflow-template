@@ -25,7 +25,7 @@ export class AuthTokenRepository {
     return this.mapToAuthToken(result);
   }
 
-  async findByTokenHash(hash: string, type: 'password_reset' | 'email_verification'): Promise<AuthToken | null> {
+  async findByTokenHash(hash: string, type: 'password_reset' | 'email_verification' | 'email_change'): Promise<AuthToken | null> {
     const result = await this.db
       .selectFrom('auth_tokens')
       .selectAll()

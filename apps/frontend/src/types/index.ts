@@ -345,5 +345,15 @@ export interface ListInvitesFilters {
   status?: InviteStatus
 }
 
+// Email Change types
+export interface RequestEmailChangeRequest {
+  newEmail: string
+  currentPassword: string
+}
+
+export interface ConfirmEmailChangeRequest {
+  token: string
+}
+
 // Error types
 export type { DisplayType, ErrorResponse } from './errors'

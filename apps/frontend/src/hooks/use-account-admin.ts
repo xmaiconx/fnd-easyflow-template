@@ -13,7 +13,7 @@ import type {
   AuditLog,
   AuditLogFilters,
 } from '@/types'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 // Users
 export function useAccountUsers(filters?: ListUsersFilters) {

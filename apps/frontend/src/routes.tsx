@@ -11,6 +11,7 @@ const ForgotPasswordPage = lazy(() => import('@/pages/auth/forgot-password'))
 const ResetPasswordPage = lazy(() => import('@/pages/auth/reset-password'))
 const VerifyEmailPage = lazy(() => import('@/pages/auth/verify-email'))
 const EmailNotVerifiedPage = lazy(() => import('@/pages/auth/email-not-verified'))
+const ConfirmEmailChangePage = lazy(() => import('@/pages/auth/confirm-email-change'))
 
 const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const SettingsPage = lazy(() => import('@/pages/settings'))
@@ -94,6 +95,14 @@ export function AppRoutes() {
           element={
             <Suspense fallback={<PageSkeleton variant="auth" />}>
               <EmailNotVerifiedPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/confirm-email-change/:token"
+          element={
+            <Suspense fallback={<PageSkeleton variant="auth" />}>
+              <ConfirmEmailChangePage />
             </Suspense>
           }
         />

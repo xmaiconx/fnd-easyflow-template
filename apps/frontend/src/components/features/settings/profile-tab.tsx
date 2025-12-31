@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuthStore } from "@/stores/auth-store"
-import { toast } from "sonner"
+import { toast } from "@/lib/toast"
 import { api } from "@/lib/api"
+import { EmailChangeDialog } from "./email-change-dialog"
 
 const roleTranslation: Record<string, string> = {
   'super-admin': 'Super Administrador',
@@ -135,7 +136,10 @@ export function ProfileTab() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-muted-foreground">Email</p>
-              <p className="text-base font-medium truncate">{user.email}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-base font-medium truncate">{user.email}</p>
+                <EmailChangeDialog currentEmail={user.email} />
+              </div>
             </div>
           </div>
 

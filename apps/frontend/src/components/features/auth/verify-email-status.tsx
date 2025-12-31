@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { motion } from "framer-motion"
-import { toast } from "sonner"
+import { toast } from "@/lib/toast"
 import { CheckCircle2, Loader2, XCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { LoadingButton } from "@/components/ui/loading-button"

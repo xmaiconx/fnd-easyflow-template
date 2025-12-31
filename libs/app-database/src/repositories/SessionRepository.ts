@@ -76,6 +76,16 @@ export class SessionRepository {
       .execute();
   }
 
+  async revokeAllExcept(userId: string, sessionIdToKeep: string): Promise<void> {
+    await this.db
+      .updateTable('sessions')
+      .set({ revoked_at: new Date() })
+      .where('user_id', '=', userId)
+      .where('id', '!=', sessionIdToKeep)
+      .where('revoked_at', 'is', null)
+      .execute();
+  }
+
   async deleteExpired(): Promise<void> {
     await this.db
       .deleteFrom('sessions')

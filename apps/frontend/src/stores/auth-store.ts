@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { api } from '@/lib/api'
 import type { User, LoginDto, SignupDto, AuthResponse, SignupResponse, Workspace } from '@/types'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 interface AuthState {
   user: User | null

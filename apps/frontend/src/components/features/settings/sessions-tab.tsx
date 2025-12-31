@@ -23,7 +23,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import type { Session } from "@/types"
-import { toast } from "sonner"
+import { toast } from "@/lib/toast"
 
 function getDeviceIcon(device: string) {
   const deviceLower = device.toLowerCase()
