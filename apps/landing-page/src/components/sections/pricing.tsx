@@ -57,7 +57,7 @@ export function Pricing() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            Investimento
+            Escolha seu caminho
           </motion.p>
           <motion.h2
             className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
@@ -65,8 +65,11 @@ export function Pricing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Código <span className="text-blue-500">grátis</span>.{' '}
-            <span className="text-orange-500">Gestão</span> é o diferencial.
+            <span className="block">O código é <span className="text-blue-500">grátis</span>.</span>
+            <span className="block mt-2">
+              O <span className="text-orange-500">FND</span> é o que faz você{' '}
+              <span className="text-orange-500">lançar</span>.
+            </span>
           </motion.h2>
           <motion.p
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
@@ -75,8 +78,9 @@ export function Pricing() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            O template é open source. O FND TECHLEAD é o que transforma
-            o template em um SaaS de sucesso.
+            Template open source para quem quer fazer sozinho.
+            <br className="hidden md:block" />
+            FND completo para quem quer resultado de verdade.
           </motion.p>
         </div>
 
