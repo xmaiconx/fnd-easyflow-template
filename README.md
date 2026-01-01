@@ -1,183 +1,222 @@
-# FND QuickLaunch
+<p align="center">
+  <img src="https://img.shields.io/badge/FND-META--CODE-black?style=for-the-badge&labelColor=000" alt="FND META-CODE" />
+</p>
 
-> **Template base para alunos da Fábrica de Negócios Digitais (FND)** construírem seus SaaS utilizando IA.
+<h1 align="center">Fábrica de Negócios Digitais</h1>
 
-## 🎯 Sobre o FND QuickLaunch
+<p align="center">
+  <strong>Você não precisa aprender a programar.<br>Precisa aprender a LIDERAR.</strong>
+</p>
 
-O **FND QuickLaunch** é um template pronto para produção que permite aos alunos da FND iniciarem o desenvolvimento de seus SaaS com uma base sólida e bem arquitetada.
+<p align="center">
+  O FND transforma a IA no seu time de desenvolvimento — e você no CEO da sua própria empresa de tecnologia.
+</p>
 
-**A grande promessa do FND**: Pare de tentar construir tijolo por tijolo. Entre na Fábrica, use nossas máquinas (QuickLaunch + SalesFlow) e tenha não só o produto pronto, mas a máquina de vendas construída.
+<p align="center">
+  <a href="https://brabos.ai"><img src="https://img.shields.io/badge/QUERO%20ENTRAR%20NA%20F%C3%81BRICA-FF6B00?style=for-the-badge&logoColor=white" alt="Entrar na Fábrica" /></a>
+</p>
 
-Este template inclui:
-- ✅ Arquitetura limpa (Clean Architecture + CQRS)
-- ✅ Multi-tenancy completo (workspaces)
-- ✅ Autenticação própria (JWT + Passport.js)
-- ✅ Sistema de billing com Stripe
-- ✅ Processamento assíncrono com BullMQ + Redis
-- ✅ Webhooks para integrações externas
-- ✅ Workers híbridos (API + Background jobs)
-- ✅ Logs de auditoria
+---
 
-## 🚀 Quick Start
+## O Problema que Ninguém Te Conta
+
+Você já gastou horas (ou dias) conversando com ChatGPT, Cursor, Windsurf...
+
+O código até sai. Mas e depois?
+
+- **Quebra do nada** — e você não faz ideia do porquê
+- **Não escala** — funciona com 10 usuários, trava com 100
+- **Inseguro** — seus dados (e dos seus clientes) expostos
+- **Impossível de manter** — cada mudança gera 3 bugs novos
+
+**A IA sabe escrever código. Mas não sabe construir empresas.**
+
+Sem gestão técnica, seu projeto é um castelo de cartas esperando o vento.
+
+---
+
+## A Solução: F.N.D. META-CODE
+
+O **META-CODE** é um "Cérebro de Tech Lead" que você instala no seu projeto.
+
+Ele não escreve código — ele **COMANDA** a IA que escreve.
+
+| | Vibe Coder | Tech Owner (FND) |
+|---|---|---|
+| **Arquitetura** | "Vai fazendo aí" | Planejada antes da primeira linha |
+| **Segurança** | Descobre quando hackeia | Auditoria em tempo real |
+| **Erros** | Pânico e desespero | Diagnóstico e correção automática |
+| **Resultado** | Projeto Frankenstein | SaaS pronto pra escalar |
+
+### Os 3 Pilares do META-CODE
+
+| Pilar | O que faz |
+|-------|-----------|
+| **Architecture Core** | Planeja banco de dados e rotas ANTES de qualquer código |
+| **Security Core** | Bloqueia vulnerabilidades em tempo real |
+| **Autonomous Fix** | Corrige erros complexos sem você precisar entender |
+
+---
+
+## Este Repositório: FND QuickLaunch
+
+O **QuickLaunch** é o motor do seu SaaS. A base sólida que os alunos da Fábrica usam para construir produtos reais.
+
+**O que já vem pronto:**
+
+- Autenticação completa (login, registro, recuperação de senha)
+- Sistema de pagamentos com Stripe
+- Multi-tenancy (workspaces isolados)
+- Painel administrativo
+- Processamento em background
+- Logs de auditoria
+- Deploy configurado
+
+**Stack:**
+
+[![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs)](https://nestjs.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)](https://www.postgresql.org/)
+
+---
+
+## Quer Acesso Completo?
+
+Este repositório é **apenas o template**.
+
+O verdadeiro poder está no **META-CODE** — a inteligência que guia a construção.
+
+<p align="center">
+  <a href="https://brabos.ai"><img src="https://img.shields.io/badge/GARANTIR%20MINHA%20VAGA-FF6B00?style=for-the-badge&logoColor=white" alt="Garantir Vaga" /></a>
+</p>
+
+**O que você ganha na Fábrica:**
+
+- F.N.D. META-CODE (Cérebro de Tech Lead)
+- Template QuickLaunch (este repositório + suporte)
+- Template SalesFlow (Landing Page com IA)
+- Treinamento completo
+- Comunidade de Tech Owners
+
+---
+
+<details>
+<summary><strong>Documentação Técnica (para desenvolvedores)</strong></summary>
+
+## Quick Start
 
 ### Pré-requisitos
 
 - Node.js 18+ e npm 9+
-- Docker & Docker Compose (para ambiente local)
+- Docker & Docker Compose
 - PostgreSQL 15+
-- Redis 7+ (incluído no docker-compose)
-- Conta Stripe (para billing)
-- Conta Resend (para emails)
+- Redis 7+
+- Conta Stripe (billing)
+- Conta Resend (emails)
 
 ### Instalação
 
-1. **Clone o repositório:**
 ```bash
-git clone https://github.com/seu-usuario/fnd-easyflow-template.git
+# 1. Clone o repositório
+git clone https://github.com/xmaiconx/fnd-easyflow-template.git
 cd fnd-easyflow-template
-```
 
-2. **Instale as dependências:**
-```bash
+# 2. Instale as dependências
 npm install
-```
 
-3. **Inicie o ambiente Docker:**
-```bash
-cd infra
-docker-compose up -d
-cd ..
-```
+# 3. Inicie o ambiente Docker
+docker-compose -f infra/docker-compose.yml up -d
 
-Isso inicia:
-- PostgreSQL (porta 5432)
-- Redis (porta 6379)
-- PgAdmin (porta 5050)
-- Redis Insight (porta 8001)
-
-4. **Configure as variáveis de ambiente:**
-
-Copie o `.env.example` e configure:
-```bash
+# 4. Configure as variáveis de ambiente
 cp apps/backend/.env.example apps/backend/.env
-```
+# Edite o .env com suas credenciais
 
-Variáveis principais:
-```bash
-# Database
-DATABASE_URL=postgresql://fnd_user:fnd_pass@localhost:5432/fnd_easyflow
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# Node Mode
-NODE_MODE=hybrid  # api | workers | hybrid
-
-# JWT Auth
-JWT_SECRET=your-jwt-secret-key
-JWT_EXPIRES_IN=15m
-REFRESH_TOKEN_EXPIRES_IN=7d
-
-# Stripe
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-
-# API
-API_PORT=3001
-API_BASE_URL=http://localhost:3001
-
-# Encryption
-ENCRYPTION_KEY=your-32-byte-hex-key
-
-# Email
-RESEND_API_KEY=re_xxx
-RESEND_FROM_EMAIL=noreply@domain.com
-
-# Frontend
-FRONTEND_URL=http://localhost:3000
-```
-
-5. **Execute as migrações do banco:**
-```bash
+# 5. Execute as migrações
 npm run migrate:latest
-```
 
-6. **Inicie o ambiente de desenvolvimento:**
-```bash
-# Inicia API + Frontend em paralelo
+# 6. Inicie o desenvolvimento
 npm run dev
-
-# OU inicie separadamente:
-npm run dev:api      # Backend em modo hybrid (API + Workers)
-cd apps/frontend && npm run dev  # Frontend apenas
 ```
 
-7. **Acesse as ferramentas:**
-- Frontend: http://localhost:3000
-- API: http://localhost:3001
-- PgAdmin: http://localhost:5050 (admin@fnd.com / admin)
-- Redis Insight: http://localhost:8001
+### Portas do Ambiente Local
 
-## 📦 Stack Tecnológica
+| Serviço | Porta | URL |
+|---------|-------|-----|
+| Frontend | 3000 | http://localhost:3000 |
+| API | 3001 | http://localhost:3001 |
+| Manager | 3002 | http://localhost:3002 |
+| PostgreSQL | 5432 | - |
+| Redis | 6379 | - |
+| PgAdmin | 5050 | http://localhost:5050 |
+
+---
+
+## Stack Tecnológica
 
 ### Backend
-- **NestJS 10** - Framework Node.js com dependency injection
-- **PostgreSQL 15** - Banco de dados relacional
-- **Kysely** - Query builder type-safe
-- **BullMQ + Redis 7** - Job queue e cache para async jobs
-- **Passport.js + JWT** - Autenticação própria com refresh token rotation
-- **Stripe** - Pagamentos e assinaturas
-- **Winston** - Logging estruturado
-- **Railway** - Deploy Docker (backend)
-- **Cloudflare Pages** - Deploy estático (frontend)
+
+| Tecnologia | Versão | Uso |
+|------------|--------|-----|
+| NestJS | 10 | Framework com Dependency Injection |
+| PostgreSQL | 15 | Banco de dados relacional |
+| Kysely | 0.27 | Query builder type-safe |
+| BullMQ | 5.0 | Job queue para processamento assíncrono |
+| Redis | 7 | Cache e message broker |
+| Passport.js | - | Autenticação JWT |
+| Stripe | - | Pagamentos e assinaturas |
+| Resend | 2.0 | Envio de emails transacionais |
+| Winston | 3.10 | Logging estruturado |
 
 ### Frontend
-- **React 18** - Biblioteca UI
-- **Vite** - Build tool moderna e rápida
-- **TypeScript** - Type safety
-- **Shadcn/ui** - Componentes UI
-- **Tailwind CSS** - Utility-first CSS
-- **Zustand** - State management
-- **TanStack Query** - Data fetching e cache
-- **React Hook Form + Zod** - Formulários e validação
 
-### Infraestrutura
-- **Turbo** - Build system para monorepo
-- **Docker Compose** - Orquestração de serviços locais (PostgreSQL, Redis, PgAdmin, Redis Insight)
-- **Railway** - Deploy backend (Docker)
-- **Cloudflare Pages** - Deploy frontend (static)
+| Tecnologia | Versão | Uso |
+|------------|--------|-----|
+| React | 18.2 | Biblioteca UI |
+| Vite | 7.2 | Build tool |
+| TypeScript | 5.0+ | Type safety |
+| Shadcn/ui | - | Componentes UI |
+| Tailwind CSS | 3 | Styling |
+| Zustand | 4.4 | State management |
+| TanStack Query | 4.35 | Data fetching e cache |
+| React Hook Form | 7.69 | Formulários |
+| Zod | 3.25 | Validação de schemas |
 
-## 📂 Estrutura do Projeto
+---
+
+## Estrutura do Projeto
 
 ```
 fnd-easyflow-template/
 ├── apps/
-│   ├── backend/       # API NestJS (API + Workers híbrido)
-│   └── frontend/      # React App
+│   ├── backend/         # API NestJS (API + Workers híbrido)
+│   ├── frontend/        # React App (usuário final)
+│   └── manager/         # React App (Super Admin)
 ├── libs/
-│   ├── domain/        # Entidades e regras de negócio
-│   ├── backend/       # Interfaces de serviços
-│   └── app-database/  # Repositórios e migrations
+│   ├── domain/          # Entidades, Enums e Types (zero deps)
+│   ├── backend/         # Interfaces de serviços (contracts)
+│   └── app-database/    # Repositórios Kysely e migrations
 ├── infra/
-│   └── docker-compose.yml  # Ambiente local (PostgreSQL, Redis, etc.)
-├── docs/              # Documentação do projeto
-└── .claude/           # Skills e comandos para Claude Code
-└── .fnd/              # Informações sobre o projeto FND
-
-.fnd\about.json
-{
-    "version": "1.0.0",
-    "name": "FND QuickLaunch",
-    "type": "quicklaunch"
-}
+│   └── docker-compose.yml
+├── docs/
+│   └── features/        # Documentação de features
+└── .claude/             # Skills para Claude Code
 ```
 
-## 🛠️ Comandos Principais
+### Hierarquia de Camadas
+
+```
+domain → interfaces → database → api
+```
+
+---
+
+## Comandos Principais
 
 ```bash
 # Desenvolvimento
-npm run dev              # API + Frontend
-npm run dev:api          # Apenas API (local development)
+npm run dev              # API + Frontend + Manager
+npm run dev:api          # Apenas API (modo hybrid)
 
 # Build
 npm run build            # Build de todos os packages
@@ -187,97 +226,77 @@ npm run typecheck        # Verificar tipos TypeScript
 npm run migrate:latest   # Rodar migrations
 npm run migrate:rollback # Reverter última migration
 npm run seed:run         # Popular banco com dados
-
-# Limpeza
-npm run clean            # Remove dist/ e cache
-
-# Deploy
-git push origin main     # Railway auto-deploy (backend)
-                         # Cloudflare Pages auto-deploy (frontend)
 ```
 
-## 📖 Documentação Completa
+---
 
-Para detalhes técnicos completos sobre arquitetura, padrões e convenções, consulte:
-
-- **[CLAUDE.md](./CLAUDE.md)** - Guia técnico completo (para desenvolvedores e agentes IA)
-- **[docs/features/](./docs/features/)** - Documentação de features implementadas
-
-## 🎓 Próximos Passos
-
-1. **Customize o projeto:**
-   - Altere o nome do projeto nos `package.json`
-   - Configure suas credenciais de serviços (Stripe, Resend)
-   - Adapte o esquema do banco para seu domínio
-
-2. **Desenvolva novas features:**
-   - Use o workflow FND: `/feature` → `/plan` → `/dev` → `/review` → `/done`
-   - Siga os padrões de Clean Architecture e CQRS
-   - Documente suas features em `docs/features/`
-
-3. **Deploy:**
-   - Veja seção "Deploy" abaixo
-
-## 🚀 Deploy
+## Deploy
 
 ### Arquitetura de Produção
 
-- **Backend**: Railway (Docker container com API + Workers)
-- **Frontend**: Cloudflare Pages (static hosting)
-- **Database**: PostgreSQL (Railway addon ou externo)
-- **Queue**: Redis (Railway addon ou externo)
-
-### Railway (Backend)
-
-1. Conecte o repositório ao Railway
-2. Configure as variáveis de ambiente (ver seção abaixo)
-3. Deploy automático via `git push origin main`
-
-O backend roda em modo `hybrid` por padrão (API + Workers BullMQ no mesmo container).
-
-### Cloudflare Pages (Frontend)
-
-1. Conecte o repositório ao Cloudflare Pages
-2. Configure o build:
-   - Build command: `npm run build`
-   - Build output directory: `apps/frontend/dist`
-   - Root directory: `/`
-3. Configure as variáveis de ambiente do frontend
-4. Deploy automático via git push
+```
+┌─────────────────┐     ┌─────────────────┐
+│  Cloudflare     │     │    Railway      │
+│     Pages       │────▶│   (Docker)      │
+│   (Frontend)    │     │  API + Workers  │
+└─────────────────┘     └────────┬────────┘
+                                 │
+                    ┌────────────┴────────────┐
+                    │                         │
+              ┌─────▼─────┐           ┌───────▼───────┐
+              │ PostgreSQL│           │     Redis     │
+              │  (Railway)│           │   (Railway)   │
+              └───────────┘           └───────────────┘
+```
 
 ### Variáveis de Ambiente
 
 **Backend (Railway):**
-- `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection string
-- `NODE_MODE` - `hybrid` (padrão) | `api` | `workers`
-- `JWT_SECRET` - Secret para JWT tokens
-- `JWT_EXPIRES_IN` - Tempo de expiração do access token (ex: 15m)
-- `REFRESH_TOKEN_EXPIRES_IN` - Tempo de expiração do refresh token (ex: 7d)
-- `RESEND_API_KEY` - Resend
-- `STRIPE_SECRET_KEY` - Stripe
-- `STRIPE_WEBHOOK_SECRET`
-- `ENCRYPTION_KEY` - 32-byte hex key para AES-256-GCM
-- `API_PORT` - Porta da API (Railway define automaticamente)
-- `API_BASE_URL` - URL pública da API
-- `FRONTEND_URL` - URL do frontend em produção
-- `LOG_LEVEL` - Log level (error, warn, info, debug)
+```bash
+DATABASE_URL=postgresql://...
+REDIS_URL=redis://...
+NODE_MODE=hybrid
+JWT_SECRET=...
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+STRIPE_SECRET_KEY=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+RESEND_API_KEY=re_...
+ENCRYPTION_KEY=...  # 32-byte hex
+API_BASE_URL=https://api.seudominio.com
+FRONTEND_URL=https://seudominio.com
+```
 
 **Frontend (Cloudflare Pages):**
-- `VITE_API_URL` - URL da API em produção
-
-## 🤝 Suporte
-
-Este template faz parte do ecossistema **Fábrica de Negócios Digitais (FND)**. Para suporte:
-
-- Consulte a documentação interna do FND
-- Abra issues no repositório
-- Entre em contato com o time FND
-
-## 📄 Licença
-
-Este projeto é propriedade da Fábrica de Negócios Digitais e destinado exclusivamente para uso de seus alunos.
+```bash
+VITE_API_URL=https://api.seudominio.com
+```
 
 ---
 
-**Desenvolvido com ❤️ pela Fábrica de Negócios Digitais**
+## Documentação Adicional
+
+- **[CLAUDE.md](./CLAUDE.md)** — Guia técnico para desenvolvedores e agentes IA
+- **[docs/features/](./docs/features/)** — Documentação de features
+
+</details>
+
+---
+
+## Contribuindo
+
+Contribuições são bem-vindas! Veja as [issues](https://github.com/xmaiconx/fnd-easyflow-template/issues) abertas.
+
+---
+
+## Licença
+
+[MIT License](LICENSE)
+
+---
+
+<p align="center">
+  <strong>Fábrica de Negócios Digitais</strong><br>
+  <sub>Transformando empreendedores em Tech Owners</sub><br><br>
+  <a href="https://brabos.ai">brabos.ai</a> · Criado por <strong>Maicon Matsubara</strong>
+</p>
