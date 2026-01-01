@@ -8,50 +8,50 @@ import {
 
 const faqs = [
   {
-    question: 'Preciso saber programar para usar o QuickLaunch?',
+    question: 'O template é realmente grátis?',
     answer:
-      'Sim, o QuickLaunch é voltado para desenvolvedores ou times com conhecimento técnico. Você precisa entender TypeScript, React e conceitos de backend. O template economiza meses de setup, mas você ainda precisa desenvolver as features específicas do seu negócio.',
+      'Sim! O FND QuickLaunch é 100% open source sob licença MIT. Você pode usar para projetos comerciais, modificar como quiser e não precisa pagar nada. O template inclui auth, billing, multi-tenancy e arquitetura completa.',
   },
   {
-    question: 'Qual a diferença entre QuickLaunch e outros boilerplates?',
+    question: 'Qual a diferença entre usar só o template e entrar na FND?',
     answer:
-      'O QuickLaunch não é só um boilerplate — faz parte do ecossistema FND que inclui metodologia, comunidade e suporte. Além disso, foi construído com arquitetura limpa (Clean Architecture + CQRS), multi-tenancy real (não gambiarras), e integração completa com Stripe que funciona em produção.',
+      'O template é o código. A FND é o ecossistema completo: você ganha o FND TECHLEAD (Tech Lead Virtual que gerencia seu desenvolvimento), treinamento modular, comunidade exclusiva, mentorias ao vivo e suporte. É a diferença entre ter as ferramentas e ter quem te ensina a usar.',
   },
   {
-    question: 'Posso usar para projetos comerciais?',
+    question: 'Preciso saber programar para usar?',
     answer:
-      'Sim! O QuickLaunch é licenciado para uso comercial pelos alunos da FND. Você pode criar quantos SaaS quiser com o template. A única restrição é redistribuir o template em si.',
+      'Para usar apenas o template: sim, você precisa de conhecimento técnico em TypeScript, React e NestJS. Para usar o FND TECHLEAD: não necessariamente. O TECHLEAD assume as decisões técnicas e gerencia a IA que escreve o código. Você foca na visão de negócio.',
   },
   {
-    question: 'E se eu precisar de uma feature que não está no template?',
+    question: 'O que é o FND TECHLEAD exatamente?',
     answer:
-      'A arquitetura do QuickLaunch foi pensada para ser extensível. Seguindo os padrões estabelecidos (CQRS, Repository, etc.), você consegue adicionar qualquer feature. A comunidade FND também compartilha extensões e integrações regularmente.',
+      'É um sistema de inteligência que funciona como um Tech Lead virtual. Ele planeja arquitetura antes do código ser escrito, audita segurança em tempo real, diagnostica e corrige erros automaticamente. Pense nele como ter um engenheiro sênior de R$30k/mês trabalhando no seu projeto.',
   },
   {
     question: 'Quanto tempo economizo usando o QuickLaunch?',
     answer:
-      'Em média, alunos reportam economia de 2-4 meses de desenvolvimento. Isso inclui: setup de auth (2-3 semanas), billing com Stripe (2-4 semanas), multi-tenancy (2-3 semanas), infra de background jobs (1-2 semanas), e arquitetura base (2-4 semanas).',
+      'Em média, 2-4 meses de desenvolvimento. Isso inclui: setup de auth (2-3 semanas), billing com Stripe (2-4 semanas), multi-tenancy (2-3 semanas), infra de background jobs (1-2 semanas), e arquitetura base (2-4 semanas). Tudo já está pronto e testado em produção.',
+  },
+  {
+    question: 'Posso usar para projetos comerciais?',
+    answer:
+      'Sim! O template tem licença MIT — use para quantos projetos comerciais quiser. A única coisa que você não pode fazer é redistribuir o template como se fosse seu produto.',
   },
   {
     question: 'O template recebe atualizações?',
     answer:
-      'Sim! O QuickLaunch é ativamente mantido. Alunos da FND recebem atualizações conforme novas versões do NestJS, React e outras dependências são lançadas, além de melhorias de segurança e novas features.',
-  },
-  {
-    question: 'Posso usar com outro banco de dados?',
-    answer:
-      'O template usa PostgreSQL por padrão, que é a melhor escolha para 99% dos SaaS. Porém, como usamos Kysely (query builder), a migração para outro banco SQL é possível com ajustes. NoSQL (MongoDB, etc.) exigiria refatoração mais significativa.',
+      'Sim! O QuickLaunch é ativamente mantido. Atualizamos conforme novas versões do NestJS, React e outras dependências são lançadas, além de melhorias de segurança e novas features. Quem está na FND recebe atualizações prioritárias.',
   },
   {
     question: 'Como funciona o suporte?',
     answer:
-      'Alunos FND têm acesso à comunidade exclusiva onde podem tirar dúvidas, compartilhar experiências e receber ajuda de outros alunos e mentores. Issues técnicas específicas do template podem ser reportadas no repositório.',
+      'Para o template open source: abra issues no GitHub e a comunidade ajuda. Para quem está na FND: acesso à comunidade exclusiva com suporte direto, mentorias ao vivo e canal prioritário para dúvidas técnicas.',
   },
 ];
 
 export function FAQ() {
   return (
-    <section className="py-20 md:py-32 bg-muted/30">
+    <section id="faq" className="py-20 md:py-32 bg-muted/30">
       <div className="container px-4">
         {/* Header */}
         <div className="text-center mb-16">
@@ -104,8 +104,10 @@ export function FAQ() {
           <p className="text-muted-foreground">
             Ainda tem dúvidas?{' '}
             <a
-              href="#"
-              className="text-primary hover:underline"
+              href="https://brabos.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 hover:underline"
             >
               Fale com a equipe FND
             </a>

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 const navLinks = [
   { label: 'Features', href: '#features' },
-  { label: 'Como funciona', href: '#how-it-works' },
+  { label: 'Como Funciona', href: '#how-it-works' },
   { label: 'Preços', href: '#pricing' },
   { label: 'FAQ', href: '#faq' },
 ];
@@ -40,11 +40,14 @@ export function Navbar() {
         <nav className="container px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <a href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">Q</span>
+            <a href="/" className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
+                <span className="text-white font-bold text-sm">QL</span>
               </div>
-              <span className="font-bold text-lg">QuickLaunch</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-lg leading-tight">QuickLaunch</span>
+                <span className="text-[10px] text-muted-foreground leading-tight">Template SaaS Open Source</span>
+              </div>
             </a>
 
             {/* Desktop nav */}
@@ -62,10 +65,23 @@ export function Navbar() {
 
             {/* CTA */}
             <div className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" size="sm">
-                Entrar
+              <a
+                href="https://brabos.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Sobre a FND
+              </a>
+              <Button size="sm" asChild>
+                <a
+                  href="https://github.com/xmaiconx/fnd-easyflow-template"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Baixar Template
+                </a>
               </Button>
-              <Button size="sm">Começar agora</Button>
             </div>
 
             {/* Mobile menu button */}
@@ -118,10 +134,24 @@ export function Navbar() {
                   </a>
                 ))}
                 <hr className="my-2" />
-                <Button variant="outline" className="w-full">
-                  Entrar
+                <Button className="w-full" asChild>
+                  <a
+                    href="https://github.com/xmaiconx/fnd-easyflow-template"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Baixar Template
+                  </a>
                 </Button>
-                <Button className="w-full">Começar agora</Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-orange-500/30 text-orange-500"
+                  asChild
+                >
+                  <a href="https://brabos.ai" target="_blank" rel="noopener noreferrer">
+                    Conhecer a FND
+                  </a>
+                </Button>
               </div>
             </motion.div>
           </motion.div>

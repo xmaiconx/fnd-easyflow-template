@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Zap } from 'lucide-react';
+import { ArrowRight, Github, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function CTA() {
@@ -28,32 +28,55 @@ export function CTA() {
             viewport={{ once: true }}
             transition={{ type: 'spring', delay: 0.2 }}
           >
-            <Zap className="h-8 w-8 text-primary" />
+            <Rocket className="h-8 w-8 text-primary" />
           </motion.div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-            Pare de construir{' '}
-            <span className="text-primary">tijolo por tijolo</span>
+            Pronto para{' '}
+            <span className="text-primary">lançar</span>?
           </h2>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Entre na Fábrica de Negócios Digitais. Use nossas máquinas (QuickLaunch + SalesFlow)
-            e tenha não só o produto pronto, mas a máquina de vendas construída.
+            Clone o template, customize para seu negócio e lance em semanas.
+            100% gratuito, open source, licença MIT.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="xl" className="group">
-              Entrar na FND
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <Button size="xl" className="group" asChild>
+              <a
+                href="https://github.com/xmaiconx/fnd-easyflow-template"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="mr-2 h-5 w-5" />
+                Baixar Template
+              </a>
             </Button>
-            <Button size="xl" variant="outline">
-              Agendar conversa
+            <Button
+              size="xl"
+              variant="outline"
+              className="group border-orange-500/30 hover:border-orange-500/50 hover:bg-orange-500/5"
+              asChild
+            >
+              <a href="https://brabos.ai" target="_blank" rel="noopener noreferrer">
+                Conhecer a FND
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </a>
             </Button>
           </div>
 
           {/* Trust */}
           <p className="mt-8 text-sm text-muted-foreground">
-            +100 alunos já lançaram seus SaaS com a FND
+            Criado por{' '}
+            <a
+              href="https://linkedin.com/in/maiconmatsubara"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground hover:underline"
+            >
+              Maicon Matsubara
+            </a>
+            {' '}· Tech Lead com 15+ anos de experiência
           </p>
         </motion.div>
       </div>

@@ -30,7 +30,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-20 md:py-32 bg-muted/30">
+    <section id="how-it-works" className="py-20 md:py-32 bg-muted/30">
       <div className="container px-4">
         {/* Header */}
         <div className="text-center mb-16">
@@ -106,23 +106,6 @@ export function HowItWorks() {
             </motion.div>
           ))}
         </div>
-
-        {/* Bottom CTA */}
-        <motion.div
-          className="mt-16 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-muted-foreground">
-            Workflow completo com comandos FND:{' '}
-            <code className="text-primary">/feature</code> →{' '}
-            <code className="text-primary">/plan</code> →{' '}
-            <code className="text-primary">/dev</code> →{' '}
-            <code className="text-primary">/review</code> →{' '}
-            <code className="text-primary">/done</code>
-          </p>
-        </motion.div>
       </div>
     </section>
   );

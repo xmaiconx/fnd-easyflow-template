@@ -87,7 +87,7 @@ const item = {
 
 export function Features() {
   return (
-    <section className="py-20 md:py-32">
+    <section id="features" className="py-20 md:py-32">
       <div className="container px-4">
         {/* Header */}
         <div className="text-center mb-16">

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/FND-META--CODE-black?style=for-the-badge&labelColor=000" alt="FND META-CODE" />
+  <img src="https://img.shields.io/badge/FND-TECHLEAD-black?style=for-the-badge&labelColor=000" alt="FND TECHLEAD" />
 </p>
 
 <h1 align="center">Fábrica de Negócios Digitais</h1>
@@ -35,9 +35,11 @@ Sem gestão técnica, seu projeto é um castelo de cartas esperando o vento.
 
 ---
 
-## A Solução: F.N.D. META-CODE
+## A Solução: FND TECHLEAD
 
-O **META-CODE** é um "Cérebro de Tech Lead" que você instala no seu projeto.
+O **FND TECHLEAD** é um Tech Lead virtual que assume a gestão técnica do seu projeto.
+
+Você não precisa de equipe. Não precisa entender código. Ele decide, audita e corrige — como um engenheiro sênior faria.
 
 Ele não escreve código — ele **COMANDA** a IA que escreve.
 
@@ -48,13 +50,14 @@ Ele não escreve código — ele **COMANDA** a IA que escreve.
 | **Erros** | Pânico e desespero | Diagnóstico e correção automática |
 | **Resultado** | Projeto Frankenstein | SaaS pronto pra escalar |
 
-### Os 3 Pilares do META-CODE
+### Como o TECHLEAD Atua
 
-| Pilar | O que faz |
-|-------|-----------|
-| **Architecture Core** | Planeja banco de dados e rotas ANTES de qualquer código |
-| **Security Core** | Bloqueia vulnerabilidades em tempo real |
-| **Autonomous Fix** | Corrige erros complexos sem você precisar entender |
+| Função | O que faz |
+|--------|-----------|
+| **Arquitetura** | Planeja banco de dados e rotas ANTES de qualquer código |
+| **Segurança** | Bloqueia vulnerabilidades em tempo real |
+| **Correção** | Diagnostica e corrige erros sem você precisar entender |
+| **Gestão** | Coordena o desenvolvimento do início ao deploy |
 
 ---
 
@@ -85,7 +88,7 @@ O **QuickLaunch** é o motor do seu SaaS. A base sólida que os alunos da Fábri
 
 Este repositório é **apenas o template**.
 
-O verdadeiro poder está no **META-CODE** — a inteligência que guia a construção.
+O verdadeiro poder está no **FND TECHLEAD** — o Tech Lead que assume a gestão do seu projeto.
 
 <p align="center">
   <a href="https://brabos.ai"><img src="https://img.shields.io/badge/GARANTIR%20MINHA%20VAGA-FF6B00?style=for-the-badge&logoColor=white" alt="Garantir Vaga" /></a>
@@ -93,7 +96,7 @@ O verdadeiro poder está no **META-CODE** — a inteligência que guia a constru
 
 **O que você ganha na Fábrica:**
 
-- F.N.D. META-CODE (Cérebro de Tech Lead)
+- FND TECHLEAD (seu Tech Lead virtual)
 - Template QuickLaunch (este repositório + suporte)
 - Template SalesFlow (Landing Page com IA)
 - Treinamento completo
@@ -187,7 +190,7 @@ npm run dev
 ## Estrutura do Projeto
 
 ```
-fnd-easyflow-template/
+fnd-quicklaunch/
 ├── apps/
 │   ├── backend/         # API NestJS (API + Workers híbrido)
 │   ├── frontend/        # React App (usuário final)

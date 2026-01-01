@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Sparkles, ArrowRight, Github } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,39 +8,46 @@ import { cn } from '@/lib/utils';
 const plans = [
   {
     name: 'QuickLaunch',
-    description: 'Para quem quer começar',
-    price: 'Incluído na FND',
+    description: 'Template Open Source',
+    price: 'Grátis',
+    priceNote: 'para sempre',
     features: [
-      'Template completo',
+      'Template completo no GitHub',
       'Auth + Billing + Multi-tenancy',
-      'Clean Architecture',
-      'Documentação completa',
-      'Atualizações por 1 ano',
+      'Clean Architecture + CQRS',
+      'Documentação técnica',
+      'Licença MIT',
     ],
-    cta: 'Entrar na FND',
+    cta: 'Ver no GitHub',
+    ctaLink: 'https://github.com/xmaiconx/fnd-easyflow-template',
+    ctaIcon: Github,
     highlighted: false,
+    gradient: 'from-blue-500',
   },
   {
     name: 'FND Completo',
-    description: 'Template + Método + Comunidade',
+    description: 'TECHLEAD + Template + Método',
     price: 'Consulte',
+    priceNote: 'vagas limitadas',
     features: [
-      'Tudo do QuickLaunch',
-      'SalesFlow (máquina de vendas)',
+      'FND TECHLEAD (Tech Lead Virtual)',
+      'Template QuickLaunch + suporte',
+      'SalesFlow (Landing Page com IA)',
+      'Treinamento modular completo',
       'Comunidade exclusiva',
       'Mentorias ao vivo',
-      'Suporte prioritário',
-      'Atualizações vitalícias',
-      'Cases e templates extras',
     ],
-    cta: 'Falar com a equipe',
+    cta: 'Entrar na Fábrica',
+    ctaLink: 'https://brabos.ai',
+    ctaIcon: ArrowRight,
     highlighted: true,
+    gradient: 'from-orange-500',
   },
 ];
 
 export function Pricing() {
   return (
-    <section className="py-20 md:py-32">
+    <section id="pricing" className="py-20 md:py-32">
       <div className="container px-4">
         {/* Header */}
         <div className="text-center mb-16">
@@ -58,8 +65,8 @@ export function Pricing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Quanto custa{' '}
-            <span className="text-primary">meses de trabalho</span>?
+            Código <span className="text-blue-500">grátis</span>.{' '}
+            <span className="text-orange-500">Gestão</span> é o diferencial.
           </motion.h2>
           <motion.p
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
@@ -68,8 +75,8 @@ export function Pricing() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            O QuickLaunch faz parte do ecossistema FND. Você não compra só um template,
-            você entra numa fábrica completa.
+            O template é open source. O FND TECHLEAD é o que transforma
+            o template em um SaaS de sucesso.
           </motion.p>
         </div>
 
@@ -86,21 +93,39 @@ export function Pricing() {
               <Card
                 className={cn(
                   'relative h-full flex flex-col',
-                  plan.highlighted && 'border-primary shadow-lg shadow-primary/10'
+                  plan.highlighted && 'border-orange-500 shadow-lg shadow-orange-500/10'
                 )}
               >
                 {plan.highlighted && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600">
                     <Sparkles className="w-3 h-3 mr-1" />
                     Recomendado
                   </Badge>
                 )}
 
                 <CardHeader className="text-center pb-8 pt-8">
+                  <div
+                    className={cn(
+                      'inline-flex items-center justify-center h-12 w-12 rounded-full mx-auto mb-4',
+                      plan.highlighted ? 'bg-orange-500/10' : 'bg-blue-500/10'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'h-6 w-6 rounded-full',
+                        plan.highlighted
+                          ? 'bg-gradient-to-br from-orange-500 to-red-500'
+                          : 'bg-gradient-to-br from-blue-500 to-blue-600'
+                      )}
+                    />
+                  </div>
                   <h3 className="text-2xl font-bold">{plan.name}</h3>
                   <p className="text-sm text-muted-foreground">{plan.description}</p>
                   <div className="mt-4">
                     <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-sm text-muted-foreground ml-2">
+                      {plan.priceNote}
+                    </span>
                   </div>
                 </CardHeader>
 
@@ -108,7 +133,12 @@ export function Pricing() {
                   <ul className="space-y-3">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <Check
+                          className={cn(
+                            'h-5 w-5 flex-shrink-0 mt-0.5',
+                            plan.highlighted ? 'text-orange-500' : 'text-blue-500'
+                          )}
+                        />
                         <span className="text-sm">{feature}</span>
                       </li>
                     ))}
@@ -117,11 +147,23 @@ export function Pricing() {
 
                 <CardFooter className="pt-4">
                   <Button
-                    className="w-full"
+                    className={cn(
+                      'w-full group',
+                      plan.highlighted &&
+                        'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
+                    )}
                     size="lg"
                     variant={plan.highlighted ? 'default' : 'outline'}
+                    asChild
                   >
-                    {plan.cta}
+                    <a
+                      href={plan.ctaLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <plan.ctaIcon className="mr-2 h-4 w-4" />
+                      {plan.cta}
+                    </a>
                   </Button>
                 </CardFooter>
               </Card>

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Sparkles } from 'lucide-react';
+import { ArrowRight, Github, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -32,7 +32,7 @@ export function Hero() {
           >
             <Badge variant="outline" className="px-4 py-1.5 text-sm border-primary/30 bg-primary/5">
               <Sparkles className="w-3.5 h-3.5 mr-2 text-primary" />
-              Template pronto para produção
+              Open Source · Licença MIT
             </Badge>
           </motion.div>
 
@@ -58,7 +58,7 @@ export function Hero() {
             transition={{ delay: 0.4 }}
           >
             Template completo com autenticação, billing, multi-tenancy e arquitetura
-            limpa. Pare de construir tijolo por tijolo — entre na Fábrica e use nossas máquinas.
+            limpa. Pronto para produção. 100% gratuito.
           </motion.p>
 
           {/* CTAs */}
@@ -68,13 +68,21 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <Button size="xl" className="group">
-              Entrar na Fábrica
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <Button size="xl" className="group" asChild>
+              <a
+                href="https://github.com/xmaiconx/fnd-easyflow-template"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="mr-2 h-5 w-5" />
+                Baixar Template
+              </a>
             </Button>
-            <Button size="xl" variant="outline" className="group">
-              <Play className="mr-2 h-5 w-5" />
-              Ver demo
+            <Button size="xl" variant="outline" className="group" asChild>
+              <a href="#features">
+                Ver o que está incluso
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </a>
             </Button>
           </motion.div>
 
@@ -86,21 +94,25 @@ export function Hero() {
             transition={{ delay: 0.6 }}
           >
             <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary" />
+              <span className="h-2 w-2 rounded-full bg-green-500" />
               NestJS + React
             </span>
             <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary" />
+              <span className="h-2 w-2 rounded-full bg-green-500" />
               TypeScript 100%
             </span>
             <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary" />
+              <span className="h-2 w-2 rounded-full bg-green-500" />
               Clean Architecture
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              Stripe Integrado
             </span>
           </motion.div>
         </motion.div>
 
-        {/* Code preview */}
+        {/* Terminal preview */}
         <motion.div
           className="mt-16 md:mt-24 relative max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 40 }}
